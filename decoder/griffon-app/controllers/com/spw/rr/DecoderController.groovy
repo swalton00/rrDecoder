@@ -25,6 +25,6 @@ class DecoderController {
 
     @ControllerAction
     void aboutAction() {
-        
+
     }
 }
