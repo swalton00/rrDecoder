@@ -8,23 +8,35 @@ import javax.annotation.Nonnull
 
 @ArtifactProviderFor(GriffonView)
 class DecoderView {
-    @MVCMember @Nonnull
+    @MVCMember
+    @Nonnull
     FactoryBuilderSupport builder
-    @MVCMember @Nonnull
+    @MVCMember
+    @Nonnull
     DecoderModel model
 
     void initUI() {
         builder.with {
-            application(size: [320, 160], id: 'mainWindow',
-                title: application.configuration['application.title'],
-                iconImage:   imageIcon('/griffon-icon-48x48.png').image,
-                iconImages: [imageIcon('/griffon-icon-48x48.png').image,
-                             imageIcon('/griffon-icon-32x32.png').image,
-                             imageIcon('/griffon-icon-16x16.png').image]) {
-                gridLayout(rows: 2, cols: 1)
-                label(id: 'clickLabel', text: bind { model.clickCount },
-                     horizontalAlignment: SwingConstants.CENTER)
-                button(id: 'clickButton', clickAction)
+            application(size: [320, 420], id: 'mainWindow',
+                    title: 'Decoder List') {
+                borderLayout()
+                menuBar {
+                    menu(text: 'File') {
+                        menuItem importAction
+                        menuItem exitAction
+
+                    }
+                    menu(text: 'Edit') {
+
+                    }
+                    menu(text: 'View') {
+
+                    }
+                    menu(text: 'Help') {
+                        menuItem helpAction
+                        menuItem aboutAction
+                    }
+                }
             }
         }
     }

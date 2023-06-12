@@ -6,5 +6,5 @@ import griffon.metadata.ArtifactProviderFor
 
 @ArtifactProviderFor(GriffonModel)
 class DecoderModel {
-    @Observable int clickCount = 0
+    //@Observable int clickCount = 0
 }

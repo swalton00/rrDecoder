@@ -8,11 +8,23 @@ import javax.annotation.Nonnull
 
 @ArtifactProviderFor(GriffonController)
 class DecoderController {
-    @MVCMember @Nonnull
-    DecoderModel model
+    @ControllerAction
+    void importAction() {
+        println("got here")
+    }
 
     @ControllerAction
-    void click() {
-        model.clickCount++
+    void exitAction() {
+
+    }
+
+    @ControllerAction
+    void helpAction() {
+
+    }
+
+    @ControllerAction
+    void aboutAction() {
+        
     }
 }
