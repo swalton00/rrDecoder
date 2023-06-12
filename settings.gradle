@@ -1,0 +1,7 @@
+pluginManagement {
+    //includeBuild 'decoder'
+    //includeBuild 'doc'
+}
+
+rootProject.name = 'gradleBuild'
+include('decoder', 'doc')

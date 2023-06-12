@@ -1,0 +1,9 @@
+= Model Railroad Decoder Repository
+J. Scott Walton
+:description: Documentation for the Model Railroad Decoder Repository, a program to contain the decoders from JMRI and view them in various manners.
+
+This is the documentation for the Model Railroad Decoder Repository.
+The program imports the decoders from JMRI and stores them in an SQL database. 
+The main page is a table of the decoders. The View provides different ways to view them.
+
+

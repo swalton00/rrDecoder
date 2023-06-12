@@ -1,0 +1,19 @@
+plugins {
+    id 'org.asciidoctor.jvm.convert' version '3.3.0'
+    id 'org.asciidoctor.jvm.pdf' version '3.3.0'
+    id 'org.asciidoctor.jvm.gems' version '3.3.0'
+}
+
+apply plugin: 'java'
+
+version = '1.0.0-SNAPSHOT'
+
+
+repositories {
+    mavenCentral()
+    jcenter()
+    ruby.gems()
+}
+
+
+
