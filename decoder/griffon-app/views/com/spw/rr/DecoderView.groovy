@@ -5,6 +5,7 @@ import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 import javax.swing.SwingConstants
 import javax.annotation.Nonnull
+import java.awt.BorderLayout
 
 @ArtifactProviderFor(GriffonView)
 class DecoderView {
@@ -20,14 +21,14 @@ class DecoderView {
             application(size: [320, 420], id: 'mainWindow',
                     title: 'Decoder List') {
                 borderLayout()
-                menuBar {
+                menuBar(constraints: BorderLayout.NORTH) {
                     menu(text: 'File') {
                         menuItem importAction
                         menuItem exitAction
 
                     }
                     menu(text: 'Edit') {
-
+                        menuItem prefsAction
                     }
                     menu(text: 'View') {
 
@@ -36,6 +37,10 @@ class DecoderView {
                         menuItem helpAction
                         menuItem aboutAction
                     }
+
+                }
+                scrollPane(constraints: BorderLayout.CENTER) {
+                    table()
                 }
             }
         }
