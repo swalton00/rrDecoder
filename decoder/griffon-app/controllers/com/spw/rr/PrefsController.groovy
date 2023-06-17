@@ -11,5 +11,11 @@ import javax.swing.JFileChooser
 @ArtifactProviderFor(GriffonController)
 class PrefsController {
 
+    void onWindowShown(String name, Object window) {
+        if (name.equals("prefs")) {
+            log.debug("our window is being shown")
+        }
+
+    }
 
 }

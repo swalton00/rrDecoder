@@ -20,9 +20,15 @@ class PrefsView {
 
     void initUI() {
         builder.with {
-            application(size: [320, 420], id: 'prefsWindow',
+            application(size: [320, 420], id: 'prefs',
                     title: 'Preferences') {
-                gridLayout(rows: 10, columns: 2)
+                migLayout()
+                label("Username:", constraints: 'left')
+                textField(columns: 10, text: bind('username', target: model, mutual: true), constraints: 'wrap')
+                label("Password:", constraints: 'left')
+                passwordField(columns: 10, text: bind('password', target: model, mutual: true), constraints: 'wrap')
+                label("DatabaseURL:", constraints: 'left')
+                textField(columns: 150, text: bind('url', target: model, mutual: true), constraints: 'wrap')
             }
         }
 

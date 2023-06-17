@@ -1,6 +1,6 @@
 application {
     title = 'decoder'
-    startupGroups = ['decoder']
+    startupGroups = ['decoder', 'prefs']
     autoShutdown = true
 }
 windowManager {
@@ -13,4 +13,11 @@ mvcGroups {
         view       = 'com.spw.rr.DecoderView'
         controller = 'com.spw.rr.DecoderController'
     }
+    'prefs' {
+        model = 'com.spw.rr.PrefsModel'
+        view  = 'com.spw.rr.PrefsView'
+        controller = 'com.spw.rr.PrefsController'
+    }
 }
+
+startupWindow = 'mainWindow'

@@ -40,7 +40,9 @@ class DecoderController {
 
     @ControllerAction
     void prefsAction() {
-
+        prefsGroup = checkGroup("prefs", prefsGroup)
+        log.debug("showing the Preferences window")
+        application.getWindowManager().show("prefs")
     }
 
 

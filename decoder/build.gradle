@@ -32,9 +32,9 @@ griffon {
     version = '2.16.0'
     toolkit = 'swing'
     applicationProperties = [
-        'build_date'    : buildDate,
-        'build_time'    : buildTime,
-        'build_revision': versioning.info.commit
+            'build_date'    : buildDate,
+            'build_time'    : buildTime,
+            'build_revision': versioning.info.commit
     ]
 }
 
@@ -43,6 +43,9 @@ mainClassName = 'com.spw.rr.Launcher'
 apply from: 'gradle/publishing.gradle'
 apply from: 'gradle/code-quality.gradle'
 apply plugin: 'com.github.ben-manes.versions'
+
+
+processResources.duplicatesStrategy(DuplicatesStrategy.WARN)
 
 dependencies {
     configurations.all {
@@ -61,15 +64,10 @@ dependencies {
         exclude group: 'org.codehaus.groovy', module: 'groovy'
     }
     //testImplementation "org.codehaus.groovy:groovy:${groovyVersion}"
-    dependencies {
-        griffon 'org.codehaus.griffon.plugins:griffon-miglayout-plugin:2.0.0'
-    }
+    griffon 'org.codehaus.griffon.plugins:griffon-miglayout-plugin:2.0.0'
 }
 
 
-dependencies {
-
-}
 
 startScripts {
     doLast {
