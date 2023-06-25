@@ -6,7 +6,7 @@ import griffon.metadata.ArtifactProviderFor
 
 @ArtifactProviderFor(GriffonModel)
 class PrefsModel {
-    String username = ""
-    String password = ""
-    String url = ""
+    @Observable String username = ""
+    @Observable String password = ""
+    @Observable String url = ""
 }

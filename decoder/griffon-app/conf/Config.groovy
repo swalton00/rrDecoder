@@ -4,7 +4,8 @@ application {
     autoShutdown = true
 }
 windowManager {
-   defaultHandler = new com.spw.rr.CenteringWindowDisplayHandler()
+    defaultHandler = new com.spw.rr.CenteringWindowDisplayHandler()
+    startupWindow = 'mainWindow'
 }
 mvcGroups {
     // MVC Group for "decoder"
@@ -20,4 +21,3 @@ mvcGroups {
     }
 }
 
-startupWindow = 'mainWindow'

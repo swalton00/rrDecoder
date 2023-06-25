@@ -5,7 +5,7 @@ import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 import javax.swing.SwingConstants
 import javax.annotation.Nonnull
-import java.awt.BorderLayout
+import java.awt.GridLayout
 
 @ArtifactProviderFor(GriffonView)
 class PrefsView {
@@ -20,15 +20,17 @@ class PrefsView {
 
     void initUI() {
         builder.with {
-            application(size: [320, 420], id: 'prefs',
+            application(size: [400,200], id: 'prefs',
                     title: 'Preferences') {
-                migLayout()
-                label("Username:", constraints: 'left')
-                textField(columns: 10, text: bind('username', target: model, mutual: true), constraints: 'wrap')
-                label("Password:", constraints: 'left')
-                passwordField(columns: 10, text: bind('password', target: model, mutual: true), constraints: 'wrap')
-                label("DatabaseURL:", constraints: 'left')
-                textField(columns: 150, text: bind('url', target: model, mutual: true), constraints: 'wrap')
+                gridLayout(new GridLayout(4, 2))
+                label("Username:")
+                textField(columns: 10, text: bind('username', source: model, mutual: true))
+                label("Password:")
+                passwordField(columns: 10, text: bind('password', source: model, mutual: true))
+                label("DatabaseURL:")
+                textField(columns: 150, text: bind('url', source: model, mutual: true))
+                button(okayAction)
+                button(cancelAction)
             }
         }
 
