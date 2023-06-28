@@ -1,0 +1,11 @@
+= RRDecoder Documentation
+
+== Introduction
+This is the documentation for the Model Railroad Decoder Database program. The purpose of the
+program is to store one or more JMRI "rosters", and all the the locomotives listed therein (including
+their CV values. If you only have one JMRI instance containing decoders, that's fine -- you will only see the
+one line in the main roster view, but you can drill down into that roster.
+
+If you have more than one JMRI instance, ou can add all of them to this database. They  will remain
+distinct, but you can compare the values of a CV in one against those in another.
+
