@@ -5,6 +5,7 @@ import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 import javax.swing.SwingConstants
 import javax.annotation.Nonnull
+import java.awt.BorderLayout
 
 @ArtifactProviderFor(GriffonView)
 class DecoderView {
@@ -15,16 +16,30 @@ class DecoderView {
 
     void initUI() {
         builder.with {
-            application(size: [320, 160], id: 'mainWindow',
-                title: application.configuration['application.title'],
-                iconImage:   imageIcon('/griffon-icon-48x48.png').image,
-                iconImages: [imageIcon('/griffon-icon-48x48.png').image,
-                             imageIcon('/griffon-icon-32x32.png').image,
-                             imageIcon('/griffon-icon-16x16.png').image]) {
-                gridLayout(rows: 2, cols: 1)
-                label(id: 'clickLabel', text: bind { model.clickCount },
-                     horizontalAlignment: SwingConstants.CENTER)
-                button(id: 'clickButton', clickAction)
+            application(size: [320, 420], id: 'mainWindow',
+                    title: 'Decoder List') {
+                borderLayout()
+                menuBar(constraints: BorderLayout.NORTH) {
+                    menu(text: 'File') {
+                        menuItem importAction
+                        menuItem exitAction
+
+                    }
+                    menu(text: 'Edit') {
+                        menuItem prefsAction
+                    }
+                    menu(text: 'View') {
+
+                    }
+                    menu(text: 'Help') {
+                        menuItem helpAction
+                        menuItem aboutAction
+                    }
+
+                }
+                scrollPane(constraints: BorderLayout.CENTER) {
+                    table()
+                }
             }
         }
     }
