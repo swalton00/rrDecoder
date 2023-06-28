@@ -11,8 +11,9 @@
     <name>Model Railroad Decoder Database Project</name>
 
     <modules>
-        <module>decoder</module>
         <module>doc</module>
+        <module>decoder</module>
+
     </modules>
 
     <build>

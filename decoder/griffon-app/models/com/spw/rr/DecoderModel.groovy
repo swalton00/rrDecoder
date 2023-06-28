@@ -5,6 +5,6 @@ import griffon.transform.Observable
 import griffon.metadata.ArtifactProviderFor
 
 @ArtifactProviderFor(GriffonModel)
-class AppModel {
+class DecoderModel {
     @Observable int clickCount = 0
 }

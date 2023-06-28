@@ -7,9 +7,9 @@ import griffon.metadata.ArtifactProviderFor
 import javax.annotation.Nonnull
 
 @ArtifactProviderFor(GriffonController)
-class AppController {
+class DecoderController {
     @MVCMember @Nonnull
-    AppModel model
+    DecoderModel model
 
     @ControllerAction
     void click() {

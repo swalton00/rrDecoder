@@ -11,8 +11,8 @@ import javax.inject.Inject
 import static org.awaitility.Awaitility.await
 import static java.util.concurrent.TimeUnit.SECONDS
 
-@TestFor(AppController)
-class AppControllerTest {
+@TestFor(DecoderController)
+class DecoderControllerTest {
     static {
         System.setProperty('org.slf4j.simpleLogger.defaultLogLevel', 'trace')
     }
@@ -20,7 +20,7 @@ class AppControllerTest {
     @Inject
     private ArtifactManager artifactManager
 
-    private AppController controller
+    private DecoderController controller
 
     @Rule
     public final GriffonUnitRule griffon = new GriffonUnitRule()
@@ -28,7 +28,7 @@ class AppControllerTest {
     @Test
     void executeClickAction() {
         // given:
-        controller.model = artifactManager.newInstance(AppModel)
+        controller.model = artifactManager.newInstance(DecoderModel)
 
         // when:
         controller.invokeAction('click')

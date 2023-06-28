@@ -7,11 +7,11 @@ import javax.swing.SwingConstants
 import javax.annotation.Nonnull
 
 @ArtifactProviderFor(GriffonView)
-class AppView {
+class DecoderView {
     @MVCMember @Nonnull
     FactoryBuilderSupport builder
     @MVCMember @Nonnull
-    AppModel model
+    DecoderModel model
 
     void initUI() {
         builder.with {
