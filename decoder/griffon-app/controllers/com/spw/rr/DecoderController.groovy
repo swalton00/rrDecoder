@@ -14,6 +14,8 @@ class DecoderController {
     DecoderModel model
     private static importer = new ImportDecoderList()
 
+    private RosterImport importService = new RosterImport()
+
     MVCGroup prefsGroup = null
 
     @ControllerAction
@@ -23,7 +25,8 @@ class DecoderController {
         chooser.setDialogTitle("Select JMRI decoder index")
         int retVal = chooser.showOpenDialog(null)
         if (retVal == JFileChooser.APPROVE_OPTION) {
-            importer.importList(chooser.getSelectedFile())
+            File selected = chooser.getSelectedFile()
+            importService.importRoster(selected)
         }
 
     }
