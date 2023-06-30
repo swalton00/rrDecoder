@@ -1,0 +1,78 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spw.rr.mappers.DecoderMapper">
+<select id="listRoster" resultType="com.spw.rr.RosterEntry">
+    SELECT id,
+         entered as entryTime,
+         fullpath,
+         dateupdated,
+         systemname
+        from rrdec.roster order by systemname
+</select>
+    <update id="updateRosterEntry" parameterType="com.spw.rr.RosterEntry">
+        UPDATE
+            rrdec.roster
+        SET
+            fullpath='#{fullpath}',
+            systemName = '#{sytemName}',
+            dateUpdated = CURRENT TIMESTAMP
+        WHERE
+            id = #{id}
+    </update>
+    <insert id="insertRosterEntry" parameterType="com.spw.rr.RosterEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO
+            rrdec.roster
+        (
+            entered,
+            fullpath,
+            systemName
+        )
+        VALUES
+            (
+                CURRENT TIMESTAMP,
+                        '#{fullpath}',
+                        '#{systemName}'
+            )
+    </insert>
+    <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.RosterEntry">
+        SELECT
+            id,
+            entered AS entryTime,
+            fullpath,
+            dateupdated,
+            systemname
+        FROM
+            rrdec.roster
+        WHERE
+            id = #{id}
+        ORDER BY
+            systemname
+    </select>
+    <select id="listSystemRoster" parameterType="String" resultType="com.spw.rr.RosterEntry">
+        SELECT
+            id,
+            entered AS entryTime,
+            fullpath,
+            dateupdated,
+            systemname
+        FROM
+            rrdec.roster
+        WHERE
+            systemName = '#{systemName}'
+        ORDER BY
+            systemname
+    </select>
+    <select id="findRosterEntry"  parameterType="com.spw.rr.RosterEntry" resultType="com.spw.rr.RosterEntry">
+        SELECT
+            id,
+            entered AS entryTime,
+            fullpath,
+            dateupdated,
+            systemname
+        FROM
+            rrdec.roster
+        WHERE
+            systemName = '#{systemName}'
+          AND fullPath = '#{fullPath}';
+    </select>
+</mapper>

@@ -6,6 +6,7 @@ import griffon.core.mvc.MVCGroup
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 import javax.annotation.Nonnull
+import javax.inject.Inject
 import javax.swing.JFileChooser
 
 @ArtifactProviderFor(GriffonController)
@@ -15,6 +16,8 @@ class DecoderController {
     private static importer = new ImportDecoderList()
 
     private RosterImport importService = new RosterImport()
+
+    @Inject private DecoderDBService database
 
     MVCGroup prefsGroup = null
 
@@ -26,6 +29,7 @@ class DecoderController {
         int retVal = chooser.showOpenDialog(null)
         if (retVal == JFileChooser.APPROVE_OPTION) {
             File selected = chooser.getSelectedFile()
+            importService.setDB(database)
             importService.importRoster(selected)
         }
 

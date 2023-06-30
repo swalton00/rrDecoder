@@ -12,20 +12,29 @@ dataSource {
 environments {
     development {
         dataSource {
-            dbCreate = 'create' // one of ['create', 'skip']
-            url = 'jdbc:h2:mem:@application.name@-dev'
+            driverClassName = 'org.h2.Driver'
+            username = 'rr'
+            password = 'rrpass'
+            dbCreate = 'skip' // one of ['create', 'skip']
+            url = 'jdbc:h2:file:D:/Projects/RailRoad_Database/Dev/test;AUTO_SERVER=TRUE;MODE=DB2;'
         }
     }
     test {
         dataSource {
-            dbCreate = 'create'
-            url = 'jdbc:h2:mem:@application.name@-test'
+            driverClassName = 'org.h2.Driver'
+            username = 'rrdec'
+            password = 'rrdecpw'
+            dbCreate = 'skip'
+            url = 'jdbc:h2:file:D:/Projects/RailRoad_Database/Dev/test;AUTO_SERVER=TRUE;MODE=DB2;'
         }
     }
     production {
         dataSource {
+            driverClassName = 'org.h2.Driver'
+            username = 'rrdec'
+            password = 'rrdecpw'
             dbCreate = 'skip'
-            url = 'jdbc:h2:mem:@application.name@-prod'
+            url = 'jdbc:h2:file:D:/Projects/RailRoad_Database/Dev/test;AUTO_SERVER=TRUE;MODE=DB2;'
         }
     }
 }

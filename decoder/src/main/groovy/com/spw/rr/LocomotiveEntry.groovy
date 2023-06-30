@@ -1,7 +1,10 @@
 package com.spw.rr
 
+import groovy.transform.ToString
+
 import java.sql.Timestamp
 
+@ToString(includeNames = true, includePackage = false, includeFields = true)
 class LocomotiveEntry {
     Integer id
     String locoId
