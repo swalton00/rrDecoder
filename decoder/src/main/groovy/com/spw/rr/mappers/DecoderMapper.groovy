@@ -9,7 +9,7 @@ import com.spw.rr.DecoderEntry
 
 @TypeProviderFor(MybatisMapper)
 interface DecoderMapper extends MybatisMapper {
-    int insertRosterEntry(RosterEntry entry)
+    RosterEntry insertRosterEntry(RosterEntry entry)
 
     void updateRosterEntry(RosterEntry entry)
 
@@ -37,5 +37,7 @@ interface DecoderMapper extends MybatisMapper {
     LocomotiveEntry getLocomotive(int id)
 
     DecoderEntry getDecoder(int id)
+
+    DecoderEntry findDecoder(String family, String model)
 
 }

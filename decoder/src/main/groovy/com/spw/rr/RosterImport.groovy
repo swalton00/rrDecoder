@@ -8,9 +8,48 @@ class RosterImport {
 
     private DecoderDBService database
 
+    List<DecoderEntry> decoderList = null
+
     void setDB(DecoderDBService database) {
         log.debug("setting the database service address")
         this.database = database
+    }
+
+    private String getSystemName() {
+        log.debug("getting System name")
+        return System.getenv("COMPUTERNAME")
+    }
+
+
+    void buildDecoderList() {
+        log.debug("now building a list of current decoders") {
+            if (decoderList == null) {
+                decoderList = new ArrayList<DecoderEntry>()
+            } else {
+                decoderList.clear()
+            }
+            def newList = database.listDecoders()
+            newList.each {entry ->
+                decoderList.add(entry)
+            }
+        }
+    }
+
+    DecoderEntry findDecoder(String family, String model) {
+        log.debug("finding decoder with family: ${family} and model: ${model}")
+        DecoderEntry found = null
+        decoderList.each {
+            if (it.decoderFamily.equals(family) & it.decoderModel.equals(model)) {
+                log.debug("found the decoder")
+                return it
+            }
+        }
+        found = new DecoderEntry()
+        found.decoderModel = model
+        found.decoderFamily = family
+        found = database.insertDecoderEntry(found)
+        decoderList.add(found)
+        return found
     }
 
     void importRoster(File rosterFile) {
@@ -22,12 +61,54 @@ class RosterImport {
         def firstEntry = rosterValues.roster.locomotive[0]
         int arraySize = rosterValues.roster.locomotive.size()
         def entryList = rosterValues.roster.locomotive
+        buildDecoderList()
         RosterEntry thisRoster = getRosterEntry(rosterFile.path)
+        boolean rosterFound = false
+        if (thisRoster == null) {
+            log.debug("roster not found -- adding new")
+            thisRoster = new RosterEntry()
+            thisRoster.fullPath = rosterFile.path
+            thisRoster.systemName = getSystemName()
+            thisRoster = database.addRoster(thisRoster)
+        } else {
+            rosterFound = true
+            updateRosterEntries(thisRoster)
+        }
         for (i in 0..<arraySize) {
             log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
+            LocomotiveEntry newEntry = setLocoValues(entryList[i], thisRoster)
         }
         def firstId = firstEntry.'@id'.text()
         log.debug("there are ${arraySize} entries in this roster")
+    }
+
+    LocomotiveEntry addLoco(Object thisEntry, RosterEntry rosterEntry) {
+        newLoco = setLocoValues(thisEntry)
+        database.addLocomotiveEntry(LocomotiveEntry)
+    }
+
+    LocomotiveEntry setLocoValues(Object thisEntry, RosterEntry rosterEntry) {
+        LocomotiveEntry entry = new LocomotiveEntry()
+        entry.rosterId = rosterEntry.id
+        String decoderModel = thisEntry.decoder'@model'
+        String decoderFamily = thisEntry'@family'
+        log.debug("find decoder for ${decoderModel} with family ${decoderFamily}")
+        DecoderEntry decoder = findDecoder(decoderFamily, decoderModel)
+        entry.decoderId = decoder.id
+        entry.fileName = thisEntry'@fileName'
+        entry.roadName = thisEntry'@roadName'
+        entry.manufacturer = thisEntry'@mfg'
+        entry.owner = thisEntry'@owner'
+        entry.model = thisEntry'@model'
+        entry.dccAddress = thisEntry'@dccAddress'
+        entry.manufacturerId = thisEntry'@manufacturerID'
+        entry.productId = thisEntry'@productID'
+        return entry
+    }
+
+    void updateRosterEntries(RosterEntry thisEntry) {
+        log.debug("updating an existing roster")
+
     }
 
     /*
@@ -47,7 +128,7 @@ class RosterImport {
      */
 
     RosterEntry getRosterEntry(String fullPath) {
-        String systemName = System.getenv("COMPUTERNAME")
+        String systemName = getSystemName()
         return database.getRosterEntry(systemName, fullPath)
     }
 }

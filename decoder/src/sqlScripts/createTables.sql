@@ -46,6 +46,7 @@ CREATE TABLE
         roadName       VARCHAR(256),
         manufacturer   VARCHAR(256),
         owner          VARCHAR(256),
+        model          VARCHAR(256),
         dccaddress     VARCHAR(256),
         manufacturerID VARCHAR(256),
         productid      VARCHAR(256),

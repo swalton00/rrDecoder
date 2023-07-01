@@ -1,7 +1,6 @@
 package com.spw.rr
 
 import com.spw.rr.mappers.DecoderMapper
-import com.spw.rr.mappers.Parameters
 import griffon.core.artifact.GriffonService
 import griffon.plugins.mybatis.MybatisHandler
 import org.apache.ibatis.session.SqlSession
@@ -18,11 +17,23 @@ class DecoderDBService {
     private MybatisHandler handler
 
     List<RosterEntry> listRosters(){
-
+        log.debug("getting the list of rosters")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            List<RosterEntry> result = mapper.listRoster()
+            log.debug("result found was ${result}")
+            return result
+        }
     }
 
-    void addRoster(RosterEntry entry) {
-
+    RosterEntry addRoster(RosterEntry entry) {
+        log.debug("adding a new RosterEntry: ${entry}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            int result = mapper.insertRosterEntry(entry)
+            log.debug("result found was ${entry}")
+            return entry
+        }
     }
 
     void updateRosterEntry(RosterEntry entry) {
@@ -41,6 +52,63 @@ class DecoderDBService {
             RosterEntry result = mapper.findRosterEntry(systemName, fullPath)
             log.debug("result found was ${result}")
             return result
+        }
+    }
+
+    LocomotiveEntry addLocomotiveEntry(LocomotiveEntry locomotiveEntry) {
+        log.debug("adding a new Locomotive ${locomotiveEntry}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            int result = mapper.insertLocomotiveEntry(locomotiveEntry)
+            log.debug("result was ${locomotiveEntry}")
+            return locomotiveEntry
+        }
+    }
+
+    List<DecoderEntry> listDecoders() {
+        log.debug("Retrieving list of decoders")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper = session.getMapper(DecoderMapper.class)
+            return mapper.listDecoders()
+        }
+    }
+
+    DecoderEntry insertDecoderEntry(DecoderEntry entry) {
+        log.debug("adding new decoder: ${entry}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            int result = mapper.insertDecoderEntry(entry)
+            log.debug("result was ${entry}")
+            return entry
+        }
+    }
+
+    DecoderEntry getDecoder(int id) {
+        log.debug("Retrieving decoder with id of ${fid}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            DecoderEntry result = mapper.getDecoder(id)
+            log.debug("result found was ${result}")
+            return result
+        }
+    }
+
+    DecoderEntry findDecoder(String family, String model) {
+        log.debug("Retrieving decoder entry with family: ${family} and model: ${model}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            DecoderEntry result = mapper.findDecoder(family, model)
+            log.debug("result found was ${result}")
+            return result
+        }
+    }
+
+    void updateDecoderEntry(DecoderEntry entry) {
+        log.debug("Updated decoder entry: ${entry}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            mapper.updateDecoderEntry(entry)
+            return
         }
     }
 

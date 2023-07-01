@@ -19,4 +19,5 @@ class LocomotiveEntry {
     String productId
     Timestamp dateUpdated
     Integer decoderId
+    Integer rosterId
 }
