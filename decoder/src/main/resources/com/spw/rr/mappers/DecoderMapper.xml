@@ -58,11 +58,11 @@
         FROM
             rrdec.roster
         WHERE
-            systemName = '#{systemName}'
+            systemName = #{systemName}
         ORDER BY
             systemname
     </select>
-    <select id="findRosterEntry"  parameterType="com.spw.rr.RosterEntry" resultType="com.spw.rr.RosterEntry">
+    <select id="findRosterEntry"  resultType="com.spw.rr.RosterEntry">
         SELECT
             id,
             entered AS entryTime,
@@ -72,7 +72,7 @@
         FROM
             rrdec.roster
         WHERE
-            systemName = '#{systemName}'
-          AND fullPath = '#{fullPath}';
+            systemName = #{param1}
+          AND fullPath = #{param2};
     </select>
 </mapper>

@@ -1,6 +1,7 @@
 package com.spw.rr
 
 import com.spw.rr.mappers.DecoderMapper
+import com.spw.rr.mappers.Parameters
 import griffon.core.artifact.GriffonService
 import griffon.plugins.mybatis.MybatisHandler
 import org.apache.ibatis.session.SqlSession
@@ -34,11 +35,10 @@ class DecoderDBService {
 
     RosterEntry getRosterEntry(String systemName, String fullPath) {
         log.debug("Retrieving roster for ${systemName} with path of ${fullPath}")
-        RosterEntry entry = new RosterEntry()
-        entry.fullPath = fullPath
-        entry.systemName = systemName
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
-            RosterEntry result = session.getMapper(DecoderMapper).findRosterEntry(entry)
+            log.trace("Parameter is ${systemName} and ${fullPath}")
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            RosterEntry result = mapper.findRosterEntry(systemName, fullPath)
             log.debug("result found was ${result}")
             return result
         }

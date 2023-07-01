@@ -6,6 +6,7 @@ import com.spw.rr.RosterEntry
 import com.spw.rr.LocomotiveEntry
 import com.spw.rr.DecoderEntry
 
+
 @TypeProviderFor(MybatisMapper)
 interface DecoderMapper extends MybatisMapper {
     int insertRosterEntry(RosterEntry entry)
@@ -16,7 +17,7 @@ interface DecoderMapper extends MybatisMapper {
 
     RosterEntry getRosterEntry(int id)
 
-    RosterEntry findRosterEntry(RosterEntry entry)
+    RosterEntry findRosterEntry(String systemName, String fullPath)
 
     int insertLocomotiveEntry(LocomotiveEntry entry)
 
