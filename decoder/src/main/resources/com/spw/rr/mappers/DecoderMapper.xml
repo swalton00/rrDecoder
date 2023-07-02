@@ -84,10 +84,10 @@
         FROM
             rrdec.decoder
         ORDER BY
-            family,
-            mode
+            decoderFamily,
+            decoderModel
     </select>
-    <insert id="insertDecoderEntry" parameterType="com.spw.rr.DecoderEntry">
+    <insert id="insertDecoderEntry" parameterType="com.spw.rr.DecoderEntry" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO
             rrdec.decoder
         (
@@ -136,24 +136,19 @@
             id = #{id}
     </update>
     <insert id="insertLocomotiveEntry" parameterType="com.spw.rr.LocomotiveEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        INSERT INTO
-            rrdec.locomotive
-        (
-            locoid,
-            filename,
-            roadnumber,
-            roadname,
-            manufacturer,
-            owner,
-            dccaddress,
-            productid,
-            decoderId,
-            rosterid,
-            dateUpdated
-        )
-        VALUES
-            (
-                #{locoId},
+        INSERT INTO rrdec.locomotive
+        (locoid,
+         filename,
+         roadnumber,
+         roadname,
+         manufacturer,
+         owner,
+         dccaddress,
+         productid,
+         decoderId,
+         rosterid,
+         dateUpdated)
+        VALUES (#{locoId},
                 #{fileName},
                 #{roadNumber},
                 #{roadName},
@@ -163,6 +158,6 @@
                 #{productId},
                 #{decoderId},
                 #{rosterId},
-                CURRENT TIMESTAMP
+                   CURRENT TIMESTAMP)
     </insert>
 </mapper>

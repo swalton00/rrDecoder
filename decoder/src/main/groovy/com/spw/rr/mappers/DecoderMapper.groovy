@@ -9,7 +9,7 @@ import com.spw.rr.DecoderEntry
 
 @TypeProviderFor(MybatisMapper)
 interface DecoderMapper extends MybatisMapper {
-    RosterEntry insertRosterEntry(RosterEntry entry)
+    int insertRosterEntry(RosterEntry entry)
 
     void updateRosterEntry(RosterEntry entry)
 

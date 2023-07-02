@@ -15,7 +15,7 @@ class LocomotiveEntry {
     String owner
     String model
     String dccAddress
-    String manufacturerID
+    String manufacturerId
     String productId
     Timestamp dateUpdated
     Integer decoderId

@@ -22,16 +22,15 @@ class RosterImport {
 
 
     void buildDecoderList() {
-        log.debug("now building a list of current decoders") {
-            if (decoderList == null) {
-                decoderList = new ArrayList<DecoderEntry>()
-            } else {
-                decoderList.clear()
-            }
-            def newList = database.listDecoders()
-            newList.each {entry ->
-                decoderList.add(entry)
-            }
+        log.debug("now building a list of current decoders")
+        if (decoderList == null) {
+            decoderList = new ArrayList<DecoderEntry>()
+        } else {
+            decoderList.clear()
+        }
+        def newList = database.listDecoders()
+        newList.each { entry ->
+            decoderList.add(entry)
         }
     }
 
@@ -41,8 +40,12 @@ class RosterImport {
         decoderList.each {
             if (it.decoderFamily.equals(family) & it.decoderModel.equals(model)) {
                 log.debug("found the decoder")
-                return it
+                found = it
+                return
             }
+        }
+        if (found != null) {
+            return found
         }
         found = new DecoderEntry()
         found.decoderModel = model
@@ -53,7 +56,7 @@ class RosterImport {
     }
 
     void importRoster(File rosterFile) {
-        log.debug("importing from ${rosterFile.path}" )
+        log.debug("importing from ${rosterFile.path}")
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
         def first = rosterValues.'roster-config'
@@ -77,32 +80,37 @@ class RosterImport {
         for (i in 0..<arraySize) {
             log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
             LocomotiveEntry newEntry = setLocoValues(entryList[i], thisRoster)
+            if (!rosterFound) {
+                addLoco(newEntry)
+            } else {
+                log.error("should have added locomotive")
+            }
         }
         def firstId = firstEntry.'@id'.text()
         log.debug("there are ${arraySize} entries in this roster")
     }
 
-    LocomotiveEntry addLoco(Object thisEntry, RosterEntry rosterEntry) {
-        newLoco = setLocoValues(thisEntry)
-        database.addLocomotiveEntry(LocomotiveEntry)
+    LocomotiveEntry addLoco(LocomotiveEntry entry) {
+        database.addLocomotiveEntry(entry)
     }
 
     LocomotiveEntry setLocoValues(Object thisEntry, RosterEntry rosterEntry) {
         LocomotiveEntry entry = new LocomotiveEntry()
         entry.rosterId = rosterEntry.id
-        String decoderModel = thisEntry.decoder'@model'
-        String decoderFamily = thisEntry'@family'
+        String decoderModel = thisEntry.decoder.'@model'
+        String decoderFamily = thisEntry.'@family'
         log.debug("find decoder for ${decoderModel} with family ${decoderFamily}")
         DecoderEntry decoder = findDecoder(decoderFamily, decoderModel)
         entry.decoderId = decoder.id
-        entry.fileName = thisEntry'@fileName'
-        entry.roadName = thisEntry'@roadName'
-        entry.manufacturer = thisEntry'@mfg'
-        entry.owner = thisEntry'@owner'
-        entry.model = thisEntry'@model'
-        entry.dccAddress = thisEntry'@dccAddress'
-        entry.manufacturerId = thisEntry'@manufacturerID'
-        entry.productId = thisEntry'@productID'
+        entry.locoId = thisEntry.'@id'
+        entry.fileName = thisEntry.'@fileName'
+        entry.roadName = thisEntry.'@roadName'
+        entry.manufacturer = thisEntry.'@mfg'
+        entry.owner = thisEntry.'@owner'
+        entry.model = thisEntry.'@model'
+        entry.dccAddress = thisEntry.'@dccAddress'
+        entry.manufacturerId = thisEntry.'@manufacturerID'
+        entry.productId = thisEntry.'@productID'
         return entry
     }
 

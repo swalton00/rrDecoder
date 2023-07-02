@@ -50,6 +50,7 @@ CREATE TABLE
         dccaddress     VARCHAR(256),
         manufacturerID VARCHAR(256),
         productid      VARCHAR(256),
+        dateUpdated    TIMESTAMP CONSTRAINT loco_TS NOT NULL,
         decoderID      INTEGER NOT NULL CONSTRAINT loco_decoder REFERENCES rrdec.decoder(id) ON 
 DELETE 
     RESTRICT,
