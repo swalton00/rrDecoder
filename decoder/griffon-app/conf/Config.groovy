@@ -1,5 +1,5 @@
 application {
-    title = 'decoder'
+    title = 'RR Decoder Database'
     startupGroups = ['decoder', 'prefs']
     autoShutdown = true
 }

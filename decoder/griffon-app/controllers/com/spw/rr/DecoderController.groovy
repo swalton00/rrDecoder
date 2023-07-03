@@ -11,13 +11,20 @@ import javax.swing.JFileChooser
 
 @ArtifactProviderFor(GriffonController)
 class DecoderController {
-    @MVCMember @Nonnull
+    @MVCMember
+    @Nonnull
     DecoderModel model
     private static importer = new ImportDecoderList()
 
+    @MVCMember
+    DecoderView view
+
     private RosterImport importService = new RosterImport()
 
-    @Inject private DecoderDBService database
+    @Inject
+    private DecoderDBService database
+
+    private boolean inited = false
 
     MVCGroup prefsGroup = null
 
@@ -30,10 +37,37 @@ class DecoderController {
         if (retVal == JFileChooser.APPROVE_OPTION) {
             File selected = chooser.getSelectedFile()
             importService.setDB(database)
-            importService.importRoster(selected)
+            RosterEntry entry = importService.importRoster(selected)
+            ArrayList<String> newEntry = new ArrayList<String>()
+            newEntry.add(entry.id.toString())
+            newEntry.add(entry.systemName)
+            newEntry.add(entry.fullPath)
+            model.tableList.add(newEntry)
+            view.tableModel.dataChanged()
         }
 
     }
+
+    void onWindowShown(String name, Object window) {
+        if (name.equals("mainWindow") & !inited) {
+            log.debug("in the initialization phase - about to get the database data")
+            inited = true
+            ArrayList<RosterEntry> dataForTable = database.listRosters()
+            if (dataForTable != null) {
+                dataForTable.each {
+                    ArrayList<String> newArray = new ArrayList<String>()
+                    newArray.add(it.id.toString())
+                    newArray.add(it.systemName)
+                    newArray.add(it.fullPath)
+                    model.tableList.add(newArray)
+                }
+                if (view.tableModel != null) {
+                    view.tableModel.dataChanged()
+                }
+            }
+        }
+    }
+
 
     private checkGroup(String groupName, MVCGroup group) {
         if (group == null) {

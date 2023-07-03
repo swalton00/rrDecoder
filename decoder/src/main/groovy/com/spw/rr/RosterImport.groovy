@@ -55,7 +55,7 @@ class RosterImport {
         return found
     }
 
-    void importRoster(File rosterFile) {
+    RosterEntry importRoster(File rosterFile) {
         log.debug("importing from ${rosterFile.path}")
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
@@ -74,6 +74,7 @@ class RosterImport {
             thisRoster.systemName = getSystemName()
             thisRoster = database.addRoster(thisRoster)
         } else {
+            //TODO this area needs work
             rosterFound = true
             updateRosterEntries(thisRoster)
         }
@@ -88,6 +89,7 @@ class RosterImport {
         }
         def firstId = firstEntry.'@id'.text()
         log.debug("there are ${arraySize} entries in this roster")
+        return thisRoster
     }
 
     LocomotiveEntry addLoco(LocomotiveEntry entry) {
