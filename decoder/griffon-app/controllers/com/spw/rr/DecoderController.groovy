@@ -5,6 +5,8 @@ import griffon.core.controller.ControllerAction
 import griffon.core.mvc.MVCGroup
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
+import griffon.transform.Threading
+
 import javax.annotation.Nonnull
 import javax.inject.Inject
 import javax.swing.JFileChooser
@@ -29,20 +31,28 @@ class DecoderController {
     MVCGroup prefsGroup = null
 
     @ControllerAction
+    @Threading(Threading.Policy.INSIDE_UITHREAD_ASYNC)
     void importAction() {
         log.info("Importing a JMRI collection - choosing file now")
         JFileChooser chooser = new JFileChooser()
         chooser.setDialogTitle("Select JMRI decoder index")
         int retVal = chooser.showOpenDialog(null)
         if (retVal == JFileChooser.APPROVE_OPTION) {
-            File selected = chooser.getSelectedFile()
-            importService.setDB(database)
-            RosterEntry entry = importService.importRoster(selected)
-            ArrayList<String> newEntry = new ArrayList<String>()
-            newEntry.add(entry.id.toString())
-            newEntry.add(entry.systemName)
-            newEntry.add(entry.fullPath)
-            model.tableList.add(newEntry)
+            boolean newItem = true
+            RosterEntry entry = null
+            runOutsideUI {
+                File selected = chooser.getSelectedFile()
+                importService.setDB(database)
+                newItem = importService.doesRosterExist(selected)
+                entry = importService.importRoster(selected)
+                ArrayList<String> newEntry = new ArrayList<String>()
+                if (newItem) {
+                    newEntry.add(entry.id.toString())
+                    newEntry.add(entry.systemName)
+                    newEntry.add(entry.fullPath)
+                    model.tableList.add(newEntry)
+                }
+            }
             view.tableModel.dataChanged()
         }
 
@@ -64,6 +74,9 @@ class DecoderController {
                 if (view.tableModel != null) {
                     view.tableModel.dataChanged()
                 }
+            }
+            for (i in 0..<model.preferredWidths.size()) {
+                view.completeTable.getColumnModel().getColumn(i).setPreferredWidth(model.preferredWidths[i])
             }
         }
     }

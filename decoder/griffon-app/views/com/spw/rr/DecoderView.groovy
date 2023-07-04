@@ -17,13 +17,13 @@ class DecoderView {
     DecoderModel model
 
     RRTableModel tableModel
-
+    def completeTable
 
     void initUI() {
         JTable theTable
         RRTableModel modelCopy
         builder.with {
-            application(size: [320, 420], id: 'mainWindow',
+            application(size: [600, 400], id: 'mainWindow',
                     title: 'Decoder List') {
 
                 menuBar() {
@@ -54,5 +54,6 @@ class DecoderView {
             }
         }
         tableModel = modelCopy
+        completeTable = theTable
     }
 }

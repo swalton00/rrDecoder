@@ -158,6 +158,51 @@
                 #{productId},
                 #{decoderId},
                 #{rosterId},
-                   CURRENT TIMESTAMP)
+                #{dateUpdated})
     </insert>
+    <update id="updateLocomotiveEntry" parameterType="com.spw.rr.LocomotiveEntry">
+        UPDATE
+            rrdec.locomotive
+        SET
+            locoid = #{locoId},
+            filename = #{fileName},
+            roadnumber = #{roadNumber},
+            roadname = #{roadName},
+            manufacturer = #{manufacturer},
+            owner = #{owner},
+            dccaddress = #{dccAddress},
+            productId = #{productId},
+            decoderid = #{decoderId},
+            dateUpdated = #{dateUpdated}
+        WHERE
+            id = #{id}
+    </update>
+    <delete id="deleteLocomotiveEntry" parameterType="com.spw.rr.LocomotiveEntry">
+        DELETE
+        FROM
+            rrdec.locomotive
+        WHERE
+            id = #{id};
+    </delete>
+    <select id="listLocomotivesByRosterID" resultType="com.spw.rr.LocomotiveEntry">
+        SELECT
+            id,
+            locoid,
+            filename,
+            roadnumber,
+            roadname,
+            owner,
+            model,
+            dccaddress,
+            manufacturerid,
+            decoderid,
+            rosterid,
+            dateUpdated
+        FROM
+            rrdec.locomotive
+        WHERE
+            rosterid = #{rosterID}
+        ORDER BY
+            id
+    </select>
 </mapper>

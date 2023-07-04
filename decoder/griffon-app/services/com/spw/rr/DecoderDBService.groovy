@@ -65,6 +65,34 @@ class DecoderDBService {
         }
     }
 
+    void updateLocomotiveEntry(LocomotiveEntry locomotiveEntry) {
+        log.debug("updateing locomotive entry ${locomotiveEntry}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            mapper.updateLocomotiveEntry(locomotiveEntry)
+        }
+    }
+
+    int deleteLocomotiveEntry(LocomotiveEntry locomotiveEntry) {
+        log.debug("deleting locomotive entry ${locomotiveEntry}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            int result = mapper.deleteLocomotiveEntry(locomotiveEntry)
+            log.debug("result was ${result}")
+            return result
+        }
+    }
+
+    List<LocomotiveEntry> loocomotivesForRoster(int rosterID) {
+        log.debug("listing locomotives for rosterID ${rosterID}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            List<LocomotiveEntry> result = mapper.listLocomotivesByRosterID(rosterID)
+            log.debug("result was ${result}")
+            return result
+        }
+    }
+
     List<DecoderEntry> listDecoders() {
         log.debug("Retrieving list of decoders")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->

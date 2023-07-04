@@ -27,12 +27,15 @@ interface DecoderMapper extends MybatisMapper {
 
     void updateDecoderEntry(DecoderEntry entry)
 
+    int deleteLocomotiveEntry(DecoderEntry entry)
+
     List<RosterEntry> listRoster()
 
     List<LocomotiveEntry> listLocomotives(int rosterId)
 
     List<DecoderEntry> listDecoders()
 
+    List<LocomotiveEntry> listLocomotivesByRosterID(int rosterID)
 
     LocomotiveEntry getLocomotive(int id)
 

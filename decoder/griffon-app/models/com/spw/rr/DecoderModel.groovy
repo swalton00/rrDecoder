@@ -16,5 +16,7 @@ class DecoderModel {
 
     def columnNames = ["Id", "System", "Full Path"]
 
+    int[] preferredWidths = [10,20,300]
+
     EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
 }
