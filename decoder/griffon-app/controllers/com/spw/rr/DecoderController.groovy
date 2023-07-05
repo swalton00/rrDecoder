@@ -38,22 +38,24 @@ class DecoderController {
         chooser.setDialogTitle("Select JMRI decoder index")
         int retVal = chooser.showOpenDialog(null)
         if (retVal == JFileChooser.APPROVE_OPTION) {
-            boolean newItem = true
+            boolean existingItem = false
             RosterEntry entry = null
             runOutsideUI {
                 File selected = chooser.getSelectedFile()
                 importService.setDB(database)
-                newItem = importService.doesRosterExist(selected)
+                existingItem = importService.doesRosterExist(selected)
                 entry = importService.importRoster(selected)
                 ArrayList<String> newEntry = new ArrayList<String>()
-                if (newItem) {
+                if (!existingItem) {
                     newEntry.add(entry.id.toString())
                     newEntry.add(entry.systemName)
                     newEntry.add(entry.fullPath)
                     model.tableList.add(newEntry)
                 }
+                runInsideUISync {
+                    view.tableModel.dataChanged()
+                }
             }
-            view.tableModel.dataChanged()
         }
 
     }

@@ -8,6 +8,7 @@ import javax.swing.JTable
 import javax.swing.SwingConstants
 import javax.annotation.Nonnull
 import java.awt.BorderLayout
+import java.awt.Dimension
 
 @ArtifactProviderFor(GriffonView)
 class DecoderView {
@@ -55,5 +56,6 @@ class DecoderView {
         }
         tableModel = modelCopy
         completeTable = theTable
+        theTable.setPreferredSize(new Dimension(1500, 600))
     }
 }

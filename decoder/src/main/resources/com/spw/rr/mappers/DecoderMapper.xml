@@ -1,143 +1,68 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.spw.rr.mappers.DecoderMapper">
-<select id="listRoster" resultType="com.spw.rr.RosterEntry">
-    SELECT id,
-         entered as entryTime,
+    <insert id="insertRosterEntry" parameterType="com.spw.rr.RosterEntry" useGeneratedKeys="true" keyColumn="id"
+            keyProperty="id">
+        INSERT INTO rrdec.roster
+        (entered,
          fullpath,
-         dateupdated,
-         systemname
-        from rrdec.roster order by systemname
-</select>
+         systemName)
+        VALUES (CURRENT TIMESTAMP,
+                        #{fullPath},
+                        #{systemName})
+    </insert>
     <update id="updateRosterEntry" parameterType="com.spw.rr.RosterEntry">
         UPDATE
             rrdec.roster
-        SET
-            fullpath=#{fullpath},
-            systemName = #{sytemName},
+        SET fullpath=#{fullPath},
+            systemName = #{systemName},
             dateUpdated = CURRENT TIMESTAMP
         WHERE
             id = #{id}
     </update>
-    <insert id="insertRosterEntry" parameterType="com.spw.rr.RosterEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        INSERT INTO
-            rrdec.roster
-        (
-            entered,
-            fullpath,
-            systemName
-        )
-        VALUES
-            (
-                CURRENT TIMESTAMP,
-                        #{fullPath},
-                        #{systemName}
-            )
-    </insert>
-    <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.RosterEntry">
-        SELECT
-            id,
-            entered AS entryTime,
-            fullpath,
-            dateupdated,
-            systemname
-        FROM
-            rrdec.roster
-        WHERE
-            id = #{id}
-        ORDER BY
-            systemname
+    <select id="listRosters" resultType="com.spw.rr.RosterEntry">
+        SELECT id,
+               entered as entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        from rrdec.roster
+        order by systemname
     </select>
     <select id="listSystemRoster" parameterType="String" resultType="com.spw.rr.RosterEntry">
-        SELECT
-            id,
-            entered AS entryTime,
-            fullpath,
-            dateupdated,
-            systemname
-        FROM
-            rrdec.roster
-        WHERE
-            systemName = #{systemName}
-        ORDER BY
-            systemname
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM rrdec.roster
+        WHERE systemName = #{systemName}
+        ORDER BY systemname
     </select>
-    <select id="findRosterEntry"  resultType="com.spw.rr.RosterEntry">
-        SELECT
-            id,
-            entered AS entryTime,
-            fullpath,
-            dateupdated,
-            systemname
-        FROM
-            rrdec.roster
-        WHERE
-            systemName = #{param1}
+    <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM rrdec.roster
+        WHERE id = #{id}
+        ORDER BY systemname
+    </select>
+    <select id="findRosterEntry" resultType="com.spw.rr.RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM rrdec.roster
+        WHERE systemName = #{param1}
           AND fullPath = #{param2};
     </select>
-    <select id="listDecoders" resultType="com.spw.rr.DecoderEntry">
-        SELECT
-            id,
-            decoderFamily,
-            decoderModel,
-            dateUpdated    AS updated
-        FROM
-            rrdec.decoder
-        ORDER BY
-            decoderFamily,
-            decoderModel
-    </select>
-    <insert id="insertDecoderEntry" parameterType="com.spw.rr.DecoderEntry" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO
-            rrdec.decoder
-        (
-            decoderfamily,
-            decodermodel,
-            dateupdated
-        )
-        VALUES
-            (
-                #{decoderFamily},
-                #{decoderModel},
-                CURRENT TIMESTAMP
-            )
-    </insert>
-    <select id="getDecoder" resultType="com.spw.rr.DecoderEntry">
-        SELECT
-            id,
-            decoderFamily,
-            decoderModel,
-            dateUpdated AS updated
-        FROM
-            rrdec.decoder
-        WHERE
-            id = #{id}
-    </select>
-    <select id="findDecoder" resultType="com.spw.rr.DecoderEntry">
-        SELECT
-            id,
-            decoderFamily,
-            decoderModel,
-            dateUpdated AS updated
-        FROM
-            rrdec.decoder
-        WHERE
-            decoderFamily = #{param1}
-          AND decoderModel = #{param2}
-    </select>
-    <update id="updateDecoderEntry" parameterType="com.spw.rr.DecoderEntry">
-        UPDATE
-            rrdec.decoder
-        SET
-            decoderFamily = #{decoderFamily},
-            decoderModel = #{decoderModel},
-            dateUpdated = CURRENT TIMESTAMP
-        WHERE
-            id = #{id}
-    </update>
-    <insert id="insertLocomotiveEntry" parameterType="com.spw.rr.LocomotiveEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        INSERT INTO rrdec.locomotive
-        (locoid,
+    <insert id="insertDecoderEntry" parameterType="com.spw.rr.DecoderEntry" useGeneratedKeys="true" keyColumn="id"
+            keyProperty="id">
+        INSERT INTO rrdec.Decoder
+        (decoderid,
          filename,
          roadnumber,
          roadname,
@@ -145,10 +70,10 @@
          owner,
          dccaddress,
          productid,
-         decoderId,
+         decoderTypeId,
          rosterid,
          dateUpdated)
-        VALUES (#{locoId},
+        VALUES (#{decoderId},
                 #{fileName},
                 #{roadNumber},
                 #{roadName},
@@ -156,53 +81,90 @@
                 #{owner},
                 #{dccAddress},
                 #{productId},
-                #{decoderId},
+                #{decoderTypeId},
                 #{rosterId},
                 #{dateUpdated})
     </insert>
-    <update id="updateLocomotiveEntry" parameterType="com.spw.rr.LocomotiveEntry">
+    <update id="updateDecoderEntry" parameterType="com.spw.rr.DecoderEntry">
         UPDATE
-            rrdec.locomotive
-        SET
-            locoid = #{locoId},
-            filename = #{fileName},
-            roadnumber = #{roadNumber},
-            roadname = #{roadName},
-            manufacturer = #{manufacturer},
-            owner = #{owner},
-            dccaddress = #{dccAddress},
-            productId = #{productId},
-            decoderid = #{decoderId},
-            dateUpdated = #{dateUpdated}
+            rrdec.Decoder
+        SET decoderid     = #{decoderId},
+            filename      = #{fileName},
+            roadnumber    = #{roadNumber},
+            roadname      = #{roadName},
+            manufacturer  = #{manufacturer},
+            owner         = #{owner},
+            dccaddress    = #{dccAddress},
+            productId     = #{productId},
+            decoderTypeId = #{decoderTypeId},
+            dateUpdated   = #{dateUpdated}
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteDecoderEntry" parameterType="com.spw.rr.DecoderEntry">
+        DELETE
+        FROM rrdec.Decoder
+        WHERE id = #{id};
+    </delete>
+    <select id="listDecodersByRosterID" resultType="com.spw.rr.DecoderEntry">
+        SELECT id,
+               decoderid,
+               filename,
+               roadnumber,
+               roadname,
+               owner,
+               model,
+               dccaddress,
+               manufacturerid,
+               decoderTypeId,
+               rosterid,
+               dateUpdated
+        FROM rrdec.Decoder
+        WHERE rosterid = #{rosterID}
+        ORDER BY id
+    </select>
+    <insert id="insertDecoderTypeEntry" parameterType="com.spw.rr.DecoderType" useGeneratedKeys="true" keyProperty="id"
+            keyColumn="id">
+        INSERT INTO rrdec.decoderType
+        (decoderfamily,
+         decodermodel,
+         dateupdated)
+        VALUES (#{decoderFamily},
+                #{decoderModel},
+                   CURRENT TIMESTAMP)
+    </insert>
+    <update id="updateDecoderTypeEntry" parameterType="com.spw.rr.DecoderType">
+        UPDATE
+            rrdec.decoderType
+        SET decoderFamily = #{decoderFamily},
+            decoderModel  = #{decoderModel},
+            dateUpdated   = CURRENT TIMESTAMP
         WHERE
             id = #{id}
     </update>
-    <delete id="deleteLocomotiveEntry" parameterType="com.spw.rr.LocomotiveEntry">
-        DELETE
-        FROM
-            rrdec.locomotive
-        WHERE
-            id = #{id};
-    </delete>
-    <select id="listLocomotivesByRosterID" resultType="com.spw.rr.LocomotiveEntry">
-        SELECT
-            id,
-            locoid,
-            filename,
-            roadnumber,
-            roadname,
-            owner,
-            model,
-            dccaddress,
-            manufacturerid,
-            decoderid,
-            rosterid,
-            dateUpdated
-        FROM
-            rrdec.locomotive
-        WHERE
-            rosterid = #{rosterID}
-        ORDER BY
-            id
+    <select id="listDecoderTypes" resultType="com.spw.rr.DecoderType">
+        SELECT id,
+               decoderFamily,
+               decoderModel,
+               dateUpdated AS updated
+        FROM rrdec.decoderType
+        ORDER BY decoderFamily,
+                 decoderModel
     </select>
-</mapper>
+    <select id="getDecoderType" resultType="com.spw.rr.DecoderType">
+        SELECT id,
+               decoderFamily,
+               decoderModel,
+               dateUpdated AS updated
+        FROM rrdec.decoderType
+        WHERE id = #{id}
+    </select>
+    <select id="findDecoderType" resultType="com.spw.rr.DecoderType">
+        SELECT id,
+               decoderFamily,
+               decoderModel,
+               dateUpdated AS updated
+        FROM rrdec.decoderType
+        WHERE decoderFamily = #{param1}
+          AND decoderModel = #{param2}
+    </select>
+ </mapper>

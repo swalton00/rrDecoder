@@ -129,6 +129,69 @@ SET
     dateUpdated = CURRENT TIMESTAMP
 WHERE
     id = 1;
-    
-    
+INSERT INTO
+    rrdec.locomotive
+    (
+        locoid,
+        filename,
+        roadnumber,
+        roadname,
+        owner,
+        model,
+        dccaddress,
+        manufacturerid,
+        decoderid,
+        rosterid
+    )
+    VALUES
+    (
+        '2200',
+        '2200.xml',
+        '2200',
+        'Pennsylvania',
+        'jsw',
+        'GP-30',
+        '2200',
+        'ScaleTrains',
+        1,
+        1
+    );
+UPDATE
+    rrdec.locomotive
+SET
+    locoid = '123',
+    filename = '123',
+    roadnumber = '123',
+    roadname = '123',
+    manufacturer = 'ScaleTrains',
+    owner = 'jsw',
+    dccaddress = '123',
+    decoderid = 76,
+    dateUpdated = CURRENT TIMESTAMP
+WHERE
+    id = 1;
+DELETE
+FROM
+    rrdec.locomotive
+WHERE
+    id = 1;
+SELECT
+    id,
+    locoid,
+    filename,
+    roadnumber,
+    roadname,
+    owner,
+    model,
+    dccaddress,
+    manufacturerid,
+    decoderid,
+    rosterid,
+    dateUpdated
+FROM
+    rrdec.locomotive
+WHERE
+    rosterid = 15
+ORDER BY 
+    id;
     

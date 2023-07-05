@@ -14,7 +14,7 @@ class RosterImport {
 
     private DecoderDBService database
 
-    List<DecoderEntry> decoderList = null
+    List<DecoderType> decoderList = null
 
     void setDB(DecoderDBService database) {
         log.debug("setting the database service address")
@@ -30,7 +30,7 @@ class RosterImport {
     void buildDecoderList() {
         log.debug("now building a list of current decoders")
         if (decoderList == null) {
-            decoderList = new ArrayList<DecoderEntry>()
+            decoderList = new ArrayList<DecoderType>()
         } else {
             decoderList.clear()
         }
@@ -40,11 +40,11 @@ class RosterImport {
         }
     }
 
-    DecoderEntry findDecoder(String family, String model) {
+    DecoderType findDecoderType(String family, String model) {
         log.debug("finding decoder with family: ${family} and model: ${model}")
-        DecoderEntry found = null
+        DecoderType found = null
         decoderList.each {
-            if (it.decoderFamily.equals(family) & it.decoderModel.equals(model)) {
+            if (it.decoderFamily.equals(family) && it.decoderModel.equals(model)) {
                 log.debug("found the decoder")
                 found = it
                 return
@@ -53,19 +53,22 @@ class RosterImport {
         if (found != null) {
             return found
         }
-        found = new DecoderEntry()
+        found = new DecoderType()
         found.decoderModel = model
         found.decoderFamily = family
-        found = database.insertDecoderEntry(found)
+        found = database.insertDecoderTypeEntry(found)
         decoderList.add(found)
         return found
     }
 
     boolean doesRosterExist(File rosterFile) {
+        log.debug("looking for an existing roster on this system for ${rosterFile}")
         RosterEntry existing = getRosterEntry(rosterFile.path)
         if (existing != null) {
+            log.debug("found an existing roster -- returning true")
             return true
         } else {
+            log.debug("no roster found -- returning false")
             return false
         }
     }
@@ -80,7 +83,7 @@ class RosterImport {
         buildDecoderList()
         RosterEntry thisRoster = getRosterEntry(rosterFile.path)
         boolean rosterFound = false
-        HashMap<String, LocomotiveEntry> existingList = null
+        HashMap<String, DecoderEntry> existingList = null
         if (thisRoster == null) {
             log.debug("roster not found -- adding new")
             thisRoster = new RosterEntry()
@@ -93,43 +96,46 @@ class RosterImport {
         }
         for (i in 0..<arraySize) {
             log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
-            LocomotiveEntry newEntry = setLocoValues(entryList[i], thisRoster)
+            DecoderEntry newEntry = setLocoValues(entryList[i], thisRoster)
             if (!rosterFound) {
                 addLoco(newEntry)
             } else {
-                LocomotiveEntry previous = existingList.get(newEntry.locoId)
+                DecoderEntry previous = existingList.get(newEntry.decoderId)
                 if (previous == null) {
                     addLoco(newEntry)
                 } else {
                     newEntry.id = previous.id
-                    database.updateLocomotiveEntry(newEntry)
-                    existingList.remove(newEntry.locoId)
+                    database.updateDecoderEntry(newEntry )
+                    existingList.remove(newEntry.decoderId)
                 }
             }
         }
-        if (rosterFound & existingList.size() > 0) {
-            log.debug("still have some old existing Loco entries -- removing them")
+        if (rosterFound && existingList.size() > 0) {
+            log.debug("still have some old existing decoder entries -- removing them")
             existingList.forEach {
-                database.deleteLocomotiveEntry(it)
+                database.deleteDecoderEntry(it)
             }
         }
         log.debug("there are ${arraySize} entries in this roster")
+        if (rosterFound) {
+            database.updateRosterEntry(thisRoster)
+        }
         return thisRoster
     }
 
-    LocomotiveEntry addLoco(LocomotiveEntry entry) {
-        database.addLocomotiveEntry(entry)
+    DecoderEntry addLoco(DecoderEntry entry) {
+        database.addDecoderEntry(entry)
     }
 
-    LocomotiveEntry setLocoValues(Object thisEntry, RosterEntry rosterEntry) {
-        LocomotiveEntry entry = new LocomotiveEntry()
+    DecoderEntry setLocoValues(Object thisEntry, RosterEntry rosterEntry) {
+        DecoderEntry entry = new DecoderEntry()
         entry.rosterId = rosterEntry.id
         String decoderModel = thisEntry.decoder.'@model'
-        String decoderFamily = thisEntry.'@family'
-        log.debug("find decoder for ${decoderModel} with family ${decoderFamily}")
-        DecoderEntry decoder = findDecoder(decoderFamily, decoderModel)
-        entry.decoderId = decoder.id
-        entry.locoId = thisEntry.'@id'
+        String decoderFamily = thisEntry.decoder.'@family'
+        log.debug("find decoder type  for ${decoderModel} with family ${decoderFamily}")
+        DecoderType decoderType = findDecoderType(decoderFamily, decoderModel)
+        entry.decoderTypeId = decoderType.id
+        entry.decoderId = thisEntry.'@id'
         entry.fileName = thisEntry.'@fileName'
         entry.roadName = thisEntry.'@roadName'
         entry.roadNumber = thisEntry.'@roadNumber'
@@ -147,7 +153,7 @@ class RosterImport {
 
     Timestamp doDateModified(String dateValue) {
         Timestamp retVal = null
-        if (dateValue == null | dateValue.equals("")) {
+        if (dateValue == null || dateValue.equals("")) {
             return new Timestamp(new Date().getTime())
         }
         try {
@@ -175,12 +181,12 @@ class RosterImport {
         return new Timestamp(new Date().getTime())
     }
 
-    HashMap<String, LocomotiveEntry> updateRosterEntries(RosterEntry thisEntry) {
+    HashMap<String, DecoderEntry> updateRosterEntries(RosterEntry thisEntry) {
         log.debug("updating an existing roster")
-        List<LocomotiveEntry> existingList = database.loocomotivesForRoster(thisEntry.id)
-        HashMap<String, LocomotiveEntry> oldLocos = new HashMap<>()
+        List<DecoderEntry> existingList = database.decodersForRoster(thisEntry.id)
+        HashMap<String, DecoderEntry> oldLocos = new HashMap<>()
         existingList.each {
-            oldLocos.put(it.locoId, it)
+            oldLocos.put(it.decoderId, it)
         }
         return oldLocos
     }

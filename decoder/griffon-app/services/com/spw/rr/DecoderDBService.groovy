@@ -16,16 +16,6 @@ class DecoderDBService {
     @javax.inject.Inject
     private MybatisHandler handler
 
-    List<RosterEntry> listRosters(){
-        log.debug("getting the list of rosters")
-        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
-            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            List<RosterEntry> result = mapper.listRoster()
-            log.debug("result found was ${result}")
-            return result
-        }
-    }
-
     RosterEntry addRoster(RosterEntry entry) {
         log.debug("adding a new RosterEntry: ${entry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
@@ -37,11 +27,31 @@ class DecoderDBService {
     }
 
     void updateRosterEntry(RosterEntry entry) {
+        log.debug("updating the roster ${entry}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            mapper.updateRosterEntry(entry)
+        }
+    }
 
+    List<RosterEntry> listRosters(){
+        log.debug("getting the list of rosters")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            List<RosterEntry> result = mapper.listRosters()
+            log.debug("result found was ${result}")
+            return result
+        }
     }
 
     List<RosterEntry> listSystemRosters(String systemName) {
-
+        log.debug("getting the list of rosters for system ${systemName}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            List<RosterEntry> result = mapper.listSystemRoster(systemName)
+            log.debug("result found was ${result}")
+            return result
+        }
     }
 
     RosterEntry getRosterEntry(String systemName, String fullPath) {
@@ -55,87 +65,87 @@ class DecoderDBService {
         }
     }
 
-    LocomotiveEntry addLocomotiveEntry(LocomotiveEntry locomotiveEntry) {
-        log.debug("adding a new Locomotive ${locomotiveEntry}")
+    DecoderEntry addDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("adding a new decoder ${decoderEntry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            int result = mapper.insertLocomotiveEntry(locomotiveEntry)
-            log.debug("result was ${locomotiveEntry}")
-            return locomotiveEntry
+            int result = mapper.insertDecoderEntry(decoderEntry)
+            log.debug("result was ${decoderEntry}")
+            return decoderEntry
         }
     }
 
-    void updateLocomotiveEntry(LocomotiveEntry locomotiveEntry) {
-        log.debug("updateing locomotive entry ${locomotiveEntry}")
+    void updateDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("updateing decoder entry ${decoderEntry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            mapper.updateLocomotiveEntry(locomotiveEntry)
+            mapper.updateDecoderEntry(decoderEntry)
         }
     }
 
-    int deleteLocomotiveEntry(LocomotiveEntry locomotiveEntry) {
-        log.debug("deleting locomotive entry ${locomotiveEntry}")
+    int deleteDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("deleting decoder entry ${decoderEntry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            int result = mapper.deleteLocomotiveEntry(locomotiveEntry)
+            int result = mapper.deleteDecoderEntry(decoderEntry)
             log.debug("result was ${result}")
             return result
         }
     }
 
-    List<LocomotiveEntry> loocomotivesForRoster(int rosterID) {
-        log.debug("listing locomotives for rosterID ${rosterID}")
+    List<DecoderEntry> decodersForRoster(int rosterID) {
+        log.debug("listing decoders for rosterID ${rosterID}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            List<LocomotiveEntry> result = mapper.listLocomotivesByRosterID(rosterID)
+            List<DecoderEntry> result = mapper.listDecodersByRosterID(rosterID)
             log.debug("result was ${result}")
             return result
         }
     }
 
-    List<DecoderEntry> listDecoders() {
+    List<DecoderType> listDecoders() {
         log.debug("Retrieving list of decoders")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper = session.getMapper(DecoderMapper.class)
-            return mapper.listDecoders()
+            return mapper.listDecoderTypes()
         }
     }
 
-    DecoderEntry insertDecoderEntry(DecoderEntry entry) {
-        log.debug("adding new decoder: ${entry}")
+    DecoderType insertDecoderTypeEntry(DecoderType entry) {
+        log.debug("adding new decoder type: ${entry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            int result = mapper.insertDecoderEntry(entry)
+            int result = mapper.insertDecoderTypeEntry(entry)
             log.debug("result was ${entry}")
             return entry
         }
     }
 
-    DecoderEntry getDecoder(int id) {
+    DecoderType getDecoderType(int id) {
         log.debug("Retrieving decoder with id of ${fid}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            DecoderEntry result = mapper.getDecoder(id)
+            DecoderType result = mapper.getDecoderType(id)
             log.debug("result found was ${result}")
             return result
         }
     }
 
-    DecoderEntry findDecoder(String family, String model) {
-        log.debug("Retrieving decoder entry with family: ${family} and model: ${model}")
+    DecoderType findDecoderType(String family, String model) {
+        log.debug("Retrieving decoder type entry with family: ${family} and model: ${model}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            DecoderEntry result = mapper.findDecoder(family, model)
+            DecoderType result = mapper.findDecoderType(family, model)
             log.debug("result found was ${result}")
             return result
         }
     }
 
-    void updateDecoderEntry(DecoderEntry entry) {
+    void updateDecoderType(DecoderType entry) {
         log.debug("Updated decoder entry: ${entry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
-            mapper.updateDecoderEntry(entry)
+            mapper.updateDecoderTypeEntry(entry)
             return
         }
     }

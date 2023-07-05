@@ -1,10 +1,11 @@
 package com.spw.rr.mappers
 
+
 import griffon.metadata.TypeProviderFor
 import griffon.plugins.mybatis.MybatisMapper
 import com.spw.rr.RosterEntry
-import com.spw.rr.LocomotiveEntry
 import com.spw.rr.DecoderEntry
+import com.spw.rr.DecoderType
 
 
 @TypeProviderFor(MybatisMapper)
@@ -13,34 +14,34 @@ interface DecoderMapper extends MybatisMapper {
 
     void updateRosterEntry(RosterEntry entry)
 
+    List<RosterEntry> listRosters()
+
     List<RosterEntry> listSystemRoster(Integer systemId)
 
     RosterEntry getRosterEntry(int id)
 
     RosterEntry findRosterEntry(String systemName, String fullPath)
 
-    int insertLocomotiveEntry(LocomotiveEntry entry)
-
-    void updateLocomotiveEntry(LocomotiveEntry entry)
-
     int insertDecoderEntry(DecoderEntry entry)
 
     void updateDecoderEntry(DecoderEntry entry)
 
-    int deleteLocomotiveEntry(DecoderEntry entry)
+    int deleteDecoderEntry(DecoderEntry entry)
 
-    List<RosterEntry> listRoster()
+    List<DecoderEntry> listDecoders(int rosterId)
 
-    List<LocomotiveEntry> listLocomotives(int rosterId)
+    List<DecoderEntry> listDecodersByRosterID(int rosterID)
 
-    List<DecoderEntry> listDecoders()
+    DecoderEntry getDecoderEntry(int id)
 
-    List<LocomotiveEntry> listLocomotivesByRosterID(int rosterID)
+    int insertDecoderTypeEntry(DecoderType entry)
 
-    LocomotiveEntry getLocomotive(int id)
+    void updateDecoderTypeEntry(DecoderType entry)
 
-    DecoderEntry getDecoder(int id)
+    List<DecoderType> listDecoderTypes()
 
-    DecoderEntry findDecoder(String family, String model)
+    DecoderType getDecoderType(int id)
+
+    DecoderType findDecoderType(String family, String model)
 
 }

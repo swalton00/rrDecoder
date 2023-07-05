@@ -7,7 +7,17 @@ import java.sql.Timestamp
 @ToString(includeNames = true, includePackage = false, includeFields = true)
 class DecoderEntry {
     Integer id
-    String decoderModel
-    String decoderFamily
-    Timestamp updated
+    String decoderId
+    String fileName
+    String roadNumber
+    String roadName
+    String manufacturer
+    String owner
+    String model
+    String dccAddress
+    String manufacturerId
+    String productId
+    Timestamp dateUpdated
+    Integer decoderTypeId
+    Integer rosterId
 }
