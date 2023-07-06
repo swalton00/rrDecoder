@@ -29,7 +29,7 @@
         from rrdec.roster
         order by systemname
     </select>
-    <select id="listSystemRoster" parameterType="String" resultType="com.spw.rr.RosterEntry">
+    <select id="listSystemRosters" parameterType="String" resultType="com.spw.rr.RosterEntry">
         SELECT id,
                entered AS entryTime,
                fullpath,
@@ -105,6 +105,22 @@
         FROM rrdec.Decoder
         WHERE id = #{id};
     </delete>
+    <select id="listDecoders" resultType="com.spw.rr.DecoderEntry">
+        SELECT id,
+               decoderid,
+               filename,
+               roadnumber,
+               roadname,
+               owner,
+               model,
+               dccaddress,
+               manufacturerid,
+               decoderTypeId,
+               rosterid,
+               dateUpdated
+        FROM rrdec.Decoder
+        ORDER BY rosterid, decoderid
+    </select>
     <select id="listDecodersByRosterID" resultType="com.spw.rr.DecoderEntry">
         SELECT id,
                decoderid,
@@ -119,7 +135,12 @@
                rosterid,
                dateUpdated
         FROM rrdec.Decoder
-        WHERE rosterid = #{rosterID}
+        <where>
+        <foreach collection="param1"
+         open = "rosterid IN (" separator="," close=")">
+            #{item}
+        </foreach>
+        </where>
         ORDER BY id
     </select>
     <insert id="insertDecoderTypeEntry" parameterType="com.spw.rr.DecoderType" useGeneratedKeys="true" keyProperty="id"

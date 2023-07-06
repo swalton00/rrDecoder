@@ -16,7 +16,7 @@ interface DecoderMapper extends MybatisMapper {
 
     List<RosterEntry> listRosters()
 
-    List<RosterEntry> listSystemRoster(Integer systemId)
+    List<RosterEntry> listSystemRoster(String systemName)
 
     RosterEntry getRosterEntry(int id)
 
@@ -28,9 +28,9 @@ interface DecoderMapper extends MybatisMapper {
 
     int deleteDecoderEntry(DecoderEntry entry)
 
-    List<DecoderEntry> listDecoders(int rosterId)
+    List<DecoderEntry> listDecoders()
 
-    List<DecoderEntry> listDecodersByRosterID(int rosterID)
+    List<DecoderEntry> listDecodersByRosterID(int[] rosterID)
 
     DecoderEntry getDecoderEntry(int id)
 
