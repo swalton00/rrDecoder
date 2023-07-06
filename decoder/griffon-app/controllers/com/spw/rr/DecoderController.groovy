@@ -26,6 +26,8 @@ class DecoderController {
     @Inject
     private DecoderDBService database
 
+    MVCGroup decWindowGroup = null
+
     private boolean inited = false
 
     MVCGroup prefsGroup = null
@@ -84,10 +86,11 @@ class DecoderController {
     }
 
 
-    private checkGroup(String groupName, MVCGroup group) {
+    private MVCGroup checkGroup(String groupName, MVCGroup group) {
         if (group == null) {
-
+            return application.mvcGroupManager.findGroup(groupName)
         }
+        return group
     }
 
     @ControllerAction
@@ -101,6 +104,13 @@ class DecoderController {
         prefsGroup = checkGroup("prefs", prefsGroup)
         log.debug("showing the Preferences window")
         application.getWindowManager().show("prefs")
+    }
+
+    @ControllerAction
+    void decWindowAction() {
+        log.debug("Showing the Decoder list window")
+        decWindowGroup = checkGroup("dec", decWindowGroup)
+        application.getWindowManager().show("decWindow")
     }
 
 

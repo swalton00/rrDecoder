@@ -7,7 +7,7 @@ class RRTableModel extends AbstractTableModel{
 
     RRBaseModel model
 
-    RRTableModel(DecoderModel baseModel) {
+    RRTableModel(RRBaseModel baseModel) {
         super()
         model = baseModel
     }

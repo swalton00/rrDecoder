@@ -4,18 +4,16 @@ import griffon.core.artifact.GriffonView
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 
-import javax.swing.JTable
-import javax.swing.SwingConstants
 import javax.annotation.Nonnull
-import java.awt.BorderLayout
+import javax.swing.JTable
 import java.awt.Dimension
 
 @ArtifactProviderFor(GriffonView)
-class DecoderView {
+class DecView {
     @MVCMember @Nonnull
     FactoryBuilderSupport builder
     @MVCMember @Nonnull
-    DecoderModel model
+    DecModel model
 
     RRTableModel tableModel
     def completeTable
@@ -24,30 +22,25 @@ class DecoderView {
         JTable theTable
         RRTableModel modelCopy
         builder.with {
-            application(size: [600, 400], id: 'mainWindow',
+            application(size: [600, 400], id: 'decWindow',
                     title: 'Decoder List') {
 
                 menuBar() {
-                    menu(text: 'File') {
-                        menuItem importAction
-                        menuItem exitAction
+                    menu(text: 'Window') {
+                        menuItem mainAction
 
                     }
-                    menu(text: 'Edit') {
-                        menuItem prefsAction
-                    }
                     menu(text: 'View') {
-                        menuItem decWindowAction,text: 'Decoder List'
+
                     }
                     menu(text: 'Help') {
                         menuItem helpAction
-                        menuItem aboutAction
                     }
 
                 }
                 migLayout(constraints: 'fill')
                 def pane = scrollPane(constraints: 'grow') {
-                    theTable = table(model: modelCopy = new RRTableModel(model))
+                    theTable = table(model: modelCopy = new RRTableModel((RRBaseModel) model))
                     log.debug("theTable is ${theTable}")
                     log.debug("modelCopy is ${modelCopy}")
                     tableModel = modelCopy

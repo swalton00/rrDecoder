@@ -1,6 +1,6 @@
 application {
     title = 'RR Decoder Database'
-    startupGroups = ['decoder', 'prefs']
+    startupGroups = ['decoder', 'prefs', 'dec']
     autoShutdown = true
 }
 windowManager {
@@ -18,5 +18,10 @@ mvcGroups {
         model = 'com.spw.rr.PrefsModel'
         view  = 'com.spw.rr.PrefsView'
         controller = 'com.spw.rr.PrefsController'
+    }
+    'dec'  {
+        model = 'com.spw.rr.DecModel'
+        view  = 'com.spw.rr.DecView'
+        controller = 'com.spw.rr.DecController'
     }
 }
