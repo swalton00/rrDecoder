@@ -46,12 +46,13 @@ class DecoderView {
 
                 }
                 migLayout(constraints: 'fill')
-                scrollPane(constraints: BorderLayout.CENTER) {
+                def pane = scrollPane(constraints: 'grow') {
                     theTable = table(model: modelCopy = new RRTableModel(model))
                     log.debug("theTable is ${theTable}")
                     log.debug("modelCopy is ${modelCopy}")
                     tableModel = modelCopy
                 }
+                pane.setPreferredSize(new Dimension(1500,600))
             }
         }
         tableModel = modelCopy

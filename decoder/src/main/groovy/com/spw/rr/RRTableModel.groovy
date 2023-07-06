@@ -5,7 +5,7 @@ import javax.swing.table.AbstractTableModel
 
 class RRTableModel extends AbstractTableModel{
 
-    DecoderModel model
+    RRBaseModel model
 
     RRTableModel(DecoderModel baseModel) {
         super()
@@ -14,7 +14,7 @@ class RRTableModel extends AbstractTableModel{
 
     @Override
     String getColumnName(int col) {
-        return model.columnNames.get(col)
+        return model.columnNames[col]
     }
 
     @Override

@@ -1,0 +1,10 @@
+Things to be done:
+1. Add additional windows (decoderList, CV list, other valueslists)
+    a. based on RRBaseWindowModel
+    b. all use the same table model
+2. Add new tables for additional decoder information
+3. import the files referenced by the main decoder entry
+4. build the help system
+5. Add the help references
+6. write the documentation
+7. add the user preference manager (based on the JMRI model)
