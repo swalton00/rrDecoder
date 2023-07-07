@@ -12,4 +12,12 @@ class DecModel extends RRBaseModel {
     int[] preferredWidths = [10, 10, 40, 30, 30, 40, 30, 20, 40]
 
     EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
+
+    public enum WindowAction {
+        LIST_ALL, LIST_BY_SELECTION, CLOSE, SHOW, NONE
+    }
+
+    ArrayList<Integer> selectedRows = new ArrayList<>()
+
+    WindowAction currentAction = WindowAction.NONE
 }

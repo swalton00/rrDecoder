@@ -11,6 +11,9 @@ import javax.annotation.Nonnull
 import javax.inject.Inject
 import javax.swing.JFileChooser
 
+import static com.spw.rr.DecModel.WindowAction.LIST_ALL
+import static com.spw.rr.DecModel.WindowAction.LIST_BY_SELECTION
+
 @ArtifactProviderFor(GriffonController)
 class DecoderController {
     @MVCMember
@@ -107,10 +110,26 @@ class DecoderController {
     }
 
     @ControllerAction
+    @Threading(Threading.Policy.INSIDE_UITHREAD_SYNC)
     void decWindowAction() {
         log.debug("Showing the Decoder list window")
         decWindowGroup = checkGroup("dec", decWindowGroup)
-        application.getWindowManager().show("decWindow")
+        DecModel decModel = decWindowGroup.getModel()
+        decModel.currentAction = LIST_ALL
+        application.eventRouter.publishEvent("DecWindow", [])
+    }
+
+    @ControllerAction
+    @Threading(Threading.Policy.OUTSIDE_UITHREAD)
+    void decSelectedAction() {
+        log.debug("showing a view of the selected rosters")
+        decWindowGroup = checkGroup("dec", decWindowGroup)
+        DecModel decModel = decWindowGroup.getModel()
+        decModel.currentAction = LIST_BY_SELECTION
+        decModel.selectedRows = model.selectedRows
+        log.debug("selected index is ${model.selectedRows}")
+        log.debug("publishing the event")
+        application.eventRouter.publishEvent("DecWindow", [])
     }
 
 

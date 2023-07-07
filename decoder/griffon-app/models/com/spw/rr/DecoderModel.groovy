@@ -19,4 +19,9 @@ class DecoderModel extends RRBaseModel {
     int[] preferredWidths = [10,20,300]
 
     EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
+
+    @Observable
+    boolean tableSelectionEnabled = false
+
+    ArrayList<Integer> selectedRows = new ArrayList<>()
 }

@@ -136,7 +136,7 @@
                dateUpdated
         FROM rrdec.Decoder
         <where>
-        <foreach collection="param1"
+        <foreach collection="array" index="index" item="item"
          open = "rosterid IN (" separator="," close=")">
             #{item}
         </foreach>
