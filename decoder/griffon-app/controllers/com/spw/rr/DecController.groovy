@@ -4,6 +4,8 @@ import griffon.core.artifact.GriffonController
 import griffon.core.controller.ControllerAction
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
+import griffon.transform.Threading
+
 import static com.spw.rr.DecModel.WindowAction.*
 import javax.inject.Inject
 
@@ -29,6 +31,7 @@ class DecController {
 
     }
 
+    @Threading(Threading.Policy.OUTSIDE_UITHREAD)
     void onDecWindow() {
         log.debug("got a DecWindow event -- checking the model for actions")
         switch (model.currentAction) {
@@ -82,7 +85,11 @@ class DecController {
                 model.tableList.add(newArray)
             }
             if (view.tableModel != null) {
-                view.tableModel.dataChanged()
+                runInsideUISync {
+                    log.debug("changing the data model")
+                    view.tableModel.dataChanged()
+                    log.debug("data model now changed")
+                }
             }
         }
     }

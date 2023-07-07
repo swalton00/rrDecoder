@@ -22,7 +22,7 @@ class DecView {
         JTable theTable
         RRTableModel modelCopy
         builder.with {
-            application(size: [600, 400], id: 'decWindow',
+            application(size: [1200, 900], id: 'decWindow',
                     title: 'Decoder List') {
 
                 menuBar() {
@@ -38,18 +38,17 @@ class DecView {
                     }
 
                 }
-                migLayout(constraints: 'fill')
-                def pane = scrollPane(constraints: 'grow') {
+               migLayout(constraints: 'fill')
+                def pane = scrollPane(constraints: 'width 1200, height 900') {
                     theTable = table(model: modelCopy = new RRTableModel((RRBaseModel) model))
                     log.debug("theTable is ${theTable}")
                     log.debug("modelCopy is ${modelCopy}")
                     tableModel = modelCopy
                 }
-                pane.setPreferredSize(new Dimension(1500,600))
+                //pane.setPreferredSize(new Dimension(1500,600))
             }
         }
         tableModel = modelCopy
         completeTable = theTable
-        theTable.setPreferredSize(new Dimension(1500, 600))
     }
 }

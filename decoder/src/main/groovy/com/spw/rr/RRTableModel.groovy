@@ -28,7 +28,9 @@ class RRTableModel extends AbstractTableModel{
         if (model.tableList == null) {
             return 0
         }
-        return model.tableList.size()
+        int tableSize = model.tableList.size()
+        log.trace("returning a table model size of ${tableSize}")
+        return tableSize
     }
 
     @Override
