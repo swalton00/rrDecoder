@@ -83,7 +83,7 @@ class DecoderController {
                 }
             }
             for (i in 0..<model.preferredWidths.size()) {
-                view.completeTable.getColumnModel().getColumn(i).setPreferredWidth(model.preferredWidths[i])
+                model.theTable.getColumnModel().getColumn(i).setPreferredWidth(model.preferredWidths[i])
             }
         }
     }
