@@ -18,7 +18,6 @@ class DecoderView {
     DecoderModel model
 
     RRTableModel tableModel
-    def completeTable
 
     void initUI() {
         JTable theTable

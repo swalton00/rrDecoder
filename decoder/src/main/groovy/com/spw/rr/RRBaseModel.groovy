@@ -1,6 +1,7 @@
 package com.spw.rr
 
 import javax.swing.JTable
+import javax.swing.table.TableModel
 
 class RRBaseModel {
 
@@ -9,4 +10,6 @@ class RRBaseModel {
     int[] preferredWidths = [10,20,300]
 
     JTable theTable
+
+    TableModel tableModel
 }
