@@ -67,6 +67,7 @@ class DecoderView implements ListSelectionListener{
         theTable.setColumnSelectionAllowed(false)
         theTable.setRowSelectionAllowed(true)
         theTable.getSelectionModel().addListSelectionListener(this)
+        theTable.setAutoCreateRowSorter(true)
     }
 
     @Override

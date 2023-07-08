@@ -50,5 +50,6 @@ class DecView {
         }
         tableModel = modelCopy
         completeTable = theTable
+        completeTable.setAutoCreateRowSorter(true)
     }
 }
