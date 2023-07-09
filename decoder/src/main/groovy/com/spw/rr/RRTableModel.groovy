@@ -29,7 +29,7 @@ class RRTableModel extends AbstractTableModel{
             return 0
         }
         int tableSize = model.tableList.size()
-        log.trace("returning a table model size of ${tableSize}")
+      //  log.trace("returning a table model size of ${tableSize}")
         return tableSize
     }
 
@@ -40,7 +40,7 @@ class RRTableModel extends AbstractTableModel{
 
     @Override
     Object getValueAt(int rowIndex, int columnIndex) {
-        log.debug("getting value at row ${rowIndex} and column ${columnIndex}")
+       // log.debug("getting value at row ${rowIndex} and column ${columnIndex}")
         return model.tableList.getAt(rowIndex).getAt(columnIndex)
     }
 

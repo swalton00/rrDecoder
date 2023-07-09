@@ -2,7 +2,10 @@ package com.spw.rr
 
 import com.spw.rr.mappers.DecoderEntry
 import com.spw.rr.mappers.DecoderType
+import com.spw.rr.mappers.FunctionLabel
+import com.spw.rr.mappers.KeyValuePairs
 import com.spw.rr.mappers.RosterEntry
+import com.spw.rr.mappers.SpeedProfile
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import com.fasterxml.jackson.databind.util.StdDateFormat
@@ -113,14 +116,38 @@ class RosterImport {
             // check for additional information in the roster - function labels, attribute pairs and speed profile
             def functions = entryList[i].'functionLabels'
             def functionEntries = functions.'functionlabel'
-            def thisEntry = entryList[i].'functionlabels'.functionlabel[0].'@num'.text()
-            log.debug("entry 0 is ${thisEntry}")
-            def thisValue = entryList[i].'functionlabels'.functionlabel[0].text()
-            log.debug("and this value is ${thisValue}")
             if (functionEntries != null) {
                 int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
                 for (labelEntry in 0..<functionLabelSize) {
                     log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
+                    FunctionLabel funcLab = new FunctionLabel()
+                    funcLab.decoderId = newEntry.id
+                    funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
+                    funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
+                    log.debug("new function label is ${funcLab}")
+                }
+            }
+            int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
+            log.debug("key value size is ${keyValuesSize}")
+            if (keyValuesSize > 0) {
+                for (j in 0..<keyValuesSize) {
+                    KeyValuePairs kvp = new KeyValuePairs()
+                    kvp.decoderId = newEntry.id
+                    kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
+                    kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
+                    log.debug("new key value pair is: ${kvp}")
+                }
+            }
+            int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
+            log.debug("speed profile size is ${speedProfileSize}")
+            if (speedProfileSize > 0) {
+                for (j in 0..<speedProfileSize) {
+                    SpeedProfile sp = new SpeedProfile()
+                    sp.decoderId = newEntry.id
+                    sp.speedStep = Integer.valueOf(entryList[i].'speedprofile'.speeds.speed[j].step.text())
+                    sp.forwardValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].forward.text())
+                    sp.reverseValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].reverse.text())
+                    log.debug("new speed profile is ${sp}")
                 }
             }
         }
