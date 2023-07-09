@@ -21,6 +21,29 @@ INSERT INTO
         'test',
         'test1'
     );
+INSERT INTO
+    rrdec.decoderType
+    (
+        decoderfamily,
+        decodermodel,
+        dateupdated
+    )
+    VALUES
+    (
+        'ESU LokSound 5',
+        'LokSound 5',
+        CURRENT TIMESTAMP
+    );
+SELECT
+    id,
+    decoderFamily,
+    decoderModel,
+    dateUpdated AS updated
+FROM
+    rrdec.decoderType
+ORDER BY
+    decoderfamily,
+    decodermodel;
 UPDATE
     rrdec.roster
 SET
@@ -53,9 +76,9 @@ WHERE
     systemName = 'Mike'
 AND fullPath = 'this';
 INSERT INTO
-    rrdec.locomotive
+    rrdec.decoder
     (
-        locoid,
+        decoderId,
         filename,
         roadnumber,
         roadname,
@@ -63,7 +86,7 @@ INSERT INTO
         owner,
         dccaddress,
         productid,
-        decoderId,
+        decoderTypeId,
         rosterid
     )
     VALUES
@@ -85,30 +108,7 @@ SELECT
     decoderModel,
     dateUpdated AS updated
 FROM
-    rrdec.decoder
-ORDER BY
-    family,
-    model;
-INSERT INTO
-    rrdec.decoder
-    (
-        decoderfamily,
-        decodermodel,
-        dateupdated
-    )
-    VALUES
-    (
-        'ESU LokSound 5',
-        'LokSound 5',
-        CURRENT TIMESTAMP
-    );
-SELECT
-    id,
-    decoderFamily,
-    decoderModel,
-    dateUpdated AS updated
-FROM
-    rrdec.decoder
+    rrdec.decoderType
 WHERE
     id = 1;
 SELECT
@@ -117,12 +117,12 @@ SELECT
     decoderModel,
     dateUpdated AS updated
 FROM
-    rrdec.decoder
+    rrdec.decoderType
 WHERE
     decoderFamily = 'ESU LokSound 5'
 AND decoderModel = 'LokSound 5';
 UPDATE
-    rrdec.decoder
+    rrdec.decoderType
 SET
     decoderFamily = 'ESU Lok',
     decoderModel = 'Lok',
@@ -130,9 +130,9 @@ SET
 WHERE
     id = 1;
 INSERT INTO
-    rrdec.locomotive
+    rrdec.decoder
     (
-        locoid,
+        decoderId,
         filename,
         roadnumber,
         roadname,
@@ -140,7 +140,7 @@ INSERT INTO
         model,
         dccaddress,
         manufacturerid,
-        decoderid,
+        decoderTypeId,
         rosterid
     )
     VALUES
@@ -157,27 +157,27 @@ INSERT INTO
         1
     );
 UPDATE
-    rrdec.locomotive
+    rrdec.decoder
 SET
-    locoid = '123',
+    decoderid = '123',
     filename = '123',
     roadnumber = '123',
     roadname = '123',
     manufacturer = 'ScaleTrains',
     owner = 'jsw',
     dccaddress = '123',
-    decoderid = 76,
+    decoderTypeid = 76,
     dateUpdated = CURRENT TIMESTAMP
 WHERE
     id = 1;
 DELETE
 FROM
-    rrdec.locomotive
+    rrdec.decoder
 WHERE
     id = 1;
 SELECT
     id,
-    locoid,
+    decoderid,
     filename,
     roadnumber,
     roadname,
@@ -185,13 +185,80 @@ SELECT
     model,
     dccaddress,
     manufacturerid,
-    decoderid,
+    decodertypeid,
     rosterid,
     dateUpdated
 FROM
-    rrdec.locomotive
+    rrdec.decoder
 WHERE
     rosterid = 15
-ORDER BY 
+ORDER BY
     id;
+INSERT INTO
+    rrdec.FunctionLabels
+    (
+        decoderID,
+        FunctionNumber,
+        FunctionLabel
+    )
+    VALUES
+    (
+        180,
+        '0',
+        'Headlight'
+    );
+INSERT    INTO
+    rrdec.KeyValues
+    (
+        decoderId,
+        Pair_key,
+        Pair_value
+    )
+    VALUES
+    (
+        139,
+        'DispatcherTrainType',
+        'LOCAL PASSENGER'
+    );
+INSERT INTO
+    rrdec.speedProfile
+    (
+        decoderId,
+        STEP,
+        forward,
+        reverse
+    )
+    VALUES
+    (
+        139,
+        159,
+        52.735554,
+        53.890057
+    );
+INSERT INTO
+    rrdec.decoderDef
+    (
+        decoderID,
+        varValue,
+        item
+    )
+    VALUES
+    (
+        139,
+        'Vstart',
+        '15'
+    );
+INSERT INTO
+    rrdec.CvValues
+    ( 
+        decoderId,
+        cvvalue,
+        value 
+    )
+    VALUES 
+    (
+        139,
+        '1',
+        '15'
+    );
     

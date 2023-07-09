@@ -1,7 +1,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.spw.rr.mappers.DecoderMapper">
-    <insert id="insertRosterEntry" parameterType="com.spw.rr.RosterEntry" useGeneratedKeys="true" keyColumn="id"
+    <insert id="insertRosterEntry" parameterType="com.spw.rr.mappers.RosterEntry" useGeneratedKeys="true" keyColumn="id"
             keyProperty="id">
         INSERT INTO rrdec.roster
         (entered,
@@ -11,7 +11,7 @@
                         #{fullPath},
                         #{systemName})
     </insert>
-    <update id="updateRosterEntry" parameterType="com.spw.rr.RosterEntry">
+    <update id="updateRosterEntry" parameterType="com.spw.rr.mappers.RosterEntry">
         UPDATE
             rrdec.roster
         SET fullpath=#{fullPath},
@@ -20,7 +20,7 @@
         WHERE
             id = #{id}
     </update>
-    <select id="listRosters" resultType="com.spw.rr.RosterEntry">
+    <select id="listRosters" resultType="com.spw.rr.mappers.RosterEntry">
         SELECT id,
                entered as entryTime,
                fullpath,
@@ -29,7 +29,7 @@
         from rrdec.roster
         order by systemname
     </select>
-    <select id="listSystemRosters" parameterType="String" resultType="com.spw.rr.RosterEntry">
+    <select id="listSystemRosters" parameterType="String" resultType="com.spw.rr.mappers.RosterEntry">
         SELECT id,
                entered AS entryTime,
                fullpath,
@@ -39,7 +39,7 @@
         WHERE systemName = #{systemName}
         ORDER BY systemname
     </select>
-    <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.RosterEntry">
+    <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.mappers.RosterEntry">
         SELECT id,
                entered AS entryTime,
                fullpath,
@@ -49,7 +49,7 @@
         WHERE id = #{id}
         ORDER BY systemname
     </select>
-    <select id="findRosterEntry" resultType="com.spw.rr.RosterEntry">
+    <select id="findRosterEntry" resultType="com.spw.rr.mappers.RosterEntry">
         SELECT id,
                entered AS entryTime,
                fullpath,
@@ -59,7 +59,7 @@
         WHERE systemName = #{param1}
           AND fullPath = #{param2};
     </select>
-    <insert id="insertDecoderEntry" parameterType="com.spw.rr.DecoderEntry" useGeneratedKeys="true" keyColumn="id"
+    <insert id="insertDecoderEntry" parameterType="com.spw.rr.mappers.DecoderEntry" useGeneratedKeys="true" keyColumn="id"
             keyProperty="id">
         INSERT INTO rrdec.Decoder
         (decoderid,
@@ -85,7 +85,7 @@
                 #{rosterId},
                 #{dateUpdated})
     </insert>
-    <update id="updateDecoderEntry" parameterType="com.spw.rr.DecoderEntry">
+    <update id="updateDecoderEntry" parameterType="com.spw.rr.mappers.DecoderEntry">
         UPDATE
             rrdec.Decoder
         SET decoderid     = #{decoderId},
@@ -100,12 +100,12 @@
             dateUpdated   = #{dateUpdated}
         WHERE id = #{id}
     </update>
-    <delete id="deleteDecoderEntry" parameterType="com.spw.rr.DecoderEntry">
+    <delete id="deleteDecoderEntry" parameterType="com.spw.rr.mappers.DecoderEntry">
         DELETE
         FROM rrdec.Decoder
         WHERE id = #{id};
     </delete>
-    <select id="listDecoders" resultType="com.spw.rr.DecoderEntry">
+    <select id="listDecoders" resultType="com.spw.rr.mappers.DecoderEntry">
         SELECT id,
                decoderid,
                filename,
@@ -121,7 +121,7 @@
         FROM rrdec.Decoder
         ORDER BY rosterid, decoderid
     </select>
-    <select id="listDecodersByRosterID" resultType="com.spw.rr.DecoderEntry">
+    <select id="listDecodersByRosterID" resultType="com.spw.rr.mappers.DecoderEntry">
         SELECT id,
                decoderid,
                filename,
@@ -143,7 +143,7 @@
         </where>
         ORDER BY id
     </select>
-    <insert id="insertDecoderTypeEntry" parameterType="com.spw.rr.DecoderType" useGeneratedKeys="true" keyProperty="id"
+    <insert id="insertDecoderTypeEntry" parameterType="com.spw.rr.mappers.DecoderType" useGeneratedKeys="true" keyProperty="id"
             keyColumn="id">
         INSERT INTO rrdec.decoderType
         (decoderfamily,
@@ -153,7 +153,7 @@
                 #{decoderModel},
                    CURRENT TIMESTAMP)
     </insert>
-    <update id="updateDecoderTypeEntry" parameterType="com.spw.rr.DecoderType">
+    <update id="updateDecoderTypeEntry" parameterType="com.spw.rr.mappers.DecoderType">
         UPDATE
             rrdec.decoderType
         SET decoderFamily = #{decoderFamily},
@@ -162,7 +162,7 @@
         WHERE
             id = #{id}
     </update>
-    <select id="listDecoderTypes" resultType="com.spw.rr.DecoderType">
+    <select id="listDecoderTypes" resultType="com.spw.rr.mappers.DecoderType">
         SELECT id,
                decoderFamily,
                decoderModel,
@@ -171,7 +171,7 @@
         ORDER BY decoderFamily,
                  decoderModel
     </select>
-    <select id="getDecoderType" resultType="com.spw.rr.DecoderType">
+    <select id="getDecoderType" resultType="com.spw.rr.mappers.DecoderType">
         SELECT id,
                decoderFamily,
                decoderModel,
@@ -179,7 +179,7 @@
         FROM rrdec.decoderType
         WHERE id = #{id}
     </select>
-    <select id="findDecoderType" resultType="com.spw.rr.DecoderType">
+    <select id="findDecoderType" resultType="com.spw.rr.mappers.DecoderType">
         SELECT id,
                decoderFamily,
                decoderModel,

@@ -1,13 +1,14 @@
-package com.spw.rr
+package com.spw.rr.mappers
 
 import groovy.transform.ToString
 
 import java.sql.Timestamp
 
 @ToString(includeNames = true, includePackage = false, includeFields = true)
-class DecoderType {
+class RosterEntry {
+    Timestamp entryTime
+    String fullPath
     Integer id
-    String decoderModel
-    String decoderFamily
-    Timestamp updated
+    Timestamp dateUpdated
+    String systemName
 }

@@ -1,6 +1,9 @@
 package com.spw.rr
 
+import com.spw.rr.mappers.DecoderEntry
 import com.spw.rr.mappers.DecoderMapper
+import com.spw.rr.mappers.DecoderType
+import com.spw.rr.mappers.RosterEntry
 import griffon.core.artifact.GriffonService
 import griffon.plugins.mybatis.MybatisHandler
 import org.apache.ibatis.session.SqlSession

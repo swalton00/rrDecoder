@@ -1,4 +1,4 @@
-package com.spw.rr
+package com.spw.rr.mappers
 
 import groovy.transform.ToString
 

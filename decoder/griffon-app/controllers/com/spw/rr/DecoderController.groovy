@@ -1,5 +1,6 @@
 package com.spw.rr
 
+import com.spw.rr.mappers.RosterEntry
 import griffon.core.artifact.GriffonController
 import griffon.core.controller.ControllerAction
 import griffon.core.mvc.MVCGroup

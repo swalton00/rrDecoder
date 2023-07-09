@@ -1,5 +1,8 @@
 package com.spw.rr
 
+import com.spw.rr.mappers.DecoderEntry
+import com.spw.rr.mappers.DecoderType
+import com.spw.rr.mappers.RosterEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import com.fasterxml.jackson.databind.util.StdDateFormat
@@ -34,7 +37,7 @@ class RosterImport {
         } else {
             decoderList.clear()
         }
-        def newList = database.listDecoders()
+        def newList = database.listDecoderTypes()
         newList.each { entry ->
             decoderList.add(entry)
         }
@@ -77,7 +80,6 @@ class RosterImport {
         log.debug("importing from ${rosterFile.path}")
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
-        def firstEntry = rosterValues.roster.locomotive[0]
         int arraySize = rosterValues.roster.locomotive.size()
         def entryList = rosterValues.roster.locomotive
         buildDecoderList()
@@ -101,12 +103,24 @@ class RosterImport {
                 addLoco(newEntry)
             } else {
                 DecoderEntry previous = existingList.get(newEntry.decoderId)
-                if (previous == null) {
-                    addLoco(newEntry)
-                } else {
-                    newEntry.id = previous.id
-                    database.updateDecoderEntry(newEntry )
+                if (previous != null) {
+                    // delete previous to cascade delete any children
+                    database.deleteDecoderEntry(previous)
                     existingList.remove(newEntry.decoderId)
+                }
+                addLoco(newEntry)
+            }
+            // check for additional information in the roster - function labels, attribute pairs and speed profile
+            def functions = entryList[i].'functionLabels'
+            def functionEntries = functions.'functionlabel'
+            def thisEntry = entryList[i].'functionlabels'.functionlabel[0].'@num'.text()
+            log.debug("entry 0 is ${thisEntry}")
+            def thisValue = entryList[i].'functionlabels'.functionlabel[0].text()
+            log.debug("and this value is ${thisValue}")
+            if (functionEntries != null) {
+                int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
+                for (labelEntry in 0..<functionLabelSize) {
+                    log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
                 }
             }
         }
