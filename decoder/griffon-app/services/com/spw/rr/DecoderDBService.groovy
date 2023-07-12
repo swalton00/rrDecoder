@@ -3,7 +3,10 @@ package com.spw.rr
 import com.spw.rr.mappers.DecoderEntry
 import com.spw.rr.mappers.DecoderMapper
 import com.spw.rr.mappers.DecoderType
+import com.spw.rr.mappers.FunctionLabel
+import com.spw.rr.mappers.KeyValuePairs
 import com.spw.rr.mappers.RosterEntry
+import com.spw.rr.mappers.SpeedProfile
 import griffon.core.artifact.GriffonService
 import griffon.plugins.mybatis.MybatisHandler
 import org.apache.ibatis.session.SqlSession
@@ -187,5 +190,57 @@ class DecoderDBService {
         }
     }
 
+    FunctionLabel insertFunctionLabels(FunctionLabel newValue) {
+        log.debug("adding new function label: ${newValue}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            int result = mapper.insertFunctionLabels(newValue)
+            log.debug("result was ${newValue}")
+            return newValue
+        }
+    }
 
+    List<FunctionLabel> listFunctionLabelsFor(List<Integer> parents) {
+        log.debug("returning a list of all function labels for the following parents: ${parents}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            return mapper.listFunctionLabelsFor(parents)
+        }
+    }
+
+    SpeedProfile insertSpeedProfile(SpeedProfile sp) {
+        log.debug("adding new speed profile: ${sp}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            mapper.insertSpeedSteps(sp)
+            log.debug("result was ${sp}")
+            return sp
+        }
+    }
+
+    List<SpeedProfile> listSpeedProfilesFor(List<Integer> parents) {
+        log.debug("returning a list of speed profiles for the following parents: ${parents}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            return mapper.listSpeedStepsFor(parents)
+        }
+    }
+
+    KeyValuePairs insertKeyValuePair(KeyValuePairs kvp) {
+        log.debug("adding new key value pair: ${kvp}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            mapper.insertKeyValuePairs(kvp)
+            log.debug("result was ${kvp}")
+            return kvp
+        }
+    }
+
+    List<KeyValuePairs> listKeyValuePairsFor(List<Integer> parents) {
+        log.debug("returning a list of key value pairs for the following parents: ${parents}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            return mapper.listKeyValuePairsFor(parents)
+        }
+    }
 }

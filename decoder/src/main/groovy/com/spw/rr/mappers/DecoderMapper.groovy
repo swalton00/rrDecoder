@@ -40,4 +40,18 @@ interface DecoderMapper extends MybatisMapper {
 
     DecoderType findDecoderType(String family, String model)
 
+    int insertFunctionLabels(FunctionLabel newValue)
+
+    List<FunctionLabel> listFunctionLabelsFor(List<Integer> parents)
+
+    int insertSpeedSteps(SpeedProfile sp)
+
+    List<SpeedProfile> listSpeedStepsFor(List<Integer> parents)
+
+    int insertKeyValuePairs(KeyValuePairs kvp)
+
+    List<KeyValuePairs> listKeyValuePairsFor(List<Integer> parents)
+
+
+
 }

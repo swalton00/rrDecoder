@@ -188,4 +188,126 @@
         WHERE decoderFamily = #{param1}
           AND decoderModel = #{param2}
     </select>
- </mapper>
+    <insert id="insertFunctionLabels" parameterType="com.spw.rr.mappers.FunctionLabel" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO
+            rrdec.FunctionLabels
+        (
+            decoderID,
+            FunctionNumber,
+            FunctionLabel
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{functionNum},
+                #{functionLabel}
+            );
+
+    </insert>
+    <select id="listFunctionLabelsFor" resultType="com.spw.rr.mappers.FunctionLabel">
+        SELECT
+            c.id AS rosterId,
+            a.decoderId,
+            a.id,
+            functionNumber as functionNum,
+            functionLabel
+        FROM
+            rrdec.functionLabels a
+                INNER JOIN
+            rrdec.decoder b
+            ON
+                a.decoderid = b.id
+                INNER JOIN
+            rrdec.roster c
+            ON
+                b.rosterid = c.id
+        <where>
+        <foreach collection="param" item="item" index="index"
+            open ="a.decoderid IN (" separator="," close=")"></foreach>
+        </where>
+        ORDER BY a.decoderID, a.functionNumber, c.id
+    </select>
+    <insert id="insertSpeedSteps" parameterType="com.spw.rr.mappers.SpeedProfile" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO
+            rrdec.speedProfile
+        (
+            decoderId,
+            STEP,
+            forward,
+            reverse
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{speedStep},
+                #{forwardValue},
+                #{reverseValue}
+            )
+    </insert>
+    <select id="listSpeedStepsFor" parameterType="com.spw.rr.mappers.SpeedProfile">
+        SELECT
+            c.id AS rosterId,
+            a.decoderId,
+            a.step    AS SpeedStep,
+            a.forward AS forwardValue,
+            a.reverse AS reverseValue
+        FROM
+            rrdec.speedprofile a
+                INNER JOIN
+            rrdec.decoder b
+            ON
+                a.decoderid = b.id
+                INNER JOIN
+            rrdec.roster c
+            ON
+                b.rosterid = c.id
+        <where>
+            <foreach collection="param" item="item" index="index"
+                         open ="a.decoderid IN (" separator="," close=")"></foreach>
+            </where>
+        ORDER BY
+            a.decoderid,
+            a.step,
+            c.id
+    </select>
+    <insert id="insertKeyValuePairs" parameterType="com.spw.rr.mappers.KeyValuePairs" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT    INTO
+            rrdec.KeyValues
+        (
+            decoderId,
+            Pair_key,
+            Pair_value
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{pair_key},
+                #{pair_value}
+            )
+    </insert>
+    <select id="listKeyValuePairsFor" resultType="com.spw.rr.mappers.KeyValuePairs">
+        SELECT
+            c.id AS rosterId,
+            a.decoderId,
+            a.pair_key,
+            a.pair_value
+        FROM
+            rrdec.keyValues a
+                INNER JOIN
+            rrdec.decoder b
+            ON
+                a.decoderid = b.id
+                INNER JOIN
+            rrdec.roster c
+            ON
+                b.rosterid = c.id
+        <where>
+            <foreach collection="param" item="item" index="index"
+                     open ="a.decoderid IN (" separator="," close=")"></foreach>
+        </where>
+        ORDER BY
+            a.decoderid,
+            a.pair_key,
+            c.id;
+    </select>
+</mapper>

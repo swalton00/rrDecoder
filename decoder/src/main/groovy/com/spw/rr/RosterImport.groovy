@@ -125,6 +125,7 @@ class RosterImport {
                     funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
                     funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
                     log.debug("new function label is ${funcLab}")
+                    database.insertFunctionLabels(funcLab)
                 }
             }
             int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
@@ -136,6 +137,7 @@ class RosterImport {
                     kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
                     kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
                     log.debug("new key value pair is: ${kvp}")
+                    database.insertKeyValuePair(kvp)
                 }
             }
             int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
@@ -148,6 +150,7 @@ class RosterImport {
                     sp.forwardValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].forward.text())
                     sp.reverseValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].reverse.text())
                     log.debug("new speed profile is ${sp}")
+                    database.insertSpeedProfile(sp)
                 }
             }
         }

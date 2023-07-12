@@ -9,4 +9,5 @@ class SpeedProfile {
     Integer speedStep
     Double  forwardValue
     Double  reverseValue
+    Integer rosterId
 }

@@ -203,10 +203,29 @@ INSERT INTO
     )
     VALUES
     (
-        180,
+        765,
         '0',
         'Headlight'
     );
+SELECT
+    c.id AS rosterId,
+    a.decoderId,
+    a.id,
+    functionNumber,
+    functionLabel
+FROM
+    rrdec.functionLabels a
+INNER JOIN
+    rrdec.decoder b
+ON
+    a.decoderid = b.id
+INNER JOIN
+    rrdec.roster c
+ON
+    b.rosterid = c.id
+//WHERE
+  //  a.decoderid IN (765 );
+  ;
 INSERT    INTO
     rrdec.KeyValues
     (
@@ -216,7 +235,7 @@ INSERT    INTO
     )
     VALUES
     (
-        139,
+        765,
         'DispatcherTrainType',
         'LOCAL PASSENGER'
     );
@@ -230,7 +249,7 @@ INSERT INTO
     )
     VALUES
     (
-        139,
+        765,
         159,
         52.735554,
         53.890057
@@ -250,15 +269,58 @@ INSERT INTO
     );
 INSERT INTO
     rrdec.CvValues
-    ( 
+    (
         decoderId,
         cvvalue,
-        value 
+        value
     )
-    VALUES 
+    VALUES
     (
         139,
         '1',
         '15'
     );
-    
+SELECT
+    c.id AS rosterId,
+    a.decoderId,
+    a.step    AS SpeedStep,
+    a.forward AS forwardValue,
+    a.reverse AS reverseValue
+FROM
+    rrdec.speedprofile a
+INNER JOIN
+    rrdec.decoder b
+ON
+    a.decoderid = b.id
+INNER JOIN
+    rrdec.roster c
+ON
+    b.rosterid = c.id
+//WHERE
+   // a.decoderid IN (765 )
+ORDER BY 
+    a.decoderid, 
+    a.step, 
+    c.id;
+SELECT
+    c.id AS rosterId,
+    a.decoderId,
+    a.pair_key,
+    a.pair_value
+FROM
+    rrdec.keyValues a
+INNER JOIN
+    rrdec.decoder b
+ON
+    a.decoderid = b.id
+INNER JOIN
+    rrdec.roster c
+ON
+    b.rosterid = c.id
+//WHERE
+    //a.decoderid IN (765 )
+ORDER BY
+    a.decoderid,
+    a.pair_key,
+    c.id;
+        

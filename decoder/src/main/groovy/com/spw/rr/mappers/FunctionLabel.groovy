@@ -8,4 +8,5 @@ class FunctionLabel {
     Integer decoderId
     Integer functionNum
     String  functionLabel
+    Integer rosterId
 }
