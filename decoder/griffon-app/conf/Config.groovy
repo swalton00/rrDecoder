@@ -1,11 +1,11 @@
 application {
     title = 'RR Decoder Database'
-    startupGroups = ['decoder', 'prefs', 'dec']
+    startupGroups = ['decoder', 'prefs', 'dec', 'progress']
     autoShutdown = true
 }
 windowManager {
     defaultHandler = new com.spw.rr.CenteringWindowDisplayHandler()
-    startupWindow = 'mainWindow'
+    startingWindow = 'mainWindow'
 }
 mvcGroups {
     // MVC Group for "app"
@@ -24,4 +24,10 @@ mvcGroups {
         view  = 'com.spw.rr.DecView'
         controller = 'com.spw.rr.DecController'
     }
+    'progress' {
+        model = 'com.spw.rr.ProgressModel'
+        view  = 'com.spw.rr.ProgressView'
+        controller = 'com.spw.rr.ProgressController'
+    }
+
 }

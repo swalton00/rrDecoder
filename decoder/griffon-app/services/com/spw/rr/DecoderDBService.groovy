@@ -1,5 +1,7 @@
 package com.spw.rr
 
+import com.spw.rr.mappers.CVvalues
+import com.spw.rr.mappers.DecoderDef
 import com.spw.rr.mappers.DecoderEntry
 import com.spw.rr.mappers.DecoderMapper
 import com.spw.rr.mappers.DecoderType
@@ -241,6 +243,43 @@ class DecoderDBService {
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
             return mapper.listKeyValuePairsFor(parents)
+        }
+    }
+
+
+    DecoderDef insertDecoderDef(DecoderDef decoderDef) {
+        log.debug("adding new decoder defininiton: ${decoderDef}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            mapper.insertDecoderDef(decoderDef)
+            log.debug("result was ${decoderDef}")
+            return decoderDef
+        }
+    }
+
+    List<DecoderDef> listDecoderDefFor(Integer parent) {
+        log.debug("returning a list of decoder definitions for parent: ${parent}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper = session.getMapper(DecoderMapper.class)
+            return mapper.listDecoderDefFor(parent)
+        }
+    }
+
+    CVvalues insertCVs(CVvalues cVvalues) {
+        log.debug("adding new CV value: ${cVvalues}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper =session.getMapper(DecoderMapper.class)
+            mapper.insertCVs(cVvalues)
+            log.debug("result was ${cVvalues}")
+            return cVvalues
+        }
+    }
+
+    List<CVvalues> listCVsFor(Integer parent) {
+        log.debug("returning a list of cvs for parent: ${parent}")
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper = session.getMapper(DecoderMapper.class)
+            return mapper.listCVsFor(parent)
         }
     }
 }

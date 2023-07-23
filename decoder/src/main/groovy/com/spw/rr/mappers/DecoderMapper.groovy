@@ -52,6 +52,11 @@ interface DecoderMapper extends MybatisMapper {
 
     List<KeyValuePairs> listKeyValuePairsFor(List<Integer> parents)
 
+    void insertDecoderDef(DecoderDef decoderDef)
 
+    List<DecoderDef> listDecoderDefFor(Integer parent)
 
+    void insertCVs(CVvalues cVvalues)
+
+    List<CVvalues> listCVsFor(Integer parent)
 }

@@ -1,11 +1,17 @@
 package com.spw.rr
 
+import com.spw.rr.mappers.CVvalues
+import com.spw.rr.mappers.DecoderDef
 import com.spw.rr.mappers.DecoderEntry
 import com.spw.rr.mappers.DecoderType
 import com.spw.rr.mappers.FunctionLabel
 import com.spw.rr.mappers.KeyValuePairs
 import com.spw.rr.mappers.RosterEntry
 import com.spw.rr.mappers.SpeedProfile
+import griffon.core.GriffonApplication
+import griffon.core.mvc.MVCGroup
+import griffon.transform.MVCAware
+import groovy.swing.SwingBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import com.fasterxml.jackson.databind.util.StdDateFormat
@@ -15,16 +21,24 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
+@MVCAware
 class RosterImport {
     static final Logger log = LoggerFactory.getLogger(RosterImport.class)
 
     private DecoderDBService database
 
+    ProgressModel progress
+
+    GriffonApplication application
+
     List<DecoderType> decoderList = null
 
-    void setDB(DecoderDBService database) {
+    def futureProcess
+
+    void setRequiredData(DecoderDBService database, GriffonApplication application) {
         log.debug("setting the database service address")
         this.database = database
+        this.application = application
     }
 
     private static String getSystemName() {
@@ -81,6 +95,15 @@ class RosterImport {
 
     RosterEntry importRoster(File rosterFile) {
         log.debug("importing from ${rosterFile.path}")
+        MVCGroup progressGroup = application.mvcGroupManager.findGroup('progress')
+        progress = progressGroup.model
+        SwingBuilder builder = new SwingBuilder()
+        builder.edt({
+            progress.phaseProgress.setMaximum(3)
+            progress.phaseProgress.setMinimum(1)
+            progress.phaseProgress.setValue(1)
+        })
+        application.getWindowManager().show("progress")
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
         int arraySize = rosterValues.roster.locomotive.size()
@@ -99,7 +122,15 @@ class RosterImport {
             rosterFound = true
             existingList = updateRosterEntries(thisRoster)
         }
+        futureProcess = []
+        builder.edt({
+            progress.phaseProgress.setValue(2)
+            progress.detailProgress.setMaximum(arraySize)
+        })
         for (i in 0..<arraySize) {
+            builder.edt({
+                progress.detailProgress.setValue(i)
+            })
             log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
             DecoderEntry newEntry = setLocoValues(entryList[i], thisRoster)
             if (!rosterFound) {
@@ -153,6 +184,62 @@ class RosterImport {
                     database.insertSpeedProfile(sp)
                 }
             }
+            builder.edt({
+                progress.phaseProgress.setValue(3)
+                progress.max = futureProcess.size()
+            })
+            int currentNumber = 0
+            futureProcess.each { it ->
+                currentNumber++
+                builder.edt({
+                    progress.detailProgress.setValue(currentNumber)
+                })
+                String path = it[0].substring(0, it[0].lastIndexOf(File.separator))
+                String newFileName = path + File.separator + "roster" + File.separator + it[1]
+                boolean fileFound = false
+                String decoderText
+                try {
+                    File xmlDecoderFile = new File(newFileName)
+                    decoderText = xmlDecoderFile.text
+                    fileFound = true
+                } catch (FileNotFoundException fe) {
+                    log.error "File ${newFileName}"
+                }
+                if (fileFound) {
+                    XmlSlurper slurper = new XmlSlurper()
+                    slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+                    slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+                    def decoderXML = slurper.parseText(decoderText)
+                    int varSize = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'.size()
+                    log.debug("decoderDef size is ${varSize}")
+                    for (j in 0..<varSize) {
+                        String itemString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@item'
+                        String valueString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@value'
+                        log.debug("value is ${valueString} and item is ${itemString}")
+                        DecoderDef decoderDef = new DecoderDef()
+                        decoderDef.parent = newEntry.id
+                        decoderDef.item = itemString
+                        decoderDef.varValue = valueString
+                        database.insertDecoderDef(decoderDef)
+                    }
+                    int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
+                    log.debug("CV size is ${cvSize}")
+                    for (j in 0..<cvSize) {
+                        String name = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@name'
+                        String cvValue = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@value'
+                        log.debug("adding a CV number ${name} with value ${cvValue}")
+                        CVvalues cVvalues = new CVvalues()
+                        cVvalues.cvNumber = name
+                        cVvalues.cvValue = cvValue
+                        cVvalues.decoderId = newEntry.id
+                        database.insertCVs(cVvalues)
+                    }
+                }
+                builder.edt({
+                    currentNumber++
+                    progress.detailProgress.setValue(currentNumber)
+                })
+            }
         }
         if (rosterFound && existingList.size() > 0) {
             log.debug("still have some old existing decoder entries -- removing them")
@@ -164,6 +251,7 @@ class RosterImport {
         if (rosterFound) {
             database.updateRosterEntry(thisRoster)
         }
+        application.getWindowManager().hide("progress")
         return thisRoster
     }
 
@@ -181,6 +269,7 @@ class RosterImport {
         entry.decoderTypeId = decoderType.id
         entry.decoderId = thisEntry.'@id'
         entry.fileName = thisEntry.'@fileName'
+        futureProcess.add([rosterEntry.fullPath, entry.fileName])
         entry.roadName = thisEntry.'@roadName'
         entry.roadNumber = thisEntry.'@roadNumber'
         entry.manufacturer = thisEntry.'@mfg'

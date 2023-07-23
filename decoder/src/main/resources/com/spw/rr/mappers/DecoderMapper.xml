@@ -310,4 +310,54 @@
             a.pair_key,
             c.id;
     </select>
+    <insert id="insertDecoderDef" parameterType="com.spw.rr.mappers.DecoderDef" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO
+            rrdec.decoderDef
+        (
+            decoderID,
+            varValue,
+            item
+        )
+        VALUES
+            (
+                #{parent},
+                #{varValue},
+                #{item}
+            )
+    </insert>
+    <select id="listDecoderDefFor" parameterType="Integer" resultType="com.spw.rr.mappers.DecoderDef">
+        SELECT
+            ID,
+            DecoderID as parent,
+            VarValue,
+            item
+        FROM rrdec.DecoderDef
+        WHERE decoderId = #{parameter}
+        ORDER BY DecoderID, VarValue
+    </select>
+    <insert id="insertCVs" parameterType="com.spw.rr.mappers.CVvalues" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO
+            rrdec.CvValues
+        (
+            decoderId,
+            cvvalue,
+            value
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{cvNumber},
+                #{cvValue}
+            )
+    </insert>
+    <select id="listCVsFor" parameterType="Integer" resultType="com.spw.rr.mappers.CVvalues">
+        SELECT
+            ID,
+            decoderID,
+            value as cvNumber,
+            cvValue
+        FROM rrdec.cvvalues
+        WHERE decoderID = #{paramter}
+        ORDER BY decoderID, cvNumber
+    </select>
 </mapper>

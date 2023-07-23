@@ -10,9 +10,11 @@ import java.awt.Dimension
 
 @ArtifactProviderFor(GriffonView)
 class DecView {
-    @MVCMember @Nonnull
+    @MVCMember
+    @Nonnull
     FactoryBuilderSupport builder
-    @MVCMember @Nonnull
+    @MVCMember
+    @Nonnull
     DecModel model
 
     RRTableModel tableModel
@@ -38,7 +40,7 @@ class DecView {
                     }
 
                 }
-               migLayout(constraints: 'fill')
+                migLayout(constraints: 'fill')
                 def pane = scrollPane(constraints: 'width 1200, height 900') {
                     theTable = table(model: modelCopy = new RRTableModel((RRBaseModel) model))
                     log.debug("theTable is ${theTable}")

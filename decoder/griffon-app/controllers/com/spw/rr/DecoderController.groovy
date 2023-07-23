@@ -1,6 +1,7 @@
 package com.spw.rr
 
 import com.spw.rr.mappers.RosterEntry
+import griffon.core.GriffonApplication
 import griffon.core.artifact.GriffonController
 import griffon.core.controller.ControllerAction
 import griffon.core.mvc.MVCGroup
@@ -48,7 +49,7 @@ class DecoderController {
             RosterEntry entry = null
             runOutsideUI {
                 File selected = chooser.getSelectedFile()
-                importService.setDB(database)
+                importService.setRequiredData(database, application)
                 existingItem = importService.doesRosterExist(selected)
                 entry = importService.importRoster(selected)
                 ArrayList<String> newEntry = new ArrayList<String>()
