@@ -24,6 +24,19 @@ class DecoderDBService {
     @javax.inject.Inject
     private MybatisHandler handler
 
+    private SqlSession currentSession = null
+
+    RosterEntry transAddRoster(RosterEntry entry) {
+        log.debug("adding a new roster entry as part of a transaction")
+        if (currentSession == null) {
+            throw new RuntimeException("transaction but current session is null")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        int result = mapper.insertRosterEntry(entry)
+        log.debug("result was ${entry}")
+        return entry
+    }
+
     RosterEntry addRoster(RosterEntry entry) {
         log.debug("adding a new RosterEntry: ${entry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
@@ -32,6 +45,36 @@ class DecoderDBService {
             log.debug("result found was ${entry}")
             return entry
         }
+    }
+
+    void beginTransaction() {
+        log.debug("beginning a transaction")
+        if (currentSession == null) {
+            currentSession = handler.getSqlSession("default", false)
+        }
+    }
+
+    void commitWork() {
+        log.debug("now committing current work")
+        if (currentSession == null) {
+            throw new RuntimeException("Attempting to commit work when not in a transaction")
+        }
+        currentSession.commit()
+    }
+
+    void closeSession() {
+        log.debug("closing current session")
+        if (currentSession == null) {
+            throw new RuntimeException("attempting to close a not-open session")
+        }
+        currentSession.close()
+    }
+
+    void rollbackAll() {
+        if (currentSession == null) {
+            throw new RuntimeException("Attempting to rollback work when not in a transaction")
+        }
+        currentSession.rollback()
     }
 
     void updateRosterEntry(RosterEntry entry) {
@@ -192,6 +235,17 @@ class DecoderDBService {
         }
     }
 
+    FunctionLabel transInsertFunctionLabels(FunctionLabel newValue) {
+        log.debug("inserting new FunctionLabels as part of a transaction - ${newValue}")
+        if (currentSession == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        int result = mapper.insertFunctionLabels(newValue)
+        log.debug("returning result: ${newValue}")
+        return newValue
+    }
+
     FunctionLabel insertFunctionLabels(FunctionLabel newValue) {
         log.debug("adding new function label: ${newValue}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
@@ -220,6 +274,17 @@ class DecoderDBService {
         }
     }
 
+    SpeedProfile transInsertSpeedProfile(SpeedProfile sp) {
+        log.debug("adding a new SpeedProfile: ${sp}")
+        if (currentSession == null) {
+            throw new RuntimeException("attempting to add a speed profile outside a transaction")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        mapper.insertSpeedSteps(sp)
+        log.debug("inserted value was ${sp}")
+        return sp
+    }
+
     List<SpeedProfile> listSpeedProfilesFor(List<Integer> parents) {
         log.debug("returning a list of speed profiles for the following parents: ${parents}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
@@ -237,6 +302,18 @@ class DecoderDBService {
             return kvp
         }
     }
+
+    KeyValuePairs transInsertKeyValuePair(KeyValuePairs kvp) {
+        log.debug("adding a new KeyValuePair: ${kvp}")
+        if (currentSession == null) {
+            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        mapper.insertKeyValuePairs(kvp)
+        log.debug("inserted value was ${kvp}")
+        return kvp
+    }
+
 
     List<KeyValuePairs> listKeyValuePairsFor(List<Integer> parents) {
         log.debug("returning a list of key value pairs for the following parents: ${parents}")

@@ -12,9 +12,9 @@ import griffon.core.GriffonApplication
 import griffon.core.mvc.MVCGroup
 import griffon.transform.MVCAware
 import groovy.swing.SwingBuilder
+import org.perf4j.slf4j.Slf4JStopWatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import com.fasterxml.jackson.databind.util.StdDateFormat
 
 import java.sql.Timestamp
 import java.text.DateFormat
@@ -55,8 +55,7 @@ class RosterImport {
             decoderList.clear()
         }
         def newList = database.listDecoderTypes()
-        newList.each { entry ->
-            decoderList.add(entry)
+        newList.each { entry -> decoderList.add(entry)
         }
     }
 
@@ -112,79 +111,97 @@ class RosterImport {
         RosterEntry thisRoster = getRosterEntry(rosterFile.path)
         boolean rosterFound = false
         HashMap<String, DecoderEntry> existingList = null
-        if (thisRoster == null) {
-            log.debug("roster not found -- adding new")
-            thisRoster = new RosterEntry()
-            thisRoster.fullPath = rosterFile.path
-            thisRoster.systemName = getSystemName()
-            thisRoster = database.addRoster(thisRoster)
-        } else {
-            rosterFound = true
-            existingList = updateRosterEntries(thisRoster)
-        }
-        futureProcess = []
-        builder.edt({
-            progress.phaseProgress.setValue(2)
-            progress.detailProgress.setMaximum(arraySize)
-        })
-        for (i in 0..<arraySize) {
-            builder.edt({
-                progress.detailProgress.setValue(i)
-            })
-            log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
-            DecoderEntry newEntry = setLocoValues(entryList[i], thisRoster)
-            if (!rosterFound) {
-                addLoco(newEntry)
+        Slf4JStopWatch importTime = new Slf4JStopWatch("import", "Starting the import")
+        try {
+            database.beginTransaction()
+            if (thisRoster == null) {
+                log.debug("roster not found -- adding new")
+                thisRoster = new RosterEntry()
+                thisRoster.fullPath = rosterFile.path
+                thisRoster.systemName = getSystemName()
+                thisRoster = database.transAddRoster(thisRoster)
             } else {
-                DecoderEntry previous = existingList.get(newEntry.decoderId)
-                if (previous != null) {
-                    // delete previous to cascade delete any children
-                    database.deleteDecoderEntry(previous)
-                    existingList.remove(newEntry.decoderId)
-                }
-                addLoco(newEntry)
+                rosterFound = true
+                existingList = updateRosterEntries(thisRoster)
             }
-            // check for additional information in the roster - function labels, attribute pairs and speed profile
-            def functions = entryList[i].'functionLabels'
-            def functionEntries = functions.'functionlabel'
-            if (functionEntries != null) {
-                int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
-                for (labelEntry in 0..<functionLabelSize) {
-                    log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
-                    FunctionLabel funcLab = new FunctionLabel()
-                    funcLab.decoderId = newEntry.id
-                    funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
-                    funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
-                    log.debug("new function label is ${funcLab}")
-                    database.insertFunctionLabels(funcLab)
-                }
-            }
-            int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
-            log.debug("key value size is ${keyValuesSize}")
-            if (keyValuesSize > 0) {
-                for (j in 0..<keyValuesSize) {
-                    KeyValuePairs kvp = new KeyValuePairs()
-                    kvp.decoderId = newEntry.id
-                    kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
-                    kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
-                    log.debug("new key value pair is: ${kvp}")
-                    database.insertKeyValuePair(kvp)
-                }
-            }
-            int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
-            log.debug("speed profile size is ${speedProfileSize}")
-            if (speedProfileSize > 0) {
-                for (j in 0..<speedProfileSize) {
-                    SpeedProfile sp = new SpeedProfile()
-                    sp.decoderId = newEntry.id
-                    sp.speedStep = Integer.valueOf(entryList[i].'speedprofile'.speeds.speed[j].step.text())
-                    sp.forwardValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].forward.text())
-                    sp.reverseValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].reverse.text())
-                    log.debug("new speed profile is ${sp}")
-                    database.insertSpeedProfile(sp)
-                }
-            }
+            futureProcess = []
             builder.edt({
+                progress.phaseProgress.setValue(2)
+                progress.detailProgress.setMaximum(arraySize)
+            })
+            Slf4JStopWatch rosterStopWatch = new Slf4JStopWatch("roster", "overall roster processing")
+            for (i in 0..<arraySize) {
+                builder.edt({
+                    progress.detailProgress.setValue(i)
+                })
+                log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
+                Slf4JStopWatch individualStopWatch = new Slf4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
+                DecoderEntry newEntry = setLocoValues(entryList[i], thisRoster)
+                if (!rosterFound) {
+                    addLoco(newEntry)
+                } else {
+                    DecoderEntry previous = existingList.get(newEntry.decoderId)
+
+                    /*
+                      need some work here to update existing entries, delete obsolete ones and add new ones
+                     */
+
+                    if (previous != null) {
+                        // delete previous to cascade delete any children
+                        database.deleteDecoderEntry(previous)
+                        existingList.remove(newEntry.decoderId)
+                    }
+                    addLoco(newEntry)
+                }
+                individualStopWatch.stop()
+                // check for additional information in the roster - function labels, attribute pairs and speed profile
+                def functions = entryList[i].'functionLabels'
+                def functionEntries = functions.'functionlabel'
+                if (functionEntries != null) {
+                    Slf4JStopWatch functionsStopWatch = new Slf4JStopWatch("functions", "function entries")
+                    int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
+                    for (labelEntry in 0..<functionLabelSize) {
+                        log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
+                        FunctionLabel funcLab = new FunctionLabel()
+                        funcLab.decoderId = newEntry.id
+                        funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
+                        funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
+                        log.debug("new function label is ${funcLab}")
+                        database.transInsertFunctionLabels(funcLab)
+                    }
+                    functionsStopWatch.stop()
+                }
+                int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
+                log.debug("key value size is ${keyValuesSize}")
+                if (keyValuesSize > 0) {
+                    Slf4JStopWatch keyValsStopWatch = new Slf4JStopWatch("kvp", "key value pairs")
+                    for (j in 0..<keyValuesSize) {
+                        KeyValuePairs kvp = new KeyValuePairs()
+                        kvp.decoderId = newEntry.id
+                        kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
+                        kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
+                        log.debug("new key value pair is: ${kvp}")
+                        database.transInsertKeyValuePair(kvp)
+                    }
+                    keyValsStopWatch.stop()
+                }
+                int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
+                log.debug("speed profile size is ${speedProfileSize}")
+                if (speedProfileSize > 0) {
+                    Slf4JStopWatch speedStopWatch = new Slf4JStopWatch("speeds", "Speed Profile")
+                    for (j in 0..<speedProfileSize) {
+                        SpeedProfile sp = new SpeedProfile()
+                        sp.decoderId = newEntry.id
+                        sp.speedStep = Integer.valueOf(entryList[i].'speedprofile'.speeds.speed[j].step.text())
+                        sp.forwardValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].forward.text())
+                        sp.reverseValue = Double.valueOf(entryList[i].'speedprofile'.speeds.speed[j].reverse.text())
+                        log.debug("new speed profile is ${sp}")
+                        database.transInsertSpeedProfile(sp)
+                    }
+                    speedStopWatch.stop()
+                }
+
+                /*builder.edt({
                 progress.phaseProgress.setValue(3)
                 progress.max = futureProcess.size()
             })
@@ -239,13 +256,23 @@ class RosterImport {
                     currentNumber++
                     progress.detailProgress.setValue(currentNumber)
                 })
+
+            }*/
             }
-        }
-        if (rosterFound && existingList.size() > 0) {
-            log.debug("still have some old existing decoder entries -- removing them")
-            existingList.forEach {
-                database.deleteDecoderEntry(it)
+            if (rosterFound && existingList.size() > 0) {
+                log.debug("still have some old existing decoder entries -- removing them")
+                existingList.forEach {
+                    database.deleteDecoderEntry(it)
+                }
             }
+
+            database.commitWork()
+        } catch(Exception e) {
+            log.error("Caught an exception working with the import", e)
+            database.rollbackAll()
+        } finally {
+            database.closeSession()
+            importTime.stop()
         }
         log.debug("there are ${arraySize} entries in this roster")
         if (rosterFound) {
@@ -290,7 +317,7 @@ class RosterImport {
             return new Timestamp(new Date().getTime())
         }
         try {
-            return new Timestamp(new StdDateFormat().parse(dateValue).getTime())
+            return new Timestamp(new Date().getTime())
         } catch (ParseException ex) {
             log.debug("data parse exception -- trying SimpleDateFormat")
             try {
