@@ -12,7 +12,7 @@ import griffon.core.GriffonApplication
 import griffon.core.mvc.MVCGroup
 import griffon.transform.MVCAware
 import groovy.swing.SwingBuilder
-import org.perf4j.slf4j.Slf4JStopWatch
+import org.perf4j.log4j.Log4JStopWatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -54,9 +54,11 @@ class RosterImport {
         } else {
             decoderList.clear()
         }
+        Log4JStopWatch decoderListTime = new Log4JStopWatch("decoderList", "listing the decoders")
         def newList = database.listDecoderTypes()
         newList.each { entry -> decoderList.add(entry)
         }
+        decoderListTime.stop()
     }
 
     DecoderType findDecoderType(String family, String model) {
@@ -111,7 +113,7 @@ class RosterImport {
         RosterEntry thisRoster = getRosterEntry(rosterFile.path)
         boolean rosterFound = false
         HashMap<String, DecoderEntry> existingList = null
-        Slf4JStopWatch importTime = new Slf4JStopWatch("import", "Starting the import")
+        Log4JStopWatch importTime = new Log4JStopWatch("import", "Starting the import")
         try {
             database.beginTransaction()
             if (thisRoster == null) {
@@ -129,13 +131,13 @@ class RosterImport {
                 progress.phaseProgress.setValue(2)
                 progress.detailProgress.setMaximum(arraySize)
             })
-            Slf4JStopWatch rosterStopWatch = new Slf4JStopWatch("roster", "overall roster processing")
+            Log4JStopWatch rosterStopWatch = new Log4JStopWatch("roster", "overall roster processing")
             for (i in 0..<arraySize) {
                 builder.edt({
                     progress.detailProgress.setValue(i)
                 })
                 log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
-                Slf4JStopWatch individualStopWatch = new Slf4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
+                Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
                 DecoderEntry newEntry = setLocoValues(entryList[i], thisRoster)
                 if (!rosterFound) {
                     addLoco(newEntry)
@@ -158,7 +160,7 @@ class RosterImport {
                 def functions = entryList[i].'functionLabels'
                 def functionEntries = functions.'functionlabel'
                 if (functionEntries != null) {
-                    Slf4JStopWatch functionsStopWatch = new Slf4JStopWatch("functions", "function entries")
+                    Log4JStopWatch functionsStopWatch = new Log4JStopWatch("functions", "function entries")
                     int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
                     for (labelEntry in 0..<functionLabelSize) {
                         log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
@@ -174,7 +176,7 @@ class RosterImport {
                 int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
                 log.debug("key value size is ${keyValuesSize}")
                 if (keyValuesSize > 0) {
-                    Slf4JStopWatch keyValsStopWatch = new Slf4JStopWatch("kvp", "key value pairs")
+                    Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
                     for (j in 0..<keyValuesSize) {
                         KeyValuePairs kvp = new KeyValuePairs()
                         kvp.decoderId = newEntry.id
@@ -188,7 +190,7 @@ class RosterImport {
                 int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
                 log.debug("speed profile size is ${speedProfileSize}")
                 if (speedProfileSize > 0) {
-                    Slf4JStopWatch speedStopWatch = new Slf4JStopWatch("speeds", "Speed Profile")
+                    Log4JStopWatch speedStopWatch = new Log4JStopWatch("speeds", "Speed Profile")
                     for (j in 0..<speedProfileSize) {
                         SpeedProfile sp = new SpeedProfile()
                         sp.decoderId = newEntry.id

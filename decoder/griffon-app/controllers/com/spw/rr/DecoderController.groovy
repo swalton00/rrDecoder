@@ -12,6 +12,7 @@ import griffon.transform.Threading
 import javax.annotation.Nonnull
 import javax.inject.Inject
 import javax.swing.JFileChooser
+import org.perf4j.log4j.Log4JStopWatch
 
 import static com.spw.rr.DecModel.WindowAction.LIST_ALL
 import static com.spw.rr.DecModel.WindowAction.LIST_BY_SELECTION
@@ -71,6 +72,7 @@ class DecoderController {
         if (name.equals("mainWindow") & !inited) {
             log.debug("in the initialization phase - about to get the database data")
             inited = true
+            Log4JStopWatch stopWatch = new Log4JStopWatch("dbLoad", "loading the roster list")
             ArrayList<RosterEntry> dataForTable = database.listRosters()
             if (dataForTable != null) {
                 dataForTable.each {
@@ -87,6 +89,7 @@ class DecoderController {
             for (i in 0..<model.preferredWidths.size()) {
                 model.theTable.getColumnModel().getColumn(i).setPreferredWidth(model.preferredWidths[i])
             }
+            stopWatch.stop()
         }
     }
 

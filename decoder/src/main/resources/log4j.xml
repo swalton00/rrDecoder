@@ -23,20 +23,15 @@
             <param name="ConversionPattern" value="%p %d %c{2} %m%n"/>
         </layout>
     </appender>
-    <logger name="com">
-        <appender-ref ref="console"/>
-        <appender-ref ref="logfile"/>
+    <logger name="com" additivity="false">
     </logger>
-    <logger name="org">
-        <appender-ref ref="console"/>
-        <appender-ref ref="logfile"/>
+    <logger name="org" additivity="false">
     </logger>
-    <logger name="griffon">
-        <appender-ref ref="console"/>
-        <appender-ref ref="logfile"/>
+    <logger name="griffon" additivity="false">
     </logger>
     <logger name="org.perf4j.TimingLogger" additivity="false">
         <appender-ref ref="timers"/>
+        <level value="INFO"/>
     </logger>
     <root>
         <appender-ref ref="console"/>
