@@ -21,6 +21,9 @@ class DecController {
     @Inject
     DecoderDBService database
 
+    @Inject
+    RosterImport importService
+
     @ControllerAction
     mainAction() {
 
@@ -73,8 +76,8 @@ class DecController {
             model.tableList.clear()
             entries.each {
                 ArrayList<String> newArray = new ArrayList<String>()
-                newArray.add(it.rosterId.toString())
                 newArray.add(it.id.toString())
+                newArray.add(it.rosterId.toString())
                 newArray.add(it.fileName)
                 newArray.add(it.roadName)
                 newArray.add(it.roadNumber)
@@ -95,6 +98,12 @@ class DecController {
     }
 
     boolean inited = false
+
+    @ControllerAction
+    void importDetailAction() {
+        log.debug("import detail action requested")
+        importService.importDetailDecoders(model.selectedRows)
+    }
 
     void onWindowShown(String name, Object window) {
         if (name.equals("decWindow")) {

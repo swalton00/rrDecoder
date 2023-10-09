@@ -27,7 +27,8 @@ class DecoderController {
     @MVCMember
     DecoderView view
 
-    private RosterImport importService = new RosterImport()
+    @Inject
+    private RosterImport importService
 
     @Inject
     private DecoderDBService database
@@ -66,6 +67,12 @@ class DecoderController {
             }
         }
 
+    }
+
+    @ControllerAction
+    void importDetailAction() {
+        log.debug("begining detailed import action")
+        importService.importDetailRoster(model.selectedRows)
     }
 
     void onWindowShown(String name, Object window) {

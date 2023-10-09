@@ -28,8 +28,6 @@ class ProgressView {
             application(size: [500, 200], id: 'progress',
                     title: 'Decoder Progress') {
                 migLayout()
-                label("Processing Phase:")
-                model.phaseProgress = new JProgressBar(SwingConstants.HORIZONTAL, 0, 0)
                 label("Detail Processing:", constraints: 'newline')
                 model.detailProgress = new JProgressBar(SwingConstants.HORIZONTAL, 0, 0)
             }

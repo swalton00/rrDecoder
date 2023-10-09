@@ -179,6 +179,27 @@
         FROM rrdec.decoderType
         WHERE id = #{id}
     </select>
+    <select id="getDecoderEntry" resultType="com.spw.rr.mappers.DecoderEntry" parameterType="int">
+        SELECT
+            id,
+            decoderId,
+            fileName,
+            roadNumber,
+            roadName,
+            manufacturer,
+            owner,
+            model,
+            dccAddress,
+            manufacturerId,
+            productId,
+            dateUpdated,
+            decoderTypeId,
+            rosterId
+        FROM
+            rrdec.decoder
+        WHERE
+            id = #{id}
+    </select>
     <select id="findDecoderType" resultType="com.spw.rr.mappers.DecoderType">
         SELECT id,
                decoderFamily,

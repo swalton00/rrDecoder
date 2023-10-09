@@ -1,5 +1,7 @@
 package com.spw.rr
 
+import griffon.transform.Observable
+
 import javax.swing.JTable
 import javax.swing.table.TableModel
 
@@ -12,4 +14,8 @@ class RRBaseModel {
     JTable theTable
 
     TableModel tableModel
+
+    @Observable
+    boolean tableSelectionEnabled = false
+
 }

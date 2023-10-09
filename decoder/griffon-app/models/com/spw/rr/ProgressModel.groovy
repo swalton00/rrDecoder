@@ -11,14 +11,9 @@ import javax.swing.JProgressBar
 @ArtifactProviderFor(GriffonModel)
 class ProgressModel {
 
-    Integer phase = 0
-
-    Integer phaseMax = 0
-
     Integer current = 0
 
     Integer max = 0
 
-    JProgressBar phaseProgress
     JProgressBar detailProgress
 }

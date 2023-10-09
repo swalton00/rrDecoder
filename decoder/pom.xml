@@ -11,7 +11,6 @@
         <artifactId>application-master-pom</artifactId>
         <version>1.15.1</version>
     </parent>
-
     <properties>
         <griffon.version>2.15.1</griffon.version>
         <application.main.class>com.spw.rr.Launcher</application.main.class>
@@ -21,7 +20,6 @@
         <build_time>${git.build.time}</build_time>
         <build_revision>${git.commit.id}</build_revision>
     </properties>
-
     <build>
         <filters>
             <filter>${project.build.outputDirectory}/git.properties</filter>
@@ -172,7 +170,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.1.214</version>
+            <version>1.4.199</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
         <dependency>

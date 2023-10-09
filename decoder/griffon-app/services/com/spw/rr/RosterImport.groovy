@@ -1,7 +1,5 @@
 package com.spw.rr
 
-import com.spw.rr.mappers.CVvalues
-import com.spw.rr.mappers.DecoderDef
 import com.spw.rr.mappers.DecoderEntry
 import com.spw.rr.mappers.DecoderType
 import com.spw.rr.mappers.FunctionLabel
@@ -11,24 +9,29 @@ import com.spw.rr.mappers.SpeedProfile
 import griffon.core.GriffonApplication
 import griffon.core.mvc.MVCGroup
 import griffon.transform.MVCAware
+import griffon.transform.ThreadingAware
 import groovy.swing.SwingBuilder
 import org.perf4j.log4j.Log4JStopWatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import javax.inject.Inject
 import java.sql.Timestamp
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
 @MVCAware
+@ThreadingAware
 class RosterImport {
     static final Logger log = LoggerFactory.getLogger(RosterImport.class)
 
+    @Inject
     private DecoderDBService database
 
     ProgressModel progress
 
+    @Inject
     GriffonApplication application
 
     List<DecoderType> decoderList = null
@@ -94,17 +97,81 @@ class RosterImport {
         }
     }
 
-    RosterEntry importRoster(File rosterFile) {
-        log.debug("importing from ${rosterFile.path}")
+    void importDetailDecoders(ArrayList<Integer> decoders) {
+        log.debug("importing details for ${decoders.size()} decoders")
+        HashMap<Integer, RosterEntry> rosterEntries = new HashMap<>()
+        HashMap<Integer, String> rosterFiles = new HashMap<>()
         MVCGroup progressGroup = application.mvcGroupManager.findGroup('progress')
         progress = progressGroup.model
-        SwingBuilder builder = new SwingBuilder()
-        builder.edt({
-            progress.phaseProgress.setMaximum(3)
-            progress.phaseProgress.setMinimum(1)
-            progress.phaseProgress.setValue(1)
-        })
+        runInsideUISync{
+            progress.max = decoders.size()
+            progress.current = 0
+        }
         application.getWindowManager().show("progress")
+        Log4JStopWatch detailStopWatch = new Log4JStopWatch("detail", "Importing details for ${decoders.size()}")
+        int entryCounter = 0
+        decoders.each { Integer decoderId ->
+            entryCounter++
+            runInsideUISync {
+                progress.detailProgress.setValue(entryCounter)
+            }
+            log.debug("processing details for decoder id of ${decoderId}")
+            Log4JStopWatch decoderDetail = new Log4JStopWatch("decoderDetail", "processing decoder id of ${decoderId}")
+            DecoderEntry decoderEntry = database.getDecoderEntry(decoderId)
+            RosterEntry thisEntry = null
+            if (rosterEntries.containsKey(decoderEntry.rosterId)) {
+                thisEntry = rosterEntries.get(decoderEntry.rosterId)
+            } else {
+                thisEntry = database.getRosterEntry(decoderEntry.rosterId)
+                rosterEntries.put(thisEntry.id, thisEntry)
+                String path = thisEntry.fullPath.substring(0, thisEntry.fullPath.lastIndexOf(File.separator))
+                rosterFiles.put(thisEntry.id, path)
+            }
+            String decoderFileName = rosterFiles.get(decoderEntry.rosterId) +
+                 File.separator + "roster" + File.separator + decoderEntry.fileName
+            boolean fileFound = false
+            String decoderText
+            try {
+                File xmlDecoderFile = new File(decoderFileName)
+                decoderText = xmlDecoderFile.text
+                fileFound = true
+            } catch (FileNotFoundException fe) {
+                log.error "File ${decoderFileName} was not found"
+            }
+            if (fileFound) {
+                log.debug("found roster xml for id ${decoderEntry.id}")
+                XmlSlurper slurper = new XmlSlurper()
+                slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+                slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+                def decoderXML = slurper.parseText(decoderText)
+                try {
+                    database.beginTransaction()
+                    database.commitWork()
+                } catch (Exception dbEx) {
+                    log.error("exception processing the data -- rolling back", dbEx)
+                    database.rollbackAll()
+                }
+            }
+        }
+        runInsideUISync{
+            application.getWindowManager().hide("progress")
+        }
+        detailStopWatch.stop()
+        log.debug("detail import complete")
+    }
+
+    void importDetailRoster(ArrayList<Integer> rosterNumbers) {
+        log.debug("Importing details for ${rosterNumbers.size()} roster entries")
+        List<DecoderEntry> rosterEntries = database.listDecodersByRosterID((int[]) rosterNumbers.toArray())
+        ArrayList<Integer> decoderList = new ArrayList<>()
+        rosterEntries.each {
+            decoderList.add(it.id)
+        }
+        importDetailDecoders(decoderList)
+    }
+
+    RosterEntry importRoster(File rosterFile) {
+        log.debug("importing from ${rosterFile.path}")
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
         int arraySize = rosterValues.roster.locomotive.size()

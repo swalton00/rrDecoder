@@ -29,6 +29,7 @@ class DecoderView {
                 menuBar() {
                     menu(text: 'File') {
                         menuItem importAction
+                        menuItem importDetailAction, text: 'Import Details',enabled: bind {model.tableSelectionEnabled}
                         menuItem exitAction
 
                     }

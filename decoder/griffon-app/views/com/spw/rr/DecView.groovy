@@ -6,6 +6,7 @@ import griffon.metadata.ArtifactProviderFor
 
 import javax.annotation.Nonnull
 import javax.swing.JTable
+import javax.swing.ListSelectionModel
 import java.awt.Dimension
 
 @ArtifactProviderFor(GriffonView)
@@ -28,6 +29,9 @@ class DecView {
                     title: 'Decoder List') {
 
                 menuBar() {
+                    menu(text: 'File') {
+                        menuItem importDetailAction, text: 'Import Details', enabled: bind { model.importDetailEnabled }
+                    }
                     menu(text: 'Window') {
                         menuItem mainAction
 
@@ -52,6 +56,12 @@ class DecView {
         }
         tableModel = modelCopy
         completeTable = theTable
+        model.theTable = theTable
         completeTable.setAutoCreateRowSorter(true)
+        theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
+        theTable.setCellSelectionEnabled(false)
+        theTable.setCellSelectionEnabled(false)
+        theTable.setRowSelectionAllowed(true)
+        theTable.getSelectionModel().addListSelectionListener(new ListenerForTables(model))
     }
 }
