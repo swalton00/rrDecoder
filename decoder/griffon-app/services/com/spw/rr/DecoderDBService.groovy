@@ -77,6 +77,15 @@ class DecoderDBService {
         currentSession.rollback()
     }
 
+    void transUpdateRosterEntry(RosterEntry rosterEntry) {
+        log.debug("Updating roster entry with ID of ${rosterEntry.id} within a transaction")
+        if (currentSession == null) {
+            throw new RuntimeException("transaction but current session is null")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        mapper.updateRosterEntry(rosterEntry)
+    }
+
     void updateRosterEntry(RosterEntry entry) {
         log.debug("updating the roster ${entry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
@@ -136,12 +145,34 @@ class DecoderDBService {
         }
     }
 
+    DecoderEntry transAddDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("adding decoder entry within a transaction data is ${decoderEntry}")
+        if (currentSession == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        int result = mapper.insertDecoderEntry(decoderEntry)
+        log.debug("returning decoder with id of ${decoderEntry.id}")
+        return decoderEntry
+    }
+
     void updateDecoderEntry(DecoderEntry decoderEntry) {
         log.debug("updating decoder entry ${decoderEntry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
             DecoderMapper mapper =session.getMapper(DecoderMapper.class)
             mapper.updateDecoderEntry(decoderEntry)
         }
+    }
+
+    int transDeleteDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("Deleting decoder with id of ${decoderEntry.id} within a transaction")
+        if (currentSession == null) {
+            throw new RuntimeException("transaction but current session is null")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        int result = mapper.deleteDecoderEntry(decoderEntry)
+        log.debug("return result of ${result}")
+        return result
     }
 
     int deleteDecoderEntry(DecoderEntry decoderEntry) {

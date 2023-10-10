@@ -29,8 +29,6 @@ class RosterImport {
     @Inject
     private DecoderDBService database
 
-    ProgressModel progress
-
     @Inject
     GriffonApplication application
 
@@ -102,7 +100,7 @@ class RosterImport {
         HashMap<Integer, RosterEntry> rosterEntries = new HashMap<>()
         HashMap<Integer, String> rosterFiles = new HashMap<>()
         MVCGroup progressGroup = application.mvcGroupManager.findGroup('progress')
-        progress = progressGroup.model
+        ProgressModel progress = progressGroup.model
         runInsideUISync{
             progress.max = decoders.size()
             progress.current = 0
@@ -176,11 +174,14 @@ class RosterImport {
         def rosterValues = new XmlSlurper().parseText(rosterText)
         int arraySize = rosterValues.roster.locomotive.size()
         def entryList = rosterValues.roster.locomotive
+        MVCGroup progressGroup = application.mvcGroupManager.findGroup('progress')
+        ProgressModel progress = progressGroup.model
         buildDecoderList()
         RosterEntry thisRoster = getRosterEntry(rosterFile.path)
         boolean rosterFound = false
         HashMap<String, DecoderEntry> existingList = null
         Log4JStopWatch importTime = new Log4JStopWatch("import", "Starting the import")
+        application.getWindowManager().show("progress")
         try {
             database.beginTransaction()
             if (thisRoster == null) {
@@ -194,15 +195,14 @@ class RosterImport {
                 existingList = updateRosterEntries(thisRoster)
             }
             futureProcess = []
-            builder.edt({
-                progress.phaseProgress.setValue(2)
+            runInsideUISync {
                 progress.detailProgress.setMaximum(arraySize)
-            })
+            }
             Log4JStopWatch rosterStopWatch = new Log4JStopWatch("roster", "overall roster processing")
             for (i in 0..<arraySize) {
-                builder.edt({
+                runInsideUISync {
                     progress.detailProgress.setValue(i)
-                })
+                }
                 log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
                 DecoderEntry newEntry = setLocoValues(entryList[i], thisRoster)
@@ -331,10 +331,12 @@ class RosterImport {
             if (rosterFound && existingList.size() > 0) {
                 log.debug("still have some old existing decoder entries -- removing them")
                 existingList.forEach {
-                    database.deleteDecoderEntry(it)
+                    database.transDeleteDecoderEntry(it)
                 }
             }
-
+            if (rosterFound) {
+                database.updateRosterEntry(thisRoster)
+            }
             database.commitWork()
         } catch(Exception e) {
             log.error("Caught an exception working with the import", e)
@@ -343,27 +345,25 @@ class RosterImport {
             database.closeSession()
             importTime.stop()
         }
+        application.getWindowManager().hide("progress")
         log.debug("there are ${arraySize} entries in this roster")
-        if (rosterFound) {
-            database.updateRosterEntry(thisRoster)
-        }
         application.getWindowManager().hide("progress")
         return thisRoster
     }
 
     DecoderEntry addLoco(DecoderEntry entry) {
-        database.addDecoderEntry(entry)
+        database.transAddDecoderEntry(entry)
     }
 
     DecoderEntry setLocoValues(Object thisEntry, RosterEntry rosterEntry) {
         DecoderEntry entry = new DecoderEntry()
         entry.rosterId = rosterEntry.id
+        entry.decoderId = thisEntry.'@id'
         String decoderModel = thisEntry.decoder.'@model'
         String decoderFamily = thisEntry.decoder.'@family'
         log.debug("find decoder type  for ${decoderModel} with family ${decoderFamily}")
         DecoderType decoderType = findDecoderType(decoderFamily, decoderModel)
         entry.decoderTypeId = decoderType.id
-        entry.decoderId = thisEntry.'@id'
         entry.fileName = thisEntry.'@fileName'
         futureProcess.add([rosterEntry.fullPath, entry.fileName])
         entry.roadName = thisEntry.'@roadName'
