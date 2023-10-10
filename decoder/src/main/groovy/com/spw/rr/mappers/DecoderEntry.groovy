@@ -18,6 +18,7 @@ class DecoderEntry {
     String manufacturerId
     String productId
     Timestamp dateUpdated
+    Timestamp detailTime
     Integer decoderTypeId
     Integer rosterId
 }

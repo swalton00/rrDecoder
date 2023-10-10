@@ -117,6 +117,7 @@
                manufacturerid,
                decoderTypeId,
                rosterid,
+               detailTime,
                dateUpdated
         FROM rrdec.Decoder
         ORDER BY rosterid, decoderid
@@ -133,6 +134,7 @@
                manufacturerid,
                decoderTypeId,
                rosterid,
+               detailTime,
                dateUpdated
         FROM rrdec.Decoder
         <where>
@@ -194,6 +196,7 @@
             productId,
             dateUpdated,
             decoderTypeId,
+            detailTime,
             rosterId
         FROM
             rrdec.decoder
