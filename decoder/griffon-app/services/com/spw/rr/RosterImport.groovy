@@ -34,8 +34,6 @@ class RosterImport {
 
     List<DecoderType> decoderList = null
 
-    def futureProcess
-
     void setRequiredData(DecoderDBService database, GriffonApplication application) {
         log.debug("setting the database service address")
         this.database = database
@@ -194,7 +192,6 @@ class RosterImport {
                 rosterFound = true
                 existingList = updateRosterEntries(thisRoster)
             }
-            futureProcess = []
             runInsideUISync {
                 progress.detailProgress.setMaximum(arraySize)
             }
@@ -205,22 +202,32 @@ class RosterImport {
                 }
                 log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
-                DecoderEntry newEntry = setLocoValues(entryList[i], thisRoster)
-                if (!rosterFound) {
-                    addLoco(newEntry)
-                } else {
-                    DecoderEntry previous = existingList.get(newEntry.decoderId)
+                DecoderEntry newEntry = new DecoderEntry()
+                boolean decoderExists = false
 
-                    /*
-                      need some work here to update existing entries, delete obsolete ones and add new ones
-                     */
 
+                /*
+                  problem -- decoderId is not unique so can't use it as a key
+
+                 */
+
+
+                if (rosterFound) {
+                    DecoderEntry previous = existingList.get(entryList[i].'@id'.text())
                     if (previous != null) {
-                        // delete previous to cascade delete any children
-                        database.deleteDecoderEntry(previous)
+                        newEntry = previous
+                        decoderExists = true
                         existingList.remove(newEntry.decoderId)
                     }
-                    addLoco(newEntry)
+                }
+                if (!rosterFound | (rosterFound & !decoderExists)) {
+                    log.debug("no database entry found -- inserting")
+                    setLocoValues(newEntry, entryList[i], thisRoster)
+                    database.transAddDecoderEntry(newEntry)
+                } else {
+                    log.debug("existing entry being updated id = ${newEntry.id}")
+                    setLocoValues(newEntry, entryList[i], thisRoster)
+                    database.transUpdateDecoderEntry(newEntry)
                 }
                 individualStopWatch.stop()
                 // check for additional information in the roster - function labels, attribute pairs and speed profile
@@ -329,9 +336,9 @@ class RosterImport {
             }*/
             }
             if (rosterFound && existingList.size() > 0) {
-                log.debug("still have some old existing decoder entries -- removing them")
+                log.debug("still have some old existing decoder entries -- removing them -- ${existingList.size()}")
                 existingList.forEach {
-                    database.transDeleteDecoderEntry(it)
+                    database.transDeleteDecoderEntry(existingList.get(it))
                 }
             }
             if (rosterFound) {
@@ -351,12 +358,7 @@ class RosterImport {
         return thisRoster
     }
 
-    DecoderEntry addLoco(DecoderEntry entry) {
-        database.transAddDecoderEntry(entry)
-    }
-
-    DecoderEntry setLocoValues(Object thisEntry, RosterEntry rosterEntry) {
-        DecoderEntry entry = new DecoderEntry()
+    DecoderEntry setLocoValues(DecoderEntry entry, Object thisEntry, RosterEntry rosterEntry) {
         entry.rosterId = rosterEntry.id
         entry.decoderId = thisEntry.'@id'
         String decoderModel = thisEntry.decoder.'@model'
@@ -365,7 +367,6 @@ class RosterImport {
         DecoderType decoderType = findDecoderType(decoderFamily, decoderModel)
         entry.decoderTypeId = decoderType.id
         entry.fileName = thisEntry.'@fileName'
-        futureProcess.add([rosterEntry.fullPath, entry.fileName])
         entry.roadName = thisEntry.'@roadName'
         entry.roadNumber = thisEntry.'@roadNumber'
         entry.manufacturer = thisEntry.'@mfg'

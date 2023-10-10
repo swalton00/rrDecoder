@@ -156,6 +156,15 @@ class DecoderDBService {
         return decoderEntry
     }
 
+    void transUpdateDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("updating a decoder entry with id of ${decoderEntry.id} in a transaction")
+        if (currentSession == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        mapper.updateDecoderEntry(decoderEntry)
+    }
+
     void updateDecoderEntry(DecoderEntry decoderEntry) {
         log.debug("updating decoder entry ${decoderEntry}")
         handler.withSqlSession { String sessionFactoryName, SqlSession session ->
