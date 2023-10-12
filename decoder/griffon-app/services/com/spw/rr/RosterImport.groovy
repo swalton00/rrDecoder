@@ -193,12 +193,12 @@ class RosterImport {
                 existingList = updateRosterEntries(thisRoster)
             }
             runInsideUISync {
-                progress.detailProgress.setMaximum(arraySize)
+                progress.max = arraySize
             }
             Log4JStopWatch rosterStopWatch = new Log4JStopWatch("roster", "overall roster processing")
             for (i in 0..<arraySize) {
                 runInsideUISync {
-                    progress.detailProgress.setValue(i)
+                    progress.current = i
                 }
                 log.debug("this entry has an id of ${entryList[i].'@fileName'.text()}")
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")

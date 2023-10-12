@@ -29,8 +29,9 @@ class ProgressView {
                     title: 'Decoder Progress') {
                 migLayout()
                 label("Detail Processing:")
-                model.detailProgress
+                model.detailProgress = progressBar(maximum: bind{model.max}, value: bind{model.current})
             }
         }
+
     }
 }
