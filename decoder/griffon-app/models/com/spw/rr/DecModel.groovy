@@ -21,4 +21,7 @@ class DecModel extends RRBaseModel {
     ArrayList<Integer> selectedRows = new ArrayList<>()
 
     WindowAction currentAction = WindowAction.NONE
+
+    @Observable
+    boolean enableResetFilters
 }

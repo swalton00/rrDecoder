@@ -200,7 +200,7 @@ class RosterImport {
                 runInsideUISync {
                     progress.detailProgress.setValue(i)
                 }
-                log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
+                log.debug("this entry has an id of ${entryList[i].'@fileName'.text()}")
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
                 DecoderEntry newEntry = new DecoderEntry()
                 boolean decoderExists = false
@@ -213,11 +213,11 @@ class RosterImport {
 
 
                 if (rosterFound) {
-                    DecoderEntry previous = existingList.get(entryList[i].'@id'.text())
+                    DecoderEntry previous = existingList.get(entryList[i].'@fileName')
                     if (previous != null) {
                         newEntry = previous
                         decoderExists = true
-                        existingList.remove(newEntry.decoderId)
+                        existingList.remove(newEntry.fileName)
                     }
                 }
                 if (!rosterFound | (rosterFound & !decoderExists)) {
@@ -337,8 +337,8 @@ class RosterImport {
             }
             if (rosterFound && existingList.size() > 0) {
                 log.debug("still have some old existing decoder entries -- removing them -- ${existingList.size()}")
-                existingList.forEach {
-                    database.transDeleteDecoderEntry(existingList.get(it))
+                existingList.each {
+                    database.transDeleteDecoderEntry(it)
                 }
             }
             if (rosterFound) {
@@ -416,7 +416,7 @@ class RosterImport {
         List<DecoderEntry> existingList = database.decodersForRoster(thisEntry.id)
         HashMap<String, DecoderEntry> oldLocos = new HashMap<>()
         existingList.each {
-            oldLocos.put(it.decoderId, it)
+            oldLocos.put(it.fileName, it)
         }
         return oldLocos
     }

@@ -15,5 +15,5 @@ class ProgressModel {
 
     Integer max = 0
 
-    JProgressBar detailProgress
+    JProgressBar detailProgress = new JProgressBar(javax.swing.SwingConstants.HORIZONTAL, 0, 0)
 }

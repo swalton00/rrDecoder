@@ -21,4 +21,6 @@ class DecoderEntry {
     Timestamp detailTime
     Integer decoderTypeId
     Integer rosterId
+    String hasDetail
+    String hasSpeedProfile
 }

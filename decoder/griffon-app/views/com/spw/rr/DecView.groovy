@@ -36,7 +36,18 @@ class DecView {
                         menuItem mainAction
 
                     }
+
+                    menu(text: 'Filters') {
+                        menuItem resetFiltersAction, text: "Display all", enabled: bind { model.enableResetFilters }
+                        menuItem speedWithAction, text: 'With Speed Profile'
+                        menuItem speedWithoutAction, text: 'Without Speed Profile'
+                        menuItem detailsWithAction, text: 'With Imported details'
+                        menuItem detailsWithoutAction, text: 'Without Imported Details'
+                    }
+
                     menu(text: 'View') {
+                        menuItem viewSpeedProfilesAction, text: 'View Speed Profiles'
+                        menuItem viewCVvaluesAction, text: 'View CV contents'
 
                     }
                     menu(text: 'Help') {

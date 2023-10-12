@@ -34,6 +34,41 @@ class DecController {
 
     }
 
+    @ControllerAction
+    resetFiltersAction() {
+
+    }
+
+    @ControllerAction
+    speedWithAction() {
+
+    }
+
+    @ControllerAction
+    speedWithoutAction() {
+
+    }
+
+    @ControllerAction
+    detailsWithAction() {
+
+    }
+
+    @ControllerAction
+    detailsWithoutAction() {
+
+    }
+
+    @ControllerAction
+    viewSpeedProfilesAction() {
+
+    }
+
+    @ControllerAction
+    viewCVvaluesAction() {
+
+    }
+
     @Threading(Threading.Policy.OUTSIDE_UITHREAD)
     void onDecWindow() {
         log.debug("got a DecWindow event -- checking the model for actions")
