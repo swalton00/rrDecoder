@@ -123,20 +123,47 @@
         ORDER BY rosterid, decoderid
     </select>
     <select id="listDecodersByRosterID" resultType="com.spw.rr.mappers.DecoderEntry">
-        SELECT id,
-               decoderid,
-               filename,
-               roadnumber,
-               roadname,
-               owner,
-               model,
-               dccaddress,
-               manufacturerid,
-               decoderTypeId,
-               rosterid,
-               detailTime,
-               dateUpdated
-        FROM rrdec.Decoder
+        SELECT
+               p.id,
+               p.decoderId,
+               p.fileName,
+               p.roadNumber,
+               p.roadName,
+               p.manufacturer,
+               p.owner,
+               p.model,
+               p.dccAddress,
+               p.manufacturerId,
+               p.productId,
+               p.dateUpdated,
+               p.decoderTypeId,
+               p.detailTime,
+               p.rosterId,
+               hasSpeed,
+               hasDetail
+        FROM rrdec.decoder p
+        LEFT OUTER JOIN
+        (   SELECT
+               '1' AS hasSpeed,
+               t1.Id
+        FROM
+               rrdec.decoder t1
+        WHERE
+               EXISTS (   SELECT * FROM rrdec.speedprofile sp
+                      WHERE sp.decoderid = t1.id)) AS t11
+        ON p.id = t11.id
+        LEFT OUTER JOIN
+        (   SELECT
+               '1' AS hasdetail,
+               t1.id
+        FROM
+               rrdec.decoder t1
+        WHERE
+               EXISTS (   SELECT * FROM rrdec.cvvalues cv
+                      WHERE cv.decoderid = t1.id)
+               OR  EXISTS (   SELECT * FROM rrdec.decoderdef de
+                      WHERE de.decoderid = t1.id)) AS t21
+        ON t21.id = p.id
         <where>
         <foreach collection="array" index="index" item="item"
          open = "rosterid IN (" separator="," close=")">

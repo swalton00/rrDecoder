@@ -95,14 +95,14 @@ class DecController {
 
     private listSelection() {
         log.debug("listing the selection")
-        ArrayList<DecoderEntry> entries = database.listDecodersByRosterID((int[]) model.selectedRows.toArray())
-        buildWindowArray(entries)
+        model.completeList = database.listDecodersByRosterID((int[]) model.selectedRows.toArray())
+        buildWindowArray(model.completeList)
         application.getWindowManager().show("decWindow")
     }
 
     private listAll() {
-        ArrayList<DecoderEntry> dataForTable = database.listDecoders()
-        buildWindowArray(dataForTable)
+        model.completeList = database.listDecoders()
+        buildWindowArray(model.completeList)
         application.getWindowManager().show("decWindow")
     }
 

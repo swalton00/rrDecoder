@@ -2,6 +2,7 @@ package com.spw.rr
 
 import ca.odell.glazedlists.BasicEventList
 import ca.odell.glazedlists.EventList
+import com.spw.rr.mappers.DecoderEntry
 import griffon.core.artifact.GriffonModel
 import griffon.metadata.ArtifactProviderFor
 import griffon.transform.Observable
@@ -19,6 +20,8 @@ class DecModel extends RRBaseModel {
     }
 
     ArrayList<Integer> selectedRows = new ArrayList<>()
+
+    ArrayList<DecoderEntry> completeList = new ArrayList<>()
 
     WindowAction currentAction = WindowAction.NONE
 
