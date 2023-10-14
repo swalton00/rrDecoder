@@ -29,9 +29,6 @@ class DecModel extends RRBaseModel {
     boolean enableResetFilters = false
 
     @Observable
-    boolean importDetailEnabled = false
-
-    @Observable
     boolean filterNoSpeed = true
 
     @Observable

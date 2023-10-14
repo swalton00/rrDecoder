@@ -1,5 +1,7 @@
 package com.spw.rr
 
+import com.spw.rr.mappers.CVvalues
+import com.spw.rr.mappers.DecoderDef
 import com.spw.rr.mappers.DecoderEntry
 import com.spw.rr.mappers.DecoderType
 import com.spw.rr.mappers.FunctionLabel
@@ -141,8 +143,35 @@ class RosterImport {
                 slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
                 def decoderXML = slurper.parseText(decoderText)
                 try {
+                    Log4JStopWatch individualStopWatch = new Log4JStopWatch("details1", "decoder id = ${decoderId}")
                     database.beginTransaction()
+                    int varSize = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'.size()
+                    log.debug("decoderDef size is ${varSize}")
+                    for (j in 0..<varSize) {
+                        String itemString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@item'
+                        String valueString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@value'
+                        log.debug("value is ${valueString} and item is ${itemString}")
+                        DecoderDef decoderDef = new DecoderDef()
+                        decoderDef.parent = decoderId
+                        decoderDef.item = itemString
+                        decoderDef.varValue = valueString
+                        database.transInsertDecoderDef(decoderDef)
+                    }
+                    int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
+                    log.debug("CV size is ${cvSize}")
+                    for (j in 0..<cvSize) {
+                        String name = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@name'
+                        String cvValue = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@value'
+                        log.debug("adding a CV number ${name} with value ${cvValue}")
+                        CVvalues cVvalues = new CVvalues()
+                        cVvalues.cvNumber = name
+                        cVvalues.cvValue = cvValue
+                        cVvalues.decoderId = decoderId
+                        database.transInsertCVs(cVvalues)
+                    }
+                    database.transUpdateDetailTime(decoderId)
                     database.commitWork()
+                    individualStopWatch.stop()
                 } catch (Exception dbEx) {
                     log.error("exception processing the data -- rolling back", dbEx)
                     database.rollbackAll()

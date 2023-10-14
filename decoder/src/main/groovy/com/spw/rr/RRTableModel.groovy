@@ -45,7 +45,6 @@ class RRTableModel extends AbstractTableModel{
     }
 
     void dataChanged() {
-        TableModelEvent event = new TableModelEvent(this)
-        fireTableChanged(event)
+        fireTableDataChanged()
     }
 }

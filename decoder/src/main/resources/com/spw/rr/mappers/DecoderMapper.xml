@@ -85,6 +85,11 @@
                 #{rosterId},
                 #{dateUpdated})
     </insert>
+    <update id="updateDecoderDetailTime" parameterType="Integer">
+      UPDATE rrdec.Decoder
+        set detailTime = CURRENT_TIMESTAMP
+      WHERE ID = #{Id}
+    </update>
     <update id="updateDecoderEntry" parameterType="com.spw.rr.mappers.DecoderEntry">
         UPDATE
             rrdec.Decoder

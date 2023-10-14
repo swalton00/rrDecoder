@@ -30,7 +30,7 @@ class DecView {
 
                 menuBar() {
                     menu(text: 'File') {
-                        menuItem importDetailAction, text: 'Import Details', enabled: bind { model.importDetailEnabled }
+                        menuItem importDetailAction, text: 'Import Details', enabled: bind { model.tableSelectionEnabled }
                     }
                     menu(text: 'Window') {
                         menuItem mainAction

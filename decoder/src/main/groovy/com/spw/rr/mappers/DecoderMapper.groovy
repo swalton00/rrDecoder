@@ -24,6 +24,8 @@ interface DecoderMapper extends MybatisMapper {
 
     int deleteDecoderEntry(DecoderEntry entry)
 
+    int updateDecoderDetailTime(Integer decoderId)
+
     List<DecoderEntry> listDecoders()
 
     List<DecoderEntry> listDecodersByRosterID(int[] rosterID)
