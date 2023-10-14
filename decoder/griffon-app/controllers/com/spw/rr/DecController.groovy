@@ -36,27 +36,81 @@ class DecController {
 
     @ControllerAction
     resetFiltersAction() {
+        log.debug("resetting all filters")
+        model.filterNoDetails = true
+        model.filterDetails = true
+        model.filterNoSpeed = true
+        model.filterSpeed = true
+        model.enableResetFilters = false
+        rebuildDisplay()
+    }
 
+    private void resetAndShow() {
+        model.enableResetFilters = true
+        rebuildDisplay()
+    }
+
+    private void rebuildDisplay() {
+        log.debug("rebuilding display from saved list")
+        ArrayList<DecoderEntry> tempList = new ArrayList<>()
+        model.completeList.each {
+            if (checkFilters(it)) {
+                tempList.add(it)
+            }
+        }
+        buildWindowArray(tempList)
+    }
+
+    private boolean checkFilters(DecoderEntry entry) {
+        log.debug("checking filters for id ${entry.id}")
+        // remember -- filter = true means DON'T filter on this
+        boolean returnValue = true
+        if (!model.filterSpeed) {
+            returnValue = returnValue & ! (entry.hasSpeedProfile == null)
+        }
+        if (!model.filterNoSpeed) {
+            returnValue = returnValue & (entry.hasSpeedProfile == null)
+        }
+        if (!model.filterDetails) {
+            returnValue = returnValue & ! (entry.hasDetail == null)
+        }
+        if (!model.filterNoDetails) {
+            returnValue = returnValue & (entry.hasDetail == null)
+        }
+        log.debug("returning a value of ${returnValue}")
+        return returnValue
     }
 
     @ControllerAction
     speedWithAction() {
-
+        log.debug("filtering on decoders with speed profiles")
+        model.filterSpeed = false // turn off enable -- will check for converse in filter
+        model.filterNoSpeed = true
+        resetAndShow()
     }
 
     @ControllerAction
     speedWithoutAction() {
-
+        log.debug("filtering on decoders withOUT speed profiles")
+        model.filterNoSpeed = false
+        model.filterSpeed = true
+        resetAndShow()
     }
 
     @ControllerAction
     detailsWithAction() {
-
+        log.debug("filtering on decoders with details")
+        model.filterDetails = false
+        model.filterNoDetails = true
+        resetAndShow()
     }
 
     @ControllerAction
     detailsWithoutAction() {
-
+        log.debug("filtering on decoders withOUT details")
+        model.filterNoDetails = false
+        model.filterDetails = true
+        resetAndShow()
     }
 
     @ControllerAction
@@ -66,6 +120,11 @@ class DecController {
 
     @ControllerAction
     viewCVvaluesAction() {
+
+    }
+
+    @ControllerAction
+    viewDecoderDetailAction() {
 
     }
 
@@ -95,15 +154,27 @@ class DecController {
 
     private listSelection() {
         log.debug("listing the selection")
-        model.completeList = database.listDecodersByRosterID((int[]) model.selectedRows.toArray())
+        doListSelection((int[]) model.selectedRows.toArray())
+    }
+
+    private doListSelection(int[] theList) {
+        resetAllFilters()
+        model.completeList = database.listDecodersByRosterID(theList)
         buildWindowArray(model.completeList)
         application.getWindowManager().show("decWindow")
     }
 
+    private resetAllFilters() {
+        model.enableResetFilters = false
+        model.filterNoSpeed = true
+        model.filterSpeed = true
+        model.filterNoDetails = true
+        model.filterDetails = true
+    }
+
     private listAll() {
-        model.completeList = database.listDecoders()
-        buildWindowArray(model.completeList)
-        application.getWindowManager().show("decWindow")
+        int[] dummyList = new int[0]
+        doListSelection(dummyList )
     }
 
     private void buildWindowArray(ArrayList<DecoderEntry> entries) {

@@ -139,12 +139,12 @@
                p.decoderTypeId,
                p.detailTime,
                p.rosterId,
-               hasSpeed,
+               hasSpeedProfile,
                hasDetail
         FROM rrdec.decoder p
         LEFT OUTER JOIN
         (   SELECT
-               '1' AS hasSpeed,
+               '1' AS hasSpeedProfile,
                t1.Id
         FROM
                rrdec.decoder t1

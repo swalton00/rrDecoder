@@ -39,16 +39,16 @@ class DecView {
 
                     menu(text: 'Filters') {
                         menuItem resetFiltersAction, text: "Display all", enabled: bind { model.enableResetFilters }
-                        menuItem speedWithAction, text: 'With Speed Profile'
-                        menuItem speedWithoutAction, text: 'Without Speed Profile'
-                        menuItem detailsWithAction, text: 'With Imported details'
-                        menuItem detailsWithoutAction, text: 'Without Imported Details'
+                        menuItem speedWithAction, text: '    With Speed Profile', enabled: bind { model.filterSpeed }
+                        menuItem speedWithoutAction, text: '    Without Speed Profile', enabled: bind { model.filterNoSpeed }
+                        menuItem detailsWithAction, text: '    With Imported details', enabled: bind { model.filterDetails }
+                        menuItem detailsWithoutAction, text: '    Without Imported Details', enabled: bind { model.filterNoDetails }
                     }
 
                     menu(text: 'View') {
-                        menuItem viewSpeedProfilesAction, text: 'View Speed Profiles'
-                        menuItem viewCVvaluesAction, text: 'View CV contents'
-
+                        menuItem viewSpeedProfilesAction, text: 'View Speed Profiles',enabled: bind {model.tableSelectionEnabled}
+                        menuItem viewCVvaluesAction, text: 'View CV contents',enabled: bind {model.tableSelectionEnabled}
+                        menuItem viewDecoderDetailAction, text: 'View Decoder Details',enabled: bind {model.tableSelectionEnabled}
                     }
                     menu(text: 'Help') {
                         menuItem helpAction

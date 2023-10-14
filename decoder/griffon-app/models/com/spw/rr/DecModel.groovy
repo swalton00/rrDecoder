@@ -26,5 +26,22 @@ class DecModel extends RRBaseModel {
     WindowAction currentAction = WindowAction.NONE
 
     @Observable
-    boolean enableResetFilters
+    boolean enableResetFilters = false
+
+    @Observable
+    boolean importDetailEnabled = false
+
+    @Observable
+    boolean filterNoSpeed = true
+
+    @Observable
+    boolean filterSpeed = true
+
+    @Observable
+    boolean filterNoDetails = true
+
+    @Observable
+    filterDetails = true
+
+
 }
