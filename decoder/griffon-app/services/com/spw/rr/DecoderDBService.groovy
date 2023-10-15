@@ -9,6 +9,7 @@ import com.spw.rr.mappers.FunctionLabel
 import com.spw.rr.mappers.KeyValuePairs
 import com.spw.rr.mappers.RosterEntry
 import com.spw.rr.mappers.SpeedProfile
+import com.spw.rr.mappers.StandardCVs
 import griffon.core.artifact.GriffonService
 import griffon.plugins.mybatis.MybatisHandler
 import org.apache.ibatis.session.SqlSession
@@ -414,6 +415,22 @@ class DecoderDBService {
             log.debug("result was ${cVvalues}")
             return cVvalues
         }
+    }
+
+    List<StandardCVs> listStandardCVsFor(Integer[] decoderid) {
+        log.debug("Listing standard cvs for ${decoderid}")
+    }
+
+    void tranPrepareDetail(Integer decoderId) {
+        log.debug("preparing for Detail import by deleting CvValue and DecoderDef where decoderId = ${decoderId}")
+        if (currentSession == null) {
+            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+        }
+        DecoderMapper mapper = currentSession.getMapper(DecoderMapper.class)
+        int rowsDeleted = mapper.deleteCVs(decoderId)
+        log.debug("CVvalues rows deleted = ${rowsDeleted}")
+        rowsDeleted = mapper.deleteDecoderDef(decoderId)
+        log.debug("DecoderDef rows deleted = ${rowsDeleted}")
     }
 
     List<CVvalues> listCVsFor(Integer parent) {

@@ -39,6 +39,50 @@
         WHERE systemName = #{systemName}
         ORDER BY systemname
     </select>
+    <delete id="deleteCVs" parameterType="Integer">
+        DELETE FROM rrdec.CVValues WHERE decoderId = #{decoderId}
+    </delete>
+    <delete id="deleteDecoderDef" parameterType="Integer">
+        DELETE FROM rrdec.DecoderDef WHERE decoderId = #{decoderId}
+    </delete>
+    <select id="listStandardCVs" resultType="com.spw.rr.mappers.CVvalues">
+        SELECT
+               id,
+               decoderid,
+               cvvalue,
+               value
+        FROM
+                rrdec.cvvalues
+        WHERE
+        <where>
+            <foreach collection="array" index="index" item="item"
+                     open = "decoderid IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        AND cvvalue IN ('1',
+               '2',
+               '3',
+               '4',
+               '5' ,
+               '6',
+               '7',
+               '8',
+               '9',
+               '10',
+               '11',
+               '12',
+               '13',
+               '14',
+               '15',
+               '16',
+               '17',
+               '18',
+               '19')
+        ORDER BY
+               decoderid,
+               cvvalue
+    </select>
     <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.mappers.RosterEntry">
         SELECT id,
                entered AS entryTime,

@@ -28,6 +28,8 @@ interface DecoderMapper extends MybatisMapper {
 
     List<DecoderEntry> listDecoders()
 
+    List<CVvalues> listStandardCVs(int[] decoderID)
+
     List<DecoderEntry> listDecodersByRosterID(int[] rosterID)
 
     DecoderEntry getDecoderEntry(int id)
@@ -61,4 +63,8 @@ interface DecoderMapper extends MybatisMapper {
     void insertCVs(CVvalues cVvalues)
 
     List<CVvalues> listCVsFor(Integer parent)
+
+    int deleteCVs(Integer decoderId)
+
+    int deleteDecoderDef(Integer decoderId)
 }
