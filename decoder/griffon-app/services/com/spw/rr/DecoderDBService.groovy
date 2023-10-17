@@ -50,6 +50,7 @@ class DecoderDBService {
     void beginTransaction() {
         log.debug("beginning a transaction")
         if (currentSession == null) {
+            log.info("Current session is being reused")
             currentSession = handler.getSqlSession("default", false)
         }
     }
@@ -67,7 +68,7 @@ class DecoderDBService {
         if (currentSession == null) {
             throw new RuntimeException("attempting to close a not-open session")
         }
-        currentSession.close()
+        //currentSession.close()
     }
 
     void rollbackAll() {

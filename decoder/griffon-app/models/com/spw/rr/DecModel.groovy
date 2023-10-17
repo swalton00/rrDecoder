@@ -40,5 +40,6 @@ class DecModel extends RRBaseModel {
     @Observable
     filterDetails = true
 
+    int[] savedList = null
 
 }

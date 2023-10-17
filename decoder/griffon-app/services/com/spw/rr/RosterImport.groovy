@@ -12,7 +12,6 @@ import griffon.core.GriffonApplication
 import griffon.core.mvc.MVCGroup
 import griffon.transform.MVCAware
 import griffon.transform.ThreadingAware
-import groovy.swing.SwingBuilder
 import org.perf4j.log4j.Log4JStopWatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -101,9 +100,13 @@ class RosterImport {
         HashMap<Integer, String> rosterFiles = new HashMap<>()
         MVCGroup progressGroup = application.mvcGroupManager.findGroup('progress')
         ProgressModel progress = progressGroup.model
-        runInsideUISync{
+        runInsideUISync {
+            progress.toBeProcessed = String.valueOf(decoders.size())
             progress.max = decoders.size()
-            progress.current = 0
+            progress.phaseMaximum = 3
+            progress.phaseValue = 1
+            progress.subMax = 0
+            //progress.setTotals(decoders.size(), 3)
         }
         application.getWindowManager().show("progress")
         Log4JStopWatch detailStopWatch = new Log4JStopWatch("detail", "Importing details for ${decoders.size()}")
@@ -111,7 +114,11 @@ class RosterImport {
         decoders.each { Integer decoderId ->
             entryCounter++
             runInsideUISync {
-                progress.detailProgress.setValue(entryCounter)
+                progress.currentValue = entryCounter
+                progress.phaseValue = 1
+                progress.phaseCount = "1"
+                progress.currentText = String.valueOf(entryCounter)
+                //progress.setCurrent(entryCounter, 1)
             }
             log.debug("processing details for decoder id of ${decoderId}")
             Log4JStopWatch decoderDetail = new Log4JStopWatch("decoderDetail", "processing decoder id of ${decoderId}")
@@ -126,7 +133,7 @@ class RosterImport {
                 rosterFiles.put(thisEntry.id, path)
             }
             String decoderFileName = rosterFiles.get(decoderEntry.rosterId) +
-                 File.separator + "roster" + File.separator + decoderEntry.fileName
+                    File.separator + "roster" + File.separator + decoderEntry.fileName
             boolean fileFound = false
             String decoderText
             try {
@@ -147,7 +154,17 @@ class RosterImport {
                     database.beginTransaction()
                     int varSize = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'.size()
                     log.debug("decoderDef size is ${varSize}")
+                    runInsideUISync {
+                        progress.phaseValue = 2
+                        progress.phaseCount = "2"
+                        progress.subMax = varSize
+                        //progress.setPhaseCurrent(2, varSize)
+                    }
                     for (j in 0..<varSize) {
+                        runInsideUISync {
+                            progress.subCurrent = j + 1
+                            //progress.setSubCurrent(j + 1)
+                        }
                         String itemString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@item'
                         String valueString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@value'
                         log.debug("value is ${valueString} and item is ${itemString}")
@@ -159,7 +176,17 @@ class RosterImport {
                     }
                     int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
                     log.debug("CV size is ${cvSize}")
+                    runInsideUISync {
+                        progress.phaseValue = 3
+                        progress.phaseCount = "3"
+                        progress.subMax = cvSize
+                        //progress.setPhaseCurrent(3, cvSize)
+                    }
                     for (j in 0..<cvSize) {
+                        runInsideUISync {
+                            progress.subCurrent = j + 1
+                            //progress.setSubCurrent(j + 1)
+                        }
                         String name = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@name'
                         String cvValue = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@value'
                         log.debug("adding a CV number ${name} with value ${cvValue}")
@@ -178,7 +205,7 @@ class RosterImport {
                 }
             }
         }
-        runInsideUISync{
+        runInsideUISync {
             application.getWindowManager().hide("progress")
         }
         detailStopWatch.stop()
@@ -222,25 +249,25 @@ class RosterImport {
                 existingList = updateRosterEntries(thisRoster)
             }
             runInsideUISync {
+                progress.toBeProcessed = String.valueOf(arraySize)
+                progress.currentValue = 0
                 progress.max = arraySize
+                progress.phaseMaximum = 4
+                //progress.setTotals(arraySize, 4)
             }
             Log4JStopWatch rosterStopWatch = new Log4JStopWatch("roster", "overall roster processing")
             for (i in 0..<arraySize) {
                 runInsideUISync {
-                    progress.current = i
+                    progress.currentValue = i + 1
+                    progress.currentText = String.valueOf(i + 1)
+                    progress.phaseValue = 1
+                    progress.phaseCount = "1"
+                    //progress.setCurrent(i, 1)
                 }
                 log.debug("this entry has an id of ${entryList[i].'@fileName'.text()}")
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
                 DecoderEntry newEntry = new DecoderEntry()
                 boolean decoderExists = false
-
-
-                /*
-                  problem -- decoderId is not unique so can't use it as a key
-
-                 */
-
-
                 if (rosterFound) {
                     DecoderEntry previous = existingList.get(entryList[i].'@fileName')
                     if (previous != null) {
@@ -265,7 +292,18 @@ class RosterImport {
                 if (functionEntries != null) {
                     Log4JStopWatch functionsStopWatch = new Log4JStopWatch("functions", "function entries")
                     int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
+                    runInsideUISync {
+                        progress.phaseValue = 2
+                        progress.phaseCount = "2"
+                        progress.subMax  = functionLabelSize
+                        //progress.setPhaseCurrent(2, functionLabelSize)
+                    }
+                    int functionCounter = 0
                     for (labelEntry in 0..<functionLabelSize) {
+                        runInsideUISync {
+                            progress.subCurrent = ++functionCounter
+                            //progress.setSubCurrent(++functionCounter)
+                        }
                         log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
                         FunctionLabel funcLab = new FunctionLabel()
                         funcLab.decoderId = newEntry.id
@@ -280,7 +318,17 @@ class RosterImport {
                 log.debug("key value size is ${keyValuesSize}")
                 if (keyValuesSize > 0) {
                     Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
+                    runInsideUISync {
+                        progress.phaseValue = 3
+                        progress.phaseCount = "3"
+                        progress.subMax = keyValuesSize
+                        //progress.setPhaseCurrent(3, keyValuesSize)
+                    }
                     for (j in 0..<keyValuesSize) {
+                        runInsideUISync {
+                            progress.subCurrent = j + 1
+                            //progress.setSubCurrent(j + 1)
+                        }
                         KeyValuePairs kvp = new KeyValuePairs()
                         kvp.decoderId = newEntry.id
                         kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
@@ -294,7 +342,17 @@ class RosterImport {
                 log.debug("speed profile size is ${speedProfileSize}")
                 if (speedProfileSize > 0) {
                     Log4JStopWatch speedStopWatch = new Log4JStopWatch("speeds", "Speed Profile")
+                    runInsideUISync {
+                        progress.phaseValue = 4
+                        progress.phaseCount = "4"
+                        progress.subMax = speedProfileSize
+                        //progress.setPhaseCurrent(4, speedProfileSize)
+                    }
                     for (j in 0..<speedProfileSize) {
+                        runInsideUISync {
+                            progress.subCurrent = j + 1
+                            //progress.setSubCurrent(j + 1)
+                        }
                         SpeedProfile sp = new SpeedProfile()
                         sp.decoderId = newEntry.id
                         sp.speedStep = Integer.valueOf(entryList[i].'speedprofile'.speeds.speed[j].step.text())
@@ -374,7 +432,7 @@ class RosterImport {
                 database.updateRosterEntry(thisRoster)
             }
             database.commitWork()
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Caught an exception working with the import", e)
             database.rollbackAll()
         } finally {

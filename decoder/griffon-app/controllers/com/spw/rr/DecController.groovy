@@ -58,21 +58,27 @@ class DecController {
                 tempList.add(it)
             }
         }
-        buildWindowArray(tempList)
+        buildWindowArray()
     }
 
+
+    /**
+     * Check whether this Decoder entry should be displayed according to the current filters
+     * @param entry the decoder entry to check
+     * @return true if the decoder should NOT be displayed
+     */
     private boolean checkFilters(DecoderEntry entry) {
         log.debug("checking filters for id ${entry.id}")
         // remember -- filter = true means DON'T filter on this
         boolean returnValue = true
         if (!model.filterSpeed) {
-            returnValue = returnValue & ! (entry.hasSpeedProfile == null)
+            returnValue = returnValue & !(entry.hasSpeedProfile == null)
         }
         if (!model.filterNoSpeed) {
             returnValue = returnValue & (entry.hasSpeedProfile == null)
         }
         if (!model.filterDetails) {
-            returnValue = returnValue & ! (entry.hasDetail == null)
+            returnValue = returnValue & !(entry.hasDetail == null)
         }
         if (!model.filterNoDetails) {
             returnValue = returnValue & (entry.hasDetail == null)
@@ -128,6 +134,11 @@ class DecController {
 
     }
 
+
+    /**
+     * Invoked by message from main Controller to show a list of decoders
+     * model will contain action and potentially a list of rosters to include *
+     */
     @Threading(Threading.Policy.OUTSIDE_UITHREAD)
     void onDecWindow() {
         log.debug("got a DecWindow event -- checking the model for actions")
@@ -152,16 +163,33 @@ class DecController {
         }
     }
 
-    private listSelection() {
-        log.debug("listing the selection")
+    /**
+     * invoked by the message from the controller
+     */
+    private void listSelection() {
+        log.debug("listing the selection of rosters")
         doListSelection((int[]) model.selectedRows.toArray())
     }
 
-    private doListSelection(int[] theList) {
+    /**
+     * Invoked by Controller message to list all rosters
+     */
+    private void listAll() {
+        log.debug("listing for all rosters")
+        doListSelection(new int[0])
+    }
+
+
+    /**
+     * Only invoked by the Controller, after selecting the proper rosters
+     * @param theList an array of rosters
+     */
+    private void doListSelection(int[] theList) {
+        model.savedList = theList
         resetAllFilters()
-        model.completeList = database.listDecodersByRosterID(theList)
-        buildWindowArray(model.completeList)
+        rebuildTableList()
         application.getWindowManager().show("decWindow")
+        buildWindowArray()
     }
 
     private resetAllFilters() {
@@ -172,16 +200,12 @@ class DecController {
         model.filterDetails = true
     }
 
-    private listAll() {
-        int[] dummyList = new int[0]
-        doListSelection(dummyList )
-    }
-
-    private void buildWindowArray(ArrayList<DecoderEntry> entries) {
-        if (entries != null) {
-            model.tableList.clear()
-            entries.each {
-                ArrayList<String> newArray = new ArrayList<String>()
+    private void rebuildTableList() {
+        model.completeList = database.listDecodersByRosterID(model.savedList)
+        model.tableList.clear()
+        model.completeList.each {
+            ArrayList<String> newArray = new ArrayList<String>()
+            if (checkFilters(it)) {
                 newArray.add(it.id.toString())
                 newArray.add(it.rosterId.toString())
                 newArray.add(it.fileName)
@@ -191,16 +215,21 @@ class DecController {
                 newArray.add(it.owner)
                 newArray.add(it.dccAddress)
                 newArray.add(it.dateUpdated)
-                model.tableList.add(newArray)
             }
-            if (view.tableModel != null) {
-                runInsideUISync {
-                    log.debug("changing the data model")
-                    view.tableModel.dataChanged()
-                    log.debug("data model now changed")
-                }
+            model.tableList.add(newArray)
+        }
+    }
+
+
+    private void buildWindowArray() {
+        if (view.tableModel != null) {
+            runInsideUISync {
+                log.debug("changing the data model")
+                view.tableModel.dataChanged()
+                log.debug("data model now changed")
             }
         }
+
     }
 
     boolean inited = false
