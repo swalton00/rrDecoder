@@ -23,6 +23,8 @@ class DecModel extends RRBaseModel {
 
     ArrayList<DecoderEntry> completeList = new ArrayList<>()
 
+    int[] rosterList = null
+
     WindowAction currentAction = WindowAction.NONE
 
     @Observable

@@ -51,7 +51,8 @@ class DecController {
     }
 
     private void rebuildDisplay() {
-        log.debug("rebuilding display from saved list")
+        log.debug("rebuilding list and checking filters")
+        model.completeList = database.listDecodersByRosterID(model.rosterList)
         ArrayList<DecoderEntry> tempList = new ArrayList<>()
         model.completeList.each {
             if (checkFilters(it)) {
@@ -159,6 +160,7 @@ class DecController {
 
     private doListSelection(int[] theList) {
         resetAllFilters()
+        model.rosterList = theList
         model.completeList = database.listDecodersByRosterID(theList)
         buildWindowArray(model.completeList)
         application.getWindowManager().show("decWindow")
