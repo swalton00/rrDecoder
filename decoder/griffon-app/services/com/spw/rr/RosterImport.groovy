@@ -146,6 +146,8 @@ class RosterImport {
                     Log4JStopWatch individualStopWatch = new Log4JStopWatch("details1", "decoder id = ${decoderId}")
                     database.beginTransaction()
                     int varSize = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'.size()
+                    // clean out any old CV values and DecoderDef rows first
+                    database.tranPrepareDetail(decoderEntry.id)
                     log.debug("decoderDef size is ${varSize}")
                     for (j in 0..<varSize) {
                         String itemString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@item'

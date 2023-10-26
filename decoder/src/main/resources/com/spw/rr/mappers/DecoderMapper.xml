@@ -49,12 +49,14 @@
         SELECT
                b.id,
                b.decoderid,
+               a.dccAddress,
                cvvalue as cvNumber,
                value as cvValue
         FROM
                rrdec.decoder a
         INNER JOIN
                rrdec.cvvalues b
+        ON a.id = b.decoderid
         <where>
             <foreach collection="param1" index="index" item="item"
                      open = "b.decoderid IN (" separator="," close=")">
