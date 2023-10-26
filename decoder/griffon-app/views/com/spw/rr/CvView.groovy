@@ -7,6 +7,7 @@ import griffon.metadata.ArtifactProviderFor
 import javax.annotation.Nonnull
 import javax.swing.JTable
 import javax.swing.ListSelectionModel
+import javax.swing.table.TableColumn
 
 @ArtifactProviderFor(GriffonView)
 class CvView {
@@ -26,20 +27,21 @@ class CvView {
         JTable theTable
         RRTableModel modelCopy
         builder.with {
-            application(size: [1200,900], id: 'cvWindow', title: 'CV Values')
-            menuBar() {
-                menu(text: 'File') {
-                    menuItem closeAction, text: 'Close'
+            application(size: [1200, 900], id: 'cvWindow', title: 'CV Values') {
+                menuBar() {
+                    menu(text: 'File') {
+                        menuItem closeAction, text: 'Close'
+                    }
+                    menu(text: 'Help') {
+                        menuItem helpAction, text: 'Help'
+                    }
                 }
-                menu(text: 'Help') {
-                    menuItem helpAction, text: 'Help'
+                migLayout(constraints: 'fill')
+                def pane = scrollPane(constraints: 'width 1200, height 900') {
+                    theTable = table(model: modelCopy = new RRTableModel((RRBaseModel) model))
+                    log.debug("the table is ${theTable}")
+                    tableModel = modelCopy
                 }
-            }
-            migLayout(constraints: 'fill')
-            def pane = scrollPane(constraints: 'width 1200, height 900') {
-                theTable = table(model: modelCopy = new RRTableModel((RRBaseModel) model))
-                log.debug("the table is ${theTable}")
-                tableModel = modelCopy
             }
         }
         tableModel = modelCopy
@@ -50,6 +52,11 @@ class CvView {
         theTable.setCellSelectionEnabled(false)
         theTable.setCellSelectionEnabled(false)
         theTable.setRowSelectionAllowed(true)
+        MultiLineTableHeaderRenderer renderer = new MultiLineTableHeaderRenderer()
+        Enumeration enumA = theTable.getColumnModel().getColumns()
+        while (enumA.hasMoreElements()) {
+            ((TableColumn) enumA.nextElement()).setHeaderRenderer(renderer)
+        }
         theTable.getSelectionModel().addListSelectionListener(new ListenerForTables(model))
     }
 }

@@ -426,7 +426,7 @@ class DecoderDBService {
             Integer lstDecoder = -1
             CvShow lastShow = null
             fndList.each{ CVvalues values ->
-                log.debug("processing CvShow value ${values}")
+                log.trace("processing CvShow value ${values}")
                 if (values.decoderId != lstDecoder) {
                     if (lastShow != null) {
                         returnList.add(lastShow)
@@ -434,6 +434,7 @@ class DecoderDBService {
                     lstDecoder = values.decoderId
                     lastShow = new CvShow()
                     lastShow.decoderId = values.decoderId
+                    lastShow.dccAddress = values.dccAddress
                 }
                 switch (values.cvNumber) {
                     case "1" : lastShow.cv1 = values.cvValue
@@ -477,8 +478,8 @@ class DecoderDBService {
                     default:
                         log.info("unrecognized CV number in CV Show list")
                 }
-                returnList.add(lastShow)
             }
+            returnList.add(lastShow)
             return returnList
         }
     }

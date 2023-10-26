@@ -45,9 +45,9 @@ class CvController {
         int[] decList = model.selectedRows.toArray()
         ArrayList<CvShow> showList = database.listStandardCVsFor(decList, model.rosterIds)
         model.tableList.clear()
-        ArrayList<String> newArray = new ArrayList<>()
+        log.debug("showList is ${showList}")
         showList.each {
-            newArray.add(it.id.toString())
+            ArrayList<String> newArray = new ArrayList<>()
             newArray.add(it.decoderId.toString())
             newArray.add(it.dccAddress)
             newArray.add(it.cv1)
@@ -70,6 +70,7 @@ class CvController {
             newArray.add(it.cv18)
             newArray.add(it.cv19)
             model.tableList.add(newArray)
+            log.debug("adding row with dcc address of ${it.dccAddress}")
         }
         application.getWindowManager().show("cvWindow")
         runInsideUISync {
