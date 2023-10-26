@@ -18,4 +18,8 @@ class CvModel extends RRBaseModel {
 
     EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
 
+    ArrayList<Integer> selectedRows = new ArrayList<>()
+
+    int[] rosterIds
+
 }

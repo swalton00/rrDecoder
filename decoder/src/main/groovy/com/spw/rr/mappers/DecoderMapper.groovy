@@ -28,7 +28,7 @@ interface DecoderMapper extends MybatisMapper {
 
     List<DecoderEntry> listDecoders()
 
-    List<CVvalues> listStandardCVs(int[] decoderID)
+    List<CVvalues> listStandardCVs(int[] decoderID, int[] rosterID)
 
     List<DecoderEntry> listDecodersByRosterID(int[] rosterID)
 

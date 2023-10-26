@@ -3,6 +3,7 @@ package com.spw.rr
 import com.spw.rr.mappers.DecoderEntry
 import griffon.core.artifact.GriffonController
 import griffon.core.controller.ControllerAction
+import griffon.core.mvc.MVCGroup
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 import griffon.transform.Threading
@@ -33,6 +34,16 @@ class DecController {
     helpAction() {
 
     }
+
+    MVCGroup cvsGroup = null
+
+    private MVCGroup checkGroup(String groupName, MVCGroup group) {
+        if (group == null) {
+            return application.mvcGroupManager.findGroup(groupName)
+        }
+        return group
+    }
+
 
     @ControllerAction
     resetFiltersAction() {
@@ -121,7 +132,12 @@ class DecController {
 
     @ControllerAction
     viewCVvaluesAction() {
-
+        log.debug("Got a request for a CV View")
+        cvsGroup = checkGroup("cvs", cvsGroup)
+        CvModel cvModel = cvsGroup.getModel()
+        cvModel.selectedRows = model.selectedRows
+        cvModel.rosterIds = model.rosterList
+        application.eventRouter.publishEvent("CvWindow", [])
     }
 
     @ControllerAction

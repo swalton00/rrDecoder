@@ -47,16 +47,17 @@
     </delete>
     <select id="listStandardCVs" resultType="com.spw.rr.mappers.CVvalues">
         SELECT
-               id,
-               decoderid,
-               cvvalue,
-               value
+               b.id,
+               b.decoderid,
+               cvvalue as cvNumber,
+               value as cvValue
         FROM
-                rrdec.cvvalues
-        WHERE
+               rrdec.decoder a
+        INNER JOIN
+               rrdec.cvvalues b
         <where>
-            <foreach collection="array" index="index" item="item"
-                     open = "decoderid IN (" separator="," close=")">
+            <foreach collection="param1" index="index" item="item"
+                     open = "b.decoderid IN (" separator="," close=")">
                 #{item}
             </foreach>
         </where>
@@ -80,7 +81,7 @@
                '18',
                '19')
         ORDER BY
-               decoderid,
+               b.decoderid,
                cvvalue
     </select>
     <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.mappers.RosterEntry">

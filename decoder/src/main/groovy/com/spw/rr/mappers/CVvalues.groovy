@@ -8,4 +8,5 @@ class CVvalues {
     Integer decoderId
     String  cvNumber
     String  cvValue
+    String  dccAddress      // included for purposes of some retrievals
 }

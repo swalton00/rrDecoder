@@ -417,8 +417,70 @@ class DecoderDBService {
         }
     }
 
-    List<StandardCVs> listStandardCVsFor(Integer[] decoderid) {
-        log.debug("Listing standard cvs for ${decoderid}")
+    List<CvShow> listStandardCVsFor(int[] decoderid, int[] rosterid) {
+        log.debug("Listing standard cvs for ${decoderid} or rosterId of ${rosterid}")
+        ArrayList<CvShow> returnList = new ArrayList<>()
+        handler.withSqlSession { String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper = session.getMapper(DecoderMapper.class)
+            ArrayList<CVvalues> fndList = mapper.listStandardCVs(decoderid, rosterid)
+            Integer lstDecoder = -1
+            CvShow lastShow = null
+            fndList.each{ CVvalues values ->
+                log.debug("processing CvShow value ${values}")
+                if (values.decoderId != lstDecoder) {
+                    if (lastShow != null) {
+                        returnList.add(lastShow)
+                    }
+                    lstDecoder = values.decoderId
+                    lastShow = new CvShow()
+                    lastShow.decoderId = values.decoderId
+                }
+                switch (values.cvNumber) {
+                    case "1" : lastShow.cv1 = values.cvValue
+                        break
+                    case "2" : lastShow.cv2 = values.cvValue
+                        break
+                    case "3" : lastShow.cv3 = values.cvValue
+                        break
+                    case "4" : lastShow.cv4 = values.cvValue
+                        break
+                    case "5" : lastShow.cv5 = values.cvValue
+                        break
+                    case "6" : lastShow.cv6 = values.cvValue
+                        break
+                    case "7" : lastShow.cv7 = values.cvValue
+                        break
+                    case "8" : lastShow.cv8 = values.cvValue
+                        break
+                    case "9" : lastShow.cv9 = values.cvValue
+                        break
+                    case "10" : lastShow.cv10 = values.cvValue
+                        break
+                    case "11" : lastShow.cv11 = values.cvValue
+                        break
+                    case "12" : lastShow.cv12 = values.cvValue
+                        break
+                    case "13" : lastShow.cv13 = values.cvValue
+                        break
+                    case "14" : lastShow.cv14 = values.cvValue
+                        break
+                    case "15" : lastShow.cv15 = values.cvValue
+                        break
+                    case "16" : lastShow.cv16 = values.cvValue
+                        break
+                    case "17" : lastShow.cv17 = values.cvValue
+                        break
+                    case "18" : lastShow.cv18 = values.cvValue
+                        break
+                    case "19" : lastShow.cv19 = values.cvValue
+                        break
+                    default:
+                        log.info("unrecognized CV number in CV Show list")
+                }
+                returnList.add(lastShow)
+            }
+            return returnList
+        }
     }
 
     void tranPrepareDetail(Integer decoderId) {
