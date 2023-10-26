@@ -28,7 +28,6 @@
     <logger name="griffon"/>
     <logger name="org.perf4j.TimingLogger">
         <appender-ref ref="timers"/>
-        <level value="INFO"/>
     </logger>
     <root>
         <appender-ref ref="console"/>
