@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
+        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.9'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
+    }
+}
+plugins {
+    id 'org.asciidoctor.jvm.convert' version '3.1.0'
+    id 'org.asciidoctor.jvm.pdf' version '3.2.0'
+    id 'org.asciidoctor.jvm.gems' version '3.2.0'
+}
+
+repositories {
+    jcenter()
+    ruby.gems()
+}
+
+dependencies {
+    asciidoctorGems 'rubygems:rouge:3.15.0'
+}
+
+asciidoctorPdf {
+
+    baseDir "src/docs/asciidoc "
+
+
+    dependsOn asciidoctorGemsPrepare
+
+
+    asciidoctorj {
+        attributes  'build-gradle': file('build.gradle'),
+                'sourcedir': file('src/docs/asciidoc')
+
+        sources {
+            include 'index.adoc'
+        }
+    }
+
+}
+
+asciidoctor {
+    attributes  stylesheet: 'src/docs/styles/special.css'
+
+
+    outputOptions {
+        backends = ['html5', 'pdf']
+    }
+
+    sources {
+        include 'index.adoc'
+    }
+}
