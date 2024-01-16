@@ -13,10 +13,10 @@ environments {
     development {
         dataSource {
             driverClassName = 'org.h2.Driver'
-            username = 'rr'
-            password = 'rrpass'
+            username = 'xx'
+            password = 'xx'
             dbCreate = 'skip' // one of ['create', 'skip']
-            url = 'jdbc:h2:file:D:/Projects/RailRoad_Database/Dev/test;AUTO_SERVER=TRUE;MODE=DB2;'
+            url = 'xx'
         }
     }
     test {
