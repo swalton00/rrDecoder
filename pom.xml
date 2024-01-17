@@ -3,15 +3,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.spw.rr</groupId>
-    <artifactId>rrDecoder</artifactId>
+    <artifactId>simple-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
     <name>Model Railroad Decoder Database Project</name>
+
     <modules>
         <module>doc</module>
         <module>decoder</module>
+
     </modules>
+
     <build>
         <pluginManagement>
             <plugins>
