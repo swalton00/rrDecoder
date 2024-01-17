@@ -1,5 +1,5 @@
-CREATE USER rrdec password 'rrdecpw';
-CREATE schema rrdec;
+CREATE USER IF NOT EXISTS rrdec password 'rrdecpw';
+CREATE schema IF NOT EXISTS rrdec ;
 GRANT ALTER ANY schema TO rrdec;
 CREATE TABLE
     rrdec.roster
