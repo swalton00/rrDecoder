@@ -9,4 +9,8 @@ class PrefsModel {
     @Observable String username = ""
     @Observable String password = ""
     @Observable String url = ""
+    @Observable Boolean fileSelected = false
+    @Observable Boolean urlSelected = true
+    @Observable String fileName = ""
+    @Observable String dbName = ""
 }

@@ -9,6 +9,7 @@ import com.spw.rr.PropertiesService
 
 import javax.annotation.Nonnull
 import javax.inject.Inject
+import java.sql.Connection
 
 @ArtifactProviderFor(GriffonController)
 class PrefsController {
@@ -36,6 +37,11 @@ class PrefsController {
 
     private void closeThisWindow() {
         application.getWindowManager().hide("prefs")
+    }
+
+    @ControllerAction
+    void directoryAction() {
+
     }
 
     @ControllerAction
