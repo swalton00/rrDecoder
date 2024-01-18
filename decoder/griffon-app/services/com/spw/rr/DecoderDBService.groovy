@@ -69,6 +69,7 @@ class DecoderDBService {
             throw new RuntimeException("attempting to close a not-open session")
         }
         currentSession.close()
+        currentSession = null
     }
 
     void rollbackAll() {
