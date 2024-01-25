@@ -159,6 +159,11 @@
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ibm.db2</groupId>
+            <artifactId>db2Driver</artifactId>
+            <version>1.4.199</version>
+        </dependency>
     </dependencies>
 
     <repositories>

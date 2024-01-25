@@ -110,6 +110,8 @@ dependencies {
         exclude group: 'org.codehaus.groovy', module: 'groovy'
     }
     testImplementation "org.codehaus.groovy:groovy:${groovyVersion}"
+    //runtime files('/libs/db2jcc4.jar')
+    implementation "ibm.db2:db2Driver:1.4.199"
 }
 
 startScripts {

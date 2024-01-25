@@ -1,0 +1,466 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spw.rr.mappers.DecoderMapper">
+    <insert id="insertRosterEntry" parameterType="com.spw.rr.mappers.RosterEntry" useGeneratedKeys="true" keyColumn="id"
+            keyProperty="id">
+        INSERT INTO rrdec.roster
+        (entered,
+         fullpath,
+         systemName)
+        VALUES (CURRENT TIMESTAMP,
+                        #{fullPath},
+                        #{systemName})
+    </insert>
+    <update id="updateRosterEntry" parameterType="com.spw.rr.mappers.RosterEntry">
+        UPDATE
+            rrdec.roster
+        SET fullpath=#{fullPath},
+            systemName = #{systemName},
+            dateUpdated = CURRENT TIMESTAMP
+        WHERE
+            id = #{id}
+    </update>
+    <select id="listRosters" resultType="com.spw.rr.mappers.RosterEntry">
+        SELECT id,
+               entered as entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        from rrdec.roster
+        order by systemname
+    </select>
+    <select id="listSystemRosters" parameterType="String" resultType="com.spw.rr.mappers.RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM rrdec.roster
+        WHERE systemName = #{systemName}
+        ORDER BY systemname
+    </select>
+    <delete id="deleteCVs" parameterType="Integer">
+        DELETE FROM rrdec.CVValues WHERE decoderId = #{decoderId}
+    </delete>
+    <delete id="deleteDecoderDef" parameterType="Integer">
+        DELETE FROM rrdec.DecoderDef WHERE decoderId = #{decoderId}
+    </delete>
+    <select id="listStandardCVs" resultType="com.spw.rr.mappers.CVvalues">
+        SELECT
+               b.id,
+               b.decoderid,
+               a.dccAddress,
+               cvvalue as cvNumber,
+               value as cvValue
+        FROM
+               rrdec.decoder a
+        INNER JOIN
+               rrdec.cvvalues b
+        ON a.id = b.decoderid
+        <where>
+            <foreach collection="param1" index="index" item="item"
+                     open = "b.decoderid IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        AND cvvalue IN ('1',
+               '2',
+               '3',
+               '4',
+               '5' ,
+               '6',
+               '7',
+               '8',
+               '9',
+               '10',
+               '11',
+               '12',
+               '13',
+               '14',
+               '15',
+               '16',
+               '17',
+               '18',
+               '19')
+        ORDER BY
+               b.decoderid,
+               cvvalue
+    </select>
+    <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.mappers.RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM rrdec.roster
+        WHERE id = #{id}
+        ORDER BY systemname
+    </select>
+    <select id="findRosterEntry" resultType="com.spw.rr.mappers.RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM rrdec.roster
+        WHERE systemName = #{param1}
+          AND fullPath = #{param2};
+    </select>
+    <insert id="insertDecoderEntry" parameterType="com.spw.rr.mappers.DecoderEntry" useGeneratedKeys="true" keyColumn="id"
+            keyProperty="id">
+        INSERT INTO rrdec.Decoder
+        (decoderid,
+         filename,
+         roadnumber,
+         roadname,
+         manufacturer,
+         owner,
+         dccaddress,
+         productid,
+         decoderTypeId,
+         rosterid,
+         dateUpdated)
+        VALUES (#{decoderId},
+                #{fileName},
+                #{roadNumber},
+                #{roadName},
+                #{manufacturer},
+                #{owner},
+                #{dccAddress},
+                #{productId},
+                #{decoderTypeId},
+                #{rosterId},
+                #{dateUpdated})
+    </insert>
+    <update id="updateDecoderDetailTime" parameterType="Integer">
+      UPDATE rrdec.Decoder
+        set detailTime = CURRENT_TIMESTAMP
+      WHERE ID = #{Id}
+    </update>
+    <update id="updateDecoderEntry" parameterType="com.spw.rr.mappers.DecoderEntry">
+        UPDATE
+            rrdec.Decoder
+        SET decoderid     = #{decoderId},
+            filename      = #{fileName},
+            roadnumber    = #{roadNumber},
+            roadname      = #{roadName},
+            manufacturer  = #{manufacturer},
+            owner         = #{owner},
+            dccaddress    = #{dccAddress},
+            productId     = #{productId},
+            decoderTypeId = #{decoderTypeId},
+            dateUpdated   = #{dateUpdated}
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteDecoderEntry" parameterType="com.spw.rr.mappers.DecoderEntry">
+        DELETE
+        FROM rrdec.Decoder
+        WHERE id = #{id};
+    </delete>
+    <select id="listDecoders" resultType="com.spw.rr.mappers.DecoderEntry">
+        SELECT id,
+               decoderid,
+               filename,
+               roadnumber,
+               roadname,
+               owner,
+               model,
+               dccaddress,
+               manufacturerid,
+               decoderTypeId,
+               rosterid,
+               detailTime,
+               dateUpdated
+        FROM rrdec.Decoder
+        ORDER BY rosterid, decoderid
+    </select>
+    <select id="listDecodersByRosterID" resultType="com.spw.rr.mappers.DecoderEntry">
+        SELECT
+               p.id,
+               p.decoderId,
+               p.fileName,
+               p.roadNumber,
+               p.roadName,
+               p.manufacturer,
+               p.owner,
+               p.model,
+               p.dccAddress,
+               p.manufacturerId,
+               p.productId,
+               p.dateUpdated,
+               p.decoderTypeId,
+               p.detailTime,
+               p.rosterId,
+               hasSpeedProfile,
+               hasDetail
+        FROM rrdec.decoder p
+        LEFT OUTER JOIN
+        (   SELECT
+               '1' AS hasSpeedProfile,
+               t1.Id
+        FROM
+               rrdec.decoder t1
+        WHERE
+               EXISTS (   SELECT * FROM rrdec.speedprofile sp
+                      WHERE sp.decoderid = t1.id)) AS t11
+        ON p.id = t11.id
+        LEFT OUTER JOIN
+        (   SELECT
+               '1' AS hasdetail,
+               t1.id
+        FROM
+               rrdec.decoder t1
+        WHERE
+               EXISTS (   SELECT * FROM rrdec.cvvalues cv
+                      WHERE cv.decoderid = t1.id)
+               OR  EXISTS (   SELECT * FROM rrdec.decoderdef de
+                      WHERE de.decoderid = t1.id)) AS t21
+        ON t21.id = p.id
+        <where>
+        <foreach collection="array" index="index" item="item"
+         open = "rosterid IN (" separator="," close=")">
+            #{item}
+        </foreach>
+        </where>
+        ORDER BY id
+    </select>
+    <insert id="insertDecoderTypeEntry" parameterType="com.spw.rr.mappers.DecoderType" useGeneratedKeys="true" keyProperty="id"
+            keyColumn="id">
+        INSERT INTO rrdec.decoderType
+        (decoderfamily,
+         decodermodel,
+         dateupdated)
+        VALUES (#{decoderFamily},
+                #{decoderModel},
+                   CURRENT TIMESTAMP)
+    </insert>
+    <update id="updateDecoderTypeEntry" parameterType="com.spw.rr.mappers.DecoderType">
+        UPDATE
+            rrdec.decoderType
+        SET decoderFamily = #{decoderFamily},
+            decoderModel  = #{decoderModel},
+            dateUpdated   = CURRENT TIMESTAMP
+        WHERE
+            id = #{id}
+    </update>
+    <select id="listDecoderTypes" resultType="com.spw.rr.mappers.DecoderType">
+        SELECT id,
+               decoderFamily,
+               decoderModel,
+               dateUpdated AS updated
+        FROM rrdec.decoderType
+        ORDER BY decoderFamily,
+                 decoderModel
+    </select>
+    <select id="getDecoderType" resultType="com.spw.rr.mappers.DecoderType">
+        SELECT id,
+               decoderFamily,
+               decoderModel,
+               dateUpdated AS updated
+        FROM rrdec.decoderType
+        WHERE id = #{id}
+    </select>
+    <select id="getDecoderEntry" resultType="com.spw.rr.mappers.DecoderEntry" parameterType="int">
+        SELECT
+            id,
+            decoderId,
+            fileName,
+            roadNumber,
+            roadName,
+            manufacturer,
+            owner,
+            model,
+            dccAddress,
+            manufacturerId,
+            productId,
+            dateUpdated,
+            decoderTypeId,
+            detailTime,
+            rosterId
+        FROM
+            rrdec.decoder
+        WHERE
+            id = #{id}
+    </select>
+    <select id="findDecoderType" resultType="com.spw.rr.mappers.DecoderType">
+        SELECT id,
+               decoderFamily,
+               decoderModel,
+               dateUpdated AS updated
+        FROM rrdec.decoderType
+        WHERE decoderFamily = #{param1}
+          AND decoderModel = #{param2}
+    </select>
+    <insert id="insertFunctionLabels" parameterType="com.spw.rr.mappers.FunctionLabel" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO
+            rrdec.FunctionLabels
+        (
+            decoderID,
+            FunctionNumber,
+            FunctionLabel
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{functionNum},
+                #{functionLabel}
+            );
+
+    </insert>
+    <select id="listFunctionLabelsFor" resultType="com.spw.rr.mappers.FunctionLabel">
+        SELECT
+            c.id AS rosterId,
+            a.decoderId,
+            a.id,
+            functionNumber as functionNum,
+            functionLabel
+        FROM
+            rrdec.functionLabels a
+                INNER JOIN
+            rrdec.decoder b
+            ON
+                a.decoderid = b.id
+                INNER JOIN
+            rrdec.roster c
+            ON
+                b.rosterid = c.id
+        <where>
+        <foreach collection="param" item="item" index="index"
+            open ="a.decoderid IN (" separator="," close=")"></foreach>
+        </where>
+        ORDER BY a.decoderID, a.functionNumber, c.id
+    </select>
+    <insert id="insertSpeedSteps" parameterType="com.spw.rr.mappers.SpeedProfile" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO
+            rrdec.speedProfile
+        (
+            decoderId,
+            STEP,
+            forward,
+            reverse
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{speedStep},
+                #{forwardValue},
+                #{reverseValue}
+            )
+    </insert>
+    <select id="listSpeedStepsFor" parameterType="com.spw.rr.mappers.SpeedProfile">
+        SELECT
+            c.id AS rosterId,
+            a.decoderId,
+            a.step    AS SpeedStep,
+            a.forward AS forwardValue,
+            a.reverse AS reverseValue
+        FROM
+            rrdec.speedprofile a
+                INNER JOIN
+            rrdec.decoder b
+            ON
+                a.decoderid = b.id
+                INNER JOIN
+            rrdec.roster c
+            ON
+                b.rosterid = c.id
+        <where>
+            <foreach collection="param" item="item" index="index"
+                         open ="a.decoderid IN (" separator="," close=")"></foreach>
+            </where>
+        ORDER BY
+            a.decoderid,
+            a.step,
+            c.id
+    </select>
+    <insert id="insertKeyValuePairs" parameterType="com.spw.rr.mappers.KeyValuePairs" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT    INTO
+            rrdec.KeyValues
+        (
+            decoderId,
+            Pair_key,
+            Pair_value
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{pair_key},
+                #{pair_value}
+            )
+    </insert>
+    <select id="listKeyValuePairsFor" resultType="com.spw.rr.mappers.KeyValuePairs">
+        SELECT
+            c.id AS rosterId,
+            a.decoderId,
+            a.pair_key,
+            a.pair_value
+        FROM
+            rrdec.keyValues a
+                INNER JOIN
+            rrdec.decoder b
+            ON
+                a.decoderid = b.id
+                INNER JOIN
+            rrdec.roster c
+            ON
+                b.rosterid = c.id
+        <where>
+            <foreach collection="param" item="item" index="index"
+                     open ="a.decoderid IN (" separator="," close=")"></foreach>
+        </where>
+        ORDER BY
+            a.decoderid,
+            a.pair_key,
+            c.id;
+    </select>
+    <insert id="insertDecoderDef" parameterType="com.spw.rr.mappers.DecoderDef" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO
+            rrdec.decoderDef
+        (
+            decoderID,
+            varValue,
+            item
+        )
+        VALUES
+            (
+                #{parent},
+                #{varValue},
+                #{item}
+            )
+    </insert>
+    <select id="listDecoderDefFor" parameterType="Integer" resultType="com.spw.rr.mappers.DecoderDef">
+        SELECT
+            ID,
+            DecoderID as parent,
+            VarValue,
+            item
+        FROM rrdec.DecoderDef
+        WHERE decoderId = #{parameter}
+        ORDER BY DecoderID, VarValue
+    </select>
+    <insert id="insertCVs" parameterType="com.spw.rr.mappers.CVvalues" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO
+            rrdec.CvValues
+        (
+            decoderId,
+            cvvalue,
+            value
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{cvNumber},
+                #{cvValue}
+            )
+    </insert>
+    <select id="listCVsFor" parameterType="Integer" resultType="com.spw.rr.mappers.CVvalues">
+        SELECT
+            ID,
+            decoderID,
+            value as cvNumber,
+            cvValue
+        FROM rrdec.cvvalues
+        WHERE decoderID = #{paramter}
+        ORDER BY decoderID, cvNumber
+    </select>
+</mapper>

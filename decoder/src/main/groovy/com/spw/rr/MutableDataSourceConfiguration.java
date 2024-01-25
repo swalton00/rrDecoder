@@ -46,14 +46,17 @@ public class MutableDataSourceConfiguration extends ResourceBundleConfiguration 
             log.debug("MutableDataSource - returning a new configuration value");
             config = (Map<String, Object>) super.get("dataSource");
             String url = propertiesService.getPropertyURL();
-            config.put("url", url);
             String dbClassname = "";
             if (url.contains("db2")) {
                 dbClassname = "com.ibm.db2.jcc.DB2Driver";
             }
-            if (url.contains("h2")) {
+            if (url.contains("h2") | url.length() == 0) {
                 dbClassname = "org.h2.Driver";
             }
+            if (url.length() == 0) {
+                url = "jdbc:h2:mem:memory;MODE=DB2;";
+            }
+            config.put("url", url);
             config.put("driverClassName", dbClassname);
             config.put("username", propertiesService.getPropertyUser());
             config.put("password", propertiesService.getPropertyPassword());

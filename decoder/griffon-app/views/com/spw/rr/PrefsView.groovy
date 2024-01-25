@@ -85,8 +85,10 @@ class PrefsView implements FocusListener {
                         text: bind('url', source: model, mutual: true),
                 name: URL)
                 builder.url.addFocusListener(this)
-                button(okayAction, text: "Save & Close")
-                button(cancelAction)
+                button(okayAction, text: "Save & Close", enabled: bind('okayEnabled', source: model))
+                button(cancelAction, enabled: bind('propertiesValid', source: model))
+                textField(id: "errorMessage", name: "errorMessage", constraints: "spanx 2, h 24pt", columns: 100,
+                text: bind('errorMessage', source: model))
             }
         }
 
@@ -123,6 +125,7 @@ class PrefsView implements FocusListener {
         if (componentName == null) {
             return
         }
+        model.errorMessage = ""
         switch (componentName) {
             case USERNAME : model.goodUsername = goodValue
                 break
@@ -137,6 +140,7 @@ class PrefsView implements FocusListener {
             default:
                 log.debug("unknown component name in switch - ${componentName}")
         }
+        model.prefsChanged = true
         application.eventRouter.publishEvent("prefsChange", [componentName])
     }
 }

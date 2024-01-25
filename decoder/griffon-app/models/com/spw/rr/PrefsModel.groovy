@@ -13,10 +13,13 @@ class PrefsModel {
     @Observable Boolean urlSelected = true
     @Observable String fileName = ""
     @Observable String dbName = ""
+    @Observable Boolean okayEnabled = false
+    @Observable Boolean propertiesValid = false // saved properties are good
+    @Observable String errorMessage = ""
     boolean prefsChanged = false
-    @Observable Boolean goodUsername = false
-    @Observable Boolean goodPassword = false
-    @Observable Boolean goodDbname = false
-    @Observable Boolean goodlocation = false
-    @Observable Boolean goodurl = false
+    Boolean goodUsername = false
+    Boolean goodPassword = false
+    Boolean goodDbname = false
+    Boolean goodlocation = false
+    Boolean goodurl = false
 }

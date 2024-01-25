@@ -33,6 +33,8 @@ class DecoderController {
     @Inject
     private DecoderDBService database
 
+    @Inject PropertiesService props
+
     MVCGroup decWindowGroup = null
 
     private boolean inited = false
@@ -79,6 +81,11 @@ class DecoderController {
         if (name.equals("mainWindow") & !inited) {
             log.debug("in the initialization phase - about to get the database data")
             inited = true
+            String dbUrl = props.getPropertyURL()
+            if (dbUrl ==  null | dbUrl.length() == 0) {
+                log.info("Warning - no database information -- transferring to Prefs window")
+                doPrefs()
+            }
             Log4JStopWatch stopWatch = new Log4JStopWatch("dbLoad", "loading the roster list")
             ArrayList<RosterEntry> dataForTable = database.listRosters()
             if (dataForTable != null) {
@@ -114,11 +121,16 @@ class DecoderController {
         application.shutdown()
     }
 
-    @ControllerAction
-    void prefsAction() {
+    void doPrefs() {
         prefsGroup = checkGroup("prefs", prefsGroup)
         log.debug("showing the Preferences window")
         application.getWindowManager().show("prefs")
+
+    }
+
+    @ControllerAction
+    void prefsAction() {
+        doPrefs()
     }
 
     @ControllerAction
