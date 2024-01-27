@@ -6,6 +6,13 @@ program is to store one or more JMRI "rosters", and all the the locomotives list
 their CV values. If you only have one JMRI instance containing decoders, that's fine -- you will only see the
 one line in the main roster view, but you can drill down into that roster.
 
-If you have more than one JMRI instance, ou can add all of them to this database. They  will remain
+If you have more than one JMRI instance, you can add each of them to this database. They  will remain
 distinct, but you can compare the values of a CV in one against those in another.
 
+== Installation
+
+== Running the Program
+
+== The First time - Setting the Database Values
+
+== Reading a Profile

@@ -88,9 +88,12 @@ class PrefsController {
         JFileChooser fc = new JFileChooser()
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
         if (model.fileName.length() > 0) {
+            log.debug("using previous location as starting point for directory")
             File currentLocation = new File(model.fileName)
             fc.setCurrentDirectory(currentLocation.getAbsolutePath())
             fc.setSelectedFile(currentLocation)
+        } else {
+            log.debug("no previous directiory - using default for current")
         }
         int result = fc.showDialog(null, "Select Location")
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -100,6 +103,8 @@ class PrefsController {
             model.goodlocation = true
             buildURL()
             validateSettings()
+        } else {
+            log.debug("didn't get an approve - not changing values")
         }
     }
 
@@ -154,6 +159,7 @@ class PrefsController {
         if (model.goodlocation & model.goodDbname) {
             model.url = "jdbc:h2:file:" + model.fileName + "/" + model.dbName + ";AUTO_SERVER=TRUE;MODE=DB2;"
             model.goodurl = true
+            log.debug("url built as ${model.url}")
         }
 
     }
