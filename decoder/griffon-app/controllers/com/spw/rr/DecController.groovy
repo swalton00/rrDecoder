@@ -135,7 +135,15 @@ class DecController {
         log.debug("Got a request for a CV View")
         cvsGroup = checkGroup("cvs", cvsGroup)
         CvModel cvModel = cvsGroup.getModel()
-        cvModel.selectedRows = model.selectedRows
+        ArrayList<Integer> tempList = model.selectedRows
+        if (tempList.size() < 1) {
+            log.error("ERROR - list of selected rows is empty")
+        }
+        cvModel.selectedRows.clear()
+        tempList.each {
+            cvModel.selectedRows.add(model.completeList[it-1].id)
+            log.trace("adding decoder id ${model.completeList[it-1]}")
+        }
         cvModel.rosterIds = model.rosterList
         application.eventRouter.publishEvent("CvWindow", [])
     }

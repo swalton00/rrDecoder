@@ -15,7 +15,7 @@ class CvController {
     CvModel model
 
     @MVCMember
-    view
+            view
 
     @Inject
     DecoderDBService database
@@ -46,31 +46,33 @@ class CvController {
         ArrayList<CvShow> showList = database.listStandardCVsFor(decList, model.rosterIds)
         model.tableList.clear()
         log.debug("showList is ${showList}")
-        showList.each {
-            ArrayList<String> newArray = new ArrayList<>()
-            newArray.add(it.decoderId.toString())
-            newArray.add(it.dccAddress)
-            newArray.add(it.cv1)
-            newArray.add(it.cv2)
-            newArray.add(it.cv3)
-            newArray.add(it.cv4)
-            newArray.add(it.cv5)
-            newArray.add(it.cv6)
-            newArray.add(it.cv7)
-            newArray.add(it.cv8)
-            newArray.add(it.cv9)
-            newArray.add(it.cv10)
-            newArray.add(it.cv11)
-            newArray.add(it.cv12)
-            newArray.add(it.cv13)
-            newArray.add(it.cv14)
-            newArray.add(it.cv15)
-            newArray.add(it.cv16)
-            newArray.add(it.cv17)
-            newArray.add(it.cv18)
-            newArray.add(it.cv19)
-            model.tableList.add(newArray)
-            log.debug("adding row with dcc address of ${it.dccAddress}")
+        if (showList != null) {
+            showList.each {
+                ArrayList<String> newArray = new ArrayList<>()
+                newArray.add(it.decoderId.toString())
+                newArray.add(it.dccAddress)
+                newArray.add(it.cv1)
+                newArray.add(it.cv2)
+                newArray.add(it.cv3)
+                newArray.add(it.cv4)
+                newArray.add(it.cv5)
+                newArray.add(it.cv6)
+                newArray.add(it.cv7)
+                newArray.add(it.cv8)
+                newArray.add(it.cv9)
+                newArray.add(it.cv10)
+                newArray.add(it.cv11)
+                newArray.add(it.cv12)
+                newArray.add(it.cv13)
+                newArray.add(it.cv14)
+                newArray.add(it.cv15)
+                newArray.add(it.cv16)
+                newArray.add(it.cv17)
+                newArray.add(it.cv18)
+                newArray.add(it.cv19)
+                model.tableList.add(newArray)
+                log.debug("adding row with dcc address of ${it.dccAddress}")
+            }
         }
         application.getWindowManager().show("cvWindow")
         runInsideUISync {
