@@ -35,11 +35,68 @@ presented with a dialog letting you know that the program must restart. When you
 program will end. The database information will be saved in a ".properties" file. If any errors are detected
 when the program validates the data, an error message will be shown and the properties file will not be saved.
 The preferences window will continue to be shown, allowing you correct the error.
+If no errors were found, you will see the message to press the "Okay" button to restart the program.
+O
 
-[dicsrete]
+[discrete]
 == Note
 The properties file is not encrypted and the username and password are clearly visible to anyone examining
 that file. Since this database is not exposed to the internet and cannot modify the decoder contents, this should
 not be a concern.
 
+== Using Tables
+The windows (except the preferences and graphical displays) are based on Tables. The same actions
+are available on all the tables. Click on a table heading to sort by the contents of that column.
+Click again to reverse the sort direction. Move the mouse cursor to the line between columns in
+the heading and press the mouse button to resize the column. Press the mouse button in the
+header and drag to move the column.
+
 == Reading a Profile
+When you run the program, the first window shown is the list of the rosters that you have
+imported. To add a roster you need to import it (read the profile). From the "File" menu,
+select "Import". This will open standard dialog to select a file. Navigate to the directory
+containing the profile with the roster you want to import. Select the "roster.xml" file.
+A progress bar will be shown while the file is being read. The progress bar wil show the
+number of decoders found and count down as they are read.
+
+The Import process reads the complete contents of the roster.xml file. This contains a great
+deal of information about an individual decoder, but there is additional information
+stored in an xml file specific to the decoder (the name of that file in found in the
+roster.xml file and shown in the decoder display). The contents are stored in a
+relational database. The contents of the separate file for the decoder are *NOT* read
+when the roster.xml is imported. It can take a long time to read one file as there
+can be several thousand things to be stored in the database. When you are ready, select
+one or more decoders and choose "File", "Import Details" for those decoders.
+
+== The View menu
+You can always select the "List all decoders" -- this will show every decoder you have imported.
+If you select one or more rosters, you can choose the "List Decoders for Selection" menu item --
+this will show the decoders in the selected roster(s).
+
+== The Decoder List
+Selecting either List All or List Selected, opens the "Decoder List" window. This shows the ID of
+the database entry, the ID of the roster that contains this decoder and some details about the
+decoder. The ID's shown are simply numbers to identify the decoder and the roster. They are not
+part of the JMRI roster. The remaining information comes from the JMRI roster entry. You may select
+one or several entries in the list list. Clicking on any of the headings will sort by that heading.
+Drag a column (click and hold the column label) to reposition the column. Position the mouse
+pointer on the boundary between the column headings and drag to resize.
+
+=== The File Menu
+If you have selected one or more decoders, the "File", "Import Details" menu item will be enabled.
+The JMRI roster file contains the data shown in the decoder window, but there is a great deal
+more information found in the individual XML files for each decoder. This data is not imported
+when the roster file is imported because it can take several minutes to import this data (a
+Lok Sound Version 5 decoder has over 2000 CV's!). The Import details will read those file for the
+selected decders.
+
+=== The Filters Menu
+The Filters menu enables you to view only those decoders with certain details.
+Use these commands to view only those decoders with (or without) imported details, or speed profiles.
+
+=== The View Menu
+If you have selected one or more decoders, use the View Menu items to details about the selected
+decoder(s). The Speed Profile will show you the text based contents of the Speed profile
+(if the selected decoder has one). The "CV Details" will show the values for a subset of of the
+NMRA standard CV's (with the CV meaning from the NMRA standard). The Decoder Details will show
+all the CV's and their values for the selected decoders.

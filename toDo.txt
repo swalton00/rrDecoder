@@ -11,3 +11,5 @@ Things to be done:
 5. Add the help references
 6. write the documentation
 7. add the user preference manager (based on the JMRI model)
+    a. onWindowClose - save size and position
+    b. onWindowOpen - restore size and position
