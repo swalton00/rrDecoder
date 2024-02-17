@@ -25,8 +25,19 @@
                entered as entryTime,
                fullpath,
                dateupdated,
-               systemname
-        from rrdec.roster
+               systemname,
+               coalesce(decCount, 0) as decCount
+        from rrdec.roster r
+                 LEFT OUTER JOIN
+             (   SELECT
+                     d.rosterId AS rosterEntry,
+                     COUNT(*)   AS decCount
+                 FROM
+                     rrdec.decoder d
+                 GROUP BY
+                     rosterId)
+             ON
+                 r.id = rosterEntry
         order by systemname
     </select>
     <select id="listSystemRosters" parameterType="String" resultType="com.spw.rr.mappers.RosterEntry">

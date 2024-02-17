@@ -93,6 +93,7 @@ class DecoderController {
                     ArrayList<String> newArray = new ArrayList<String>()
                     newArray.add(it.id.toString())
                     newArray.add(it.systemName)
+                    newArray.add(it.decCount)
                     newArray.add(it.fullPath)
                     model.tableList.add(newArray)
                 }

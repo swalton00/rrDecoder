@@ -14,7 +14,7 @@ import ca.odell.glazedlists.EventList;
 @ArtifactProviderFor(GriffonModel)
 class DecoderModel extends RRBaseModel {
 
-    String[] columnNames = ["Id", "System", "Full Path"]
+    String[] columnNames = ["Id", "System", "# Decoders", "Full Path"]
 
     int[] preferredWidths = [10,20,300]
 

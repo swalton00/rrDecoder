@@ -11,4 +11,5 @@ class RosterEntry {
     Integer id
     Timestamp dateUpdated
     String systemName
+    Integer decCount
 }
