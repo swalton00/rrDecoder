@@ -9,9 +9,10 @@ import griffon.transform.Observable
 
 @ArtifactProviderFor(GriffonModel)
 class DecModel extends RRBaseModel {
-    String[] columnNames = ["Id", "Roster", "File", "Road Name", "Road Number", "Manufacturer", "Owner", "Address", "Updated"]
+    String[] columnNames = ["Id", "Roster", "Profile?", "Details?", "File", "Road Name", "Road Number",
+                            "Manufacturer", "Owner", "Address", "Updated"]
 
-    int[] preferredWidths = [10, 10, 40, 30, 30, 40, 30, 20, 40]
+    int[] preferredWidths = [10, 10, 5, 5, 40, 30, 30, 40, 30, 20, 40]
 
     EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
 
@@ -44,5 +45,8 @@ class DecModel extends RRBaseModel {
 
     @Observable
     String cvDisplay = ""
+
+    @Observable
+    boolean enableCVdetail
 
 }

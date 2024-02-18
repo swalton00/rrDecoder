@@ -131,6 +131,11 @@ class DecController {
     }
 
     @ControllerAction
+    graphSpeedProfileAction() {
+
+    }
+
+    @ControllerAction
     viewCVvaluesAction() {
         log.debug("Got a request for a CV View")
         cvsGroup = checkGroup("cvs", cvsGroup)
@@ -150,6 +155,11 @@ class DecController {
 
     @ControllerAction
     viewDecoderDetailAction() {
+
+    }
+
+    @ControllerAction
+    viewSelectedCVAction() {
 
     }
 
@@ -210,6 +220,17 @@ class DecController {
                 ArrayList<String> newArray = new ArrayList<String>()
                 newArray.add(it.id.toString())
                 newArray.add(it.rosterId.toString())
+                String val = " "
+                if (it.hasSpeedProfile) {
+                    val = "T"
+                }
+                newArray.add(val)
+                if (it.hasDetail) {
+                    val = "T"
+                }  else {
+                    val = " "
+                }
+                newArray.add(val)
                 newArray.add(it.fileName)
                 newArray.add(it.roadName)
                 newArray.add(it.roadNumber)

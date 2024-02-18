@@ -48,8 +48,10 @@ class DecView {
 
                     menu(text: 'View') {
                         menuItem viewSpeedProfilesAction, text: 'View Speed Profiles',enabled: bind {model.tableSelectionEnabled}
+                        menuItem graphSpeedProfileAction, text: 'Graph Speed Profiles', enabled: bind {model.tableSelectionEnabled}
                         menuItem viewCVvaluesAction, text: 'View CV contents',enabled: bind {model.tableSelectionEnabled}
                         menuItem viewDecoderDetailAction, text: 'View Decoder Details',enabled: bind {model.tableSelectionEnabled}
+                        menuItem viewSelectedCVAction, text: 'View Selected CV Details', enabled: bind {model.enableCVdetail}
                     }
                     menu(text: 'Help') {
                         menuItem helpAction
@@ -63,7 +65,7 @@ class DecView {
                     log.debug("modelCopy is ${modelCopy}")
                     tableModel = modelCopy
                 }
-                panel(constraints: "h 20pt") {
+                panel(constraints: "h 16pt") {
                     migLayout(constraints: 'fillx')
                     label("CV's to display ID: ,", constraints: "align left")
                     textField(text: bind("cvDisplay", source: model, mutual: true), columns: 100)
