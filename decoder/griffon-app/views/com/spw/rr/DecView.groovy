@@ -5,6 +5,7 @@ import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 
 import javax.annotation.Nonnull
+import javax.crypto.spec.PSource
 import javax.swing.JTable
 import javax.swing.ListSelectionModel
 import java.awt.Dimension
@@ -56,11 +57,16 @@ class DecView {
 
                 }
                 migLayout(constraints: 'fill')
-                def pane = scrollPane(constraints: 'width 1200, height 900') {
+                def pane = scrollPane(constraints: 'width 1200, height 900, wrap') {
                     theTable = table(model: modelCopy = new RRTableModel((RRBaseModel) model))
                     log.debug("theTable is ${theTable}")
                     log.debug("modelCopy is ${modelCopy}")
                     tableModel = modelCopy
+                }
+                panel(constraints: "h 20pt") {
+                    migLayout(constraints: 'fillx')
+                    label("CV's to display ID: ,", constraints: "align left")
+                    textField(text: bind("cvDisplay", source: model, mutual: true), columns: 100)
                 }
                 //pane.setPreferredSize(new Dimension(1500,600))
             }

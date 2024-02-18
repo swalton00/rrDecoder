@@ -42,5 +42,7 @@ class DecModel extends RRBaseModel {
     @Observable
     filterDetails = true
 
+    @Observable
+    String cvDisplay = ""
 
 }
