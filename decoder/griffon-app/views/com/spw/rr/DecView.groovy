@@ -3,15 +3,16 @@ package com.spw.rr
 import griffon.core.artifact.GriffonView
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
-
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import javax.annotation.Nonnull
-import javax.crypto.spec.PSource
 import javax.swing.JTable
 import javax.swing.ListSelectionModel
-import java.awt.Dimension
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
 
 @ArtifactProviderFor(GriffonView)
-class DecView {
+class DecView implements FocusListener {
     @MVCMember
     @Nonnull
     FactoryBuilderSupport builder
@@ -21,6 +22,8 @@ class DecView {
 
     RRTableModel tableModel
     def completeTable
+
+    private static final Logger log = LoggerFactory.getLogger(DecView.class)
 
     void initUI() {
         JTable theTable
@@ -47,11 +50,11 @@ class DecView {
                     }
 
                     menu(text: 'View') {
-                        menuItem viewSpeedProfilesAction, text: 'View Speed Profiles',enabled: bind {model.tableSelectionEnabled}
-                        menuItem graphSpeedProfileAction, text: 'Graph Speed Profiles', enabled: bind {model.tableSelectionEnabled}
-                        menuItem viewCVvaluesAction, text: 'View CV contents',enabled: bind {model.tableSelectionEnabled}
-                        menuItem viewDecoderDetailAction, text: 'View Decoder Details',enabled: bind {model.tableSelectionEnabled}
-                        menuItem viewSelectedCVAction, text: 'View Selected CV Details', enabled: bind {model.enableCVdetail}
+                        menuItem viewSpeedProfilesAction, text: 'View Speed Profiles', enabled: bind { model.tableSelectionEnabled }
+                        menuItem graphSpeedProfileAction, text: 'Graph Speed Profiles', enabled: bind { model.tableSelectionEnabled }
+                        menuItem viewCVvaluesAction, text: 'View CV contents', enabled: bind { model.tableSelectionEnabled }
+                        menuItem viewDecoderDetailAction, text: 'View Decoder Details', enabled: bind { model.tableSelectionEnabled }
+                        menuItem viewSelectedCVAction, text: 'View Selected CV Details', enabled: bind { model.enableCVdetail }
                     }
                     menu(text: 'Help') {
                         menuItem helpAction
@@ -68,9 +71,12 @@ class DecView {
                 panel(constraints: "h 16pt") {
                     migLayout(constraints: 'fillx')
                     label("CV's to display ID: ,", constraints: "align left")
-                    textField(text: bind("cvDisplay", source: model, mutual: true), columns: 100)
+                    textField(text: bind("cvDisplay", source: model, mutual: true),
+                            id: "cvText",
+                            columns: 100)
                 }
                 //pane.setPreferredSize(new Dimension(1500,600))
+                builder.cvText.addFocusListener(this)
             }
         }
         tableModel = modelCopy
@@ -82,5 +88,17 @@ class DecView {
         theTable.setCellSelectionEnabled(false)
         theTable.setRowSelectionAllowed(true)
         theTable.getSelectionModel().addListSelectionListener(new ListenerForTables(model))
+
+    }
+
+    @Override
+    void focusGained(FocusEvent e) {
+
+    }
+
+    @Override
+    void focusLost(FocusEvent e) {
+        log.debug("lost the focus in the CV text field")
+
     }
 }
