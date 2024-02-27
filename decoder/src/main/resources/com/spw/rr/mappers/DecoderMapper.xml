@@ -97,6 +97,80 @@
                b.decoderid,
                cvvalue
     </select>
+    <select id="listDecodersWithCVs" resultMap="decoderMap">
+        SELECT
+            d.id,
+            d.dccaddress,
+            d.decoderid,
+            c.id as cvId,
+            c.cvvalue,
+            c.value
+        FROM
+            rrdec.decoder d
+        INNER JOIN
+            rrdec.cvvalues c
+        ON
+            d.id = c.decoderid
+        <where>
+            <foreach collection="decoders" index="index" item="item"
+                     open="d.id IN (" separator="," close=")">
+                #{item}
+            </foreach>
+            AND
+            <foreach collection="cvs" index="index" item="item"
+                     open = "cvvalue IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+    <resultMap id="decoderMap" type="com.spw.rr.mappers.DecoderEntry">
+        <id property="id" column="id"/>
+        <result property="decoderId" column="decoderid"/>
+        <result property="dccAddress" column="dccAddress"/>
+        <collection property="cvValues" javaType="ArrayList" ofType="com.spw.rr.mappers.CVvalues">
+            <id property="id" column="cvId"/>
+            <result property="cvNumber" column="cvValue"/>
+            <result property="cvValue" column="value"/>
+        </collection>
+    </resultMap>
+    <select id="selectDecoders" resultType="com.spw.rr.mappers.DecoderEntry">
+        SELECT
+            d.id,
+            d.dccaddress,
+            d.decoderid,
+            c.cvvalue,
+            c.value
+        FROM
+            rrdec.decoder d
+        INNER JOIN
+            rrdec.cvvalues c
+        ON
+            d.id = c.decoderid
+        <where>
+            <foreach collection="decoders" index="index" item="item"
+                     open = "b.decoderid IN (" separator="," close=")">
+                #{item}
+            </foreach>
+            AND
+            <foreach collection="cvs" index="index" item="item"
+                     open = "cvvalue IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+    <select id="selectCVs" resultMap="decoderMap">
+        SELECT id,
+               decoderId as decoderId,
+               cvValue as cvNumber,
+               value as cvValue
+            FROM RRDEC.CVvalues
+        WHERE decoderId = #{id}
+        AND
+        <foreach collection="cvs" index="index" item="item"
+                 open = "cvvalue IN (" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
     <select id="getRosterEntry" parameterType="integer" resultType="com.spw.rr.mappers.RosterEntry">
         SELECT id,
                entered AS entryTime,
@@ -104,7 +178,7 @@
                dateupdated,
                systemname
         FROM rrdec.roster
-        WHERE id = #{id}
+        WHERE decoderId = #{id}
         ORDER BY systemname
     </select>
     <select id="findRosterEntry" resultType="com.spw.rr.mappers.RosterEntry">

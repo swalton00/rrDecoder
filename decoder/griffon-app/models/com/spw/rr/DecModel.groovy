@@ -9,18 +9,15 @@ import griffon.transform.Observable
 
 @ArtifactProviderFor(GriffonModel)
 class DecModel extends RRBaseModel {
-    String[] columnNames = ["Id", "Roster", "Profile?", "Details?", "File", "Road Name", "Road Number",
-                            "Manufacturer", "Owner", "Address", "Updated"]
-
-    int[] preferredWidths = [10, 10, 5, 5, 40, 30, 30, 40, 30, 20, 40]
-
-    EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
+    {
+        columnNames.addAll(["Id", "Roster", "Profile?", "Details?", "File", "Road Name", "Road Number",
+                            "Manufacturer", "Owner", "Address", "Updated"])
+        preferredWidths.addAll([10, 10, 5, 5, 40, 30, 30, 40, 30, 20, 40])
+    }
 
     public enum WindowAction {
         LIST_ALL, LIST_BY_SELECTION, CLOSE, SHOW, NONE
     }
-
-    ArrayList<Integer> selectedRows = new ArrayList<>()
 
     ArrayList<DecoderEntry> completeList = new ArrayList<>()
 

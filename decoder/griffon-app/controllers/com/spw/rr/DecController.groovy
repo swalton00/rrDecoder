@@ -7,11 +7,15 @@ import griffon.core.mvc.MVCGroup
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
 import griffon.transform.Threading
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import javax.inject.Inject
 
 @ArtifactProviderFor(GriffonController)
 class DecController {
+
+    private static final Logger log = LoggerFactory.getLogger(DecController.class)
 
     @MVCMember
     DecModel model
@@ -36,12 +40,22 @@ class DecController {
     }
 
     MVCGroup cvsGroup = null
+    MVCGroup selectedGroup = null
 
     private MVCGroup checkGroup(String groupName, MVCGroup group) {
+        log.trace("Checking for group ${groupName}")
+        MVCGroup retVal
         if (group == null) {
-            return application.mvcGroupManager.findGroup(groupName)
+            retVal = application.mvcGroupManager.findGroup(groupName)
+        } else {
+            log.trace("Group ${groupName} was previously found -- ${group}")
+            retVal = group
         }
-        return group
+        if (retVal == null) {
+            throw new RuntimeException("Group ${groupName} was not found")
+        }
+        log.trace("group ${groupName} was found")
+        return retVal
     }
 
 
@@ -135,20 +149,25 @@ class DecController {
 
     }
 
+    private ArrayList<DecoderEntry> getSelected() {
+        ArrayList<Integer> tempList = model.selectedRows
+        if (tempList.size() < 1) {
+            log.error("ERROR - list of selected rows is empty")
+        }
+        ArrayList<DecoderEntry> theList = new ArrayList<>()
+        tempList.each {
+            theList.add(model.completeList[it-1].id)
+            log.trace("adding decoder id ${model.completeList[it-1]}")
+        }
+        return theList
+    }
+
     @ControllerAction
     viewCVvaluesAction() {
         log.debug("Got a request for a CV View")
         cvsGroup = checkGroup("cvs", cvsGroup)
         CvModel cvModel = cvsGroup.getModel()
-        ArrayList<Integer> tempList = model.selectedRows
-        if (tempList.size() < 1) {
-            log.error("ERROR - list of selected rows is empty")
-        }
-        cvModel.selectedRows.clear()
-        tempList.each {
-            cvModel.selectedRows.add(model.completeList[it-1].id)
-            log.trace("adding decoder id ${model.completeList[it-1]}")
-        }
+        cvModel.selectedRows = getSelected()
         cvModel.rosterIds = model.rosterList
         application.eventRouter.publishEvent("CvWindow", [])
     }
@@ -160,7 +179,12 @@ class DecController {
 
     @ControllerAction
     viewSelectedCVAction() {
-
+        log.debug("showing the selected CV's window")
+        selectedGroup = checkGroup("cvSpecific", selectedGroup)
+        CvSpecificModel cvSpecificModel = selectedGroup.getModel()
+        cvSpecificModel.cvList = model.cvDisplay
+        cvSpecificModel.selectedRows = getSelected()
+        application.eventRouter.publishEvent("specificCV", [])
     }
 
     @Threading(Threading.Policy.OUTSIDE_UITHREAD)

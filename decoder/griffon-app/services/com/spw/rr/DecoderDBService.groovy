@@ -485,6 +485,24 @@ class DecoderDBService {
         }
     }
 
+
+    /**
+     * Get a list of matching decoders (parameter 1) with the cv values for a list of CVs (parameter 2)
+     * @param decoders - a list of the ID's for the desired decoders
+     * @param cvs a list of the CV numbers (strings x, x.y or x.y.z) if null, get all CVs
+     * @return a list of the DecoderEntries with their matching CV entries
+     */
+    List<DecoderEntry> listCVsForDecoder(List<Integer> decoders, List<String> cvs) {
+        log.debug("list decoders for ${decoders} with cvs for ${cvs}")
+        List<DecoderEntry> results = null
+        handler.withSqlSession {String sessionFactoryName, SqlSession session ->
+            DecoderMapper mapper = session.getMapper(DecoderMapper.class)
+            results = mapper.listDecodersWithCVs(decoders, cvs)
+            log.debug("results are ${results}")
+            return results
+        }
+    }
+
     void tranPrepareDetail(Integer decoderId) {
         log.debug("preparing for Detail import by deleting CvValue and DecoderDef where decoderId = ${decoderId}")
         if (currentSession == null) {

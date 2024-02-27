@@ -13,15 +13,12 @@ import ca.odell.glazedlists.EventList;
 
 @ArtifactProviderFor(GriffonModel)
 class DecoderModel extends RRBaseModel {
+    {
 
-    String[] columnNames = ["Id", "System", "# Decoders", "Full Path"]
-
-    int[] preferredWidths = [10,20,300]
-
-    EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
+        columnNames.addAll(["Id", "System", "# Decoders", "Full Path"])
+        preferredWidths.addAll([10,20,300])
+    }
     
     @Observable
     boolean importDetailEnabled = false
-
-    ArrayList<Integer> selectedRows = new ArrayList<>()
 }

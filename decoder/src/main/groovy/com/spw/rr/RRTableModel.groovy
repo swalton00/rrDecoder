@@ -20,6 +20,7 @@ class RRTableModel extends AbstractTableModel{
 
     @Override
     String getColumnName(int col) {
+
         return model.columnNames[col]
     }
 

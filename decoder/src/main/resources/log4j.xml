@@ -23,8 +23,14 @@
             <param name="ConversionPattern" value="%p %d %c{2} %m%n"/>
         </layout>
     </appender>
+    <logger name="com.spw">
+        <level value="trace"/>
+    </logger>
     <logger name="com"/>
     <logger name="org"/>
+    <logger name="org.mybatis">
+        <level value="trace"/>
+    </logger>
     <logger name="griffon"/>
     <logger name="org.perf4j.TimingLogger">
         <appender-ref ref="timers"/>

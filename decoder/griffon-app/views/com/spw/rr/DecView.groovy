@@ -10,6 +10,8 @@ import javax.swing.JTable
 import javax.swing.ListSelectionModel
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 @ArtifactProviderFor(GriffonView)
 class DecView implements FocusListener {
@@ -22,6 +24,8 @@ class DecView implements FocusListener {
 
     RRTableModel tableModel
     def completeTable
+
+
 
     private static final Logger log = LoggerFactory.getLogger(DecView.class)
 
@@ -99,6 +103,13 @@ class DecView implements FocusListener {
     @Override
     void focusLost(FocusEvent e) {
         log.debug("lost the focus in the CV text field")
-
+        model.enableCVdetail = false
+        if (model.tableSelectionEnabled) {
+            Pattern regexPattern = Pattern.compile("[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}(?:\\,\\s{0,2}[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}){0,15}+\$")
+            Matcher match = regexPattern.matcher(model.cvDisplay)
+            if (match.matches()) {
+                model.enableCVdetail = true
+            }
+        }
     }
 }

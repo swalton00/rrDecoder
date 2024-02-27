@@ -1,6 +1,6 @@
 application {
     title = 'RR Decoder Database'
-    startupGroups = ['decoder', 'prefs', 'dec', 'progress', 'cvs', 'help']
+    startupGroups = ['decoder', 'prefs', 'dec', 'progress', 'cvs', 'help', 'cvSpecific']
     autoShutdown = true
 }
 windowManager {
@@ -38,5 +38,10 @@ mvcGroups {
         model = 'com.spw.rr.HelpModel'
         view  = 'com.spw.rr.HelpView'
         controller = 'com.spw.rr.HelpController'
+    }
+    'cvSpecific' {
+        model = 'com.spw.rr.CvSpecificModel'
+        view  = 'com.spw.rr.CvSpecificView'
+        controller = 'com.spw.rr.CvSpecificController'
     }
 }

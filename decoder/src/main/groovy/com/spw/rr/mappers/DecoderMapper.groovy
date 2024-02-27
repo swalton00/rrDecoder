@@ -3,6 +3,7 @@ package com.spw.rr.mappers
 
 import griffon.metadata.TypeProviderFor
 import griffon.plugins.mybatis.MybatisMapper
+import org.apache.ibatis.annotations.Param
 
 @TypeProviderFor(MybatisMapper)
 interface DecoderMapper extends MybatisMapper {
@@ -63,6 +64,8 @@ interface DecoderMapper extends MybatisMapper {
     void insertCVs(CVvalues cVvalues)
 
     List<CVvalues> listCVsFor(Integer parent)
+
+    List<DecoderEntry> listDecodersWithCVs(@Param("decoders") List<Integer> decoders, @Param("cvs") List<String> cvs)
 
     int deleteCVs(Integer decoderId)
 
