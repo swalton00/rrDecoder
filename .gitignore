@@ -1,0 +1,8 @@
+.class
+.log
+.tar
+.zip
+decoder/build/
+decoder/target/
+doc/build/
+doc/target/
