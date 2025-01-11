@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+    <appender name="timers" class="org.apache.log4j.FileAppender">
+        <param name="file" value="stopwatch.log"/>
+        <param name="append" value="true"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n"/>
+        </layout>
+    </appender>
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out"/>
+        <param name="threshold" value="INFO"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+        </layout>
+    </appender>
+    <appender name="logfile" class="org.apache.log4j.FileAppender">
+        <param name="file" value="modelRRdecoder.log"/>
+        <param name="append" value="false"/>
+        <param name="threshold" value="TRACE"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%p %d %c{2} %m%n"/>
+        </layout>
+    </appender>
+    <logger name="com.spw" additivity="false">
+        <level value="trace"/>
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="com.spw.rr.utilities" additivity="false">
+        <level value="trace"/>
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+
+    </logger>
+    <logger name="com" additivity="false">
+            <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="org">
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="org.mybatis">
+        <level value="trace"/>
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="org.perf4j.TimingLogger">
+        <appender-ref ref="timers"/>
+    </logger>
+    <root>
+        <appender-ref ref="console"/>
+        <appender-ref ref="logfile"/>
+    </root>
+</log4j:configuration>
