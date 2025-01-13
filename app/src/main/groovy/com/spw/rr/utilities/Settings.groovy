@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 class Settings {
     private static final Logger log = LoggerFactory.getLogger(Settings.class)
     private static final PropertySaver saver = PropertySaver.getInstance()
-    boolean settingComplete = false
+    boolean settingsComplete = false
     boolean settingsValid = false
 
     private static final String NAME_URL = "URL"
@@ -29,10 +29,10 @@ class Settings {
         schema = saver.getBaseString(NAME_SCHEMA)
         if (url == null | userid == null | password == null | schema == null) {
             log.debug("settings not present on initial load")
-            settingComplete = null
+            settingsComplete = null
         } else {
             log.debug("settings found complete on inital load")
-            settingComplete = true
+            settingsComplete = true
         }
     }
 
