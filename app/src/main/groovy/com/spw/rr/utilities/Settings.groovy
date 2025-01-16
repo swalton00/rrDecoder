@@ -5,7 +5,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 @ToString(includeFields = true, includeNames = true, includePackage = false, excludes = ["password"])
-@Singleton
 class Settings {
     private static final Logger log = LoggerFactory.getLogger(Settings.class)
     private static final PropertySaver saver = PropertySaver.getInstance()

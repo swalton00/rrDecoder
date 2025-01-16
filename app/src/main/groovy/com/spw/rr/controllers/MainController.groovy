@@ -18,7 +18,7 @@ class MainController {
 
     MainView view
     MainModel model
-    Settings settings = Settings.getInstance()
+    Settings settings =  new Settings()
     BackgroundWorker worker = BackgroundWorker.getInstance()
     DatabaseServices databaseServices = DatabaseServices.getInstance()
     PropsController pc
@@ -55,7 +55,7 @@ class MainController {
 
     def createProps = { ->
         pc = new PropsController()
-        pc.init(model.baseFrame)
+        pc.init(model.baseFrame, settings)
     }
 
     def settingsAction = { ActionEvent event ->

@@ -34,11 +34,21 @@
         <appender-ref ref="console"/>
 
     </logger>
+    <logger name="com.spw.rr.models" additivity="false">
+        <level value="trace"/>
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+    </logger>
     <logger name="com" additivity="false">
-            <appender-ref ref="logfile"/>
+        <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>
     <logger name="org">
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="org,h2">
+        <level value="trace"/>
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>

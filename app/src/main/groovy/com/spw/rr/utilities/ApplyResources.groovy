@@ -18,7 +18,7 @@ class ApplyResources {
      * @param conn      the connection to the database
      * @return          true if the creation is successful, false otherwise
      */
-    public static boolean apply(String resName, Connection conn) {
+    boolean apply(String resName, Connection conn) {
         log.debug("applying resources from ${resName}")
         InputStream is = this.class.getClassLoader().getResourceAsStream(resName)
         InputStreamReader rdr = new InputStreamReader(is)
@@ -40,7 +40,7 @@ class ApplyResources {
         return true
     }
 
-    private static String getNextStatement(InputStreamReader rdr) throws IOException {
+    private String getNextStatement(InputStreamReader rdr) throws IOException {
         StringBuffer sb = new StringBuffer()
         boolean quoted = false
         boolean complete = false

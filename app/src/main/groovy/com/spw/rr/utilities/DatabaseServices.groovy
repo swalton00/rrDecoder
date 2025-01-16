@@ -14,14 +14,16 @@ class DatabaseServices {
     private static final String SCHEMA_TEST = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?"
     private static final String CREATE_SCHEMA = "CREATE SCHEMA "
     private static final String TABLE_TEST =
-            "SELECT COUNT(*) from information_schema.TABLES where table_schema = ? AND  TABLE_NAME IN ( ?,?,?,?,?,?,?,?,?)"
+            "SELECT COUNT(*) from information_schema.TABLES where table_schema = ? AND  TABLE_NAME IN (?,?,?,?,?,?,?,?)"
     private static final Logger log = LoggerFactory.getLogger(DatabaseServices.class)
-    static String tableList = ['ROSTER', 'DECODERTYPE', 'DECODER', 'FUNCTIONLABELS',
+    static String[] tableList = ['ROSTER', 'DECODERTYPE', 'DECODER', 'FUNCTIONLABELS',
                                'SPEEDPROFILE', 'KEYVALUES', 'DECODERDEF', 'CVVALUES', 'DB_VERSION']
+    static final String SET_SCHEMA = "SET SCHEMA "
     private static final String RESOURCE_NAME = "createTables.sql"
 
     public boolean validate(Settings settings) {
-        log.debug("validating for  $Settings}")
+        log.debug("validating for  $settings}")
+        String schema
         /*
         if url contains schema, remove schema first to validate (schema might not be present in database
         then, connect, check for schemaa (if not present,
@@ -30,17 +32,27 @@ class DatabaseServices {
         String tempURL = settings.url
         if (tempURL.contains(";SCHEMA=")) {
             int schemaStart = tempURL.indexOf(";SCHEMA=")
-            int schemaEnd = tempURL.indexOf(";",schemaStart)
+            int schemaEnd = tempURL.indexOf(";",schemaStart+1)
+            schema = tempURL.substring(schemaStart + ";SCHEMA=".size())
+            int tempSch = schema.indexOf(";")
+            tempSch = tempSch == -1 ? schema.size() : tempSch
+            schema = settings.schema == null ? schema : settings.schema
+
             if (schemaEnd == -1) {
                 tempURL = tempURL.substring(0, schemaStart -1)
                 log.trace("URL without the schema is ${tempURL}")
             } else {
-                String front = tempURL.substring(0, schemaStart - 1)
+                String front = tempURL.substring(0, schemaStart)
                 String back = tempURL.substring(schemaEnd)
                 tempURL = front + back
                 log.trace("URL schema removed is ${tempURL}")
             }
+        } else  if (setting.schema == null) {
+            log.error("no schema passed")
+        } else {
+            schema = settings.schema
         }
+        log.debug("using a schema of ${schema} in the validator")
         log.debug("Testing database connection")
         Connection conn = null
         try {
@@ -63,6 +75,7 @@ class DatabaseServices {
                 PreparedStatement stmt3 = conn.prepareStatement(TABLE_TEST)
                 stmt3.setString(1, settings.schema)
                 tableList.eachWithIndex{ String entry, int i ->
+                    log.trace("setting parameter #h ${i} with a value of ${entry}")
                     stmt3.setString(i+1, entry)
                 }
                 ResultSet rs2 = stmt3.executeQuery()
@@ -73,7 +86,9 @@ class DatabaseServices {
                 matchCount = rs2.getInt(1)
                 if (matchCount == 0) {
                     log.debug("tables not found - creating")
-                    ApplyResources(RESOURCE_NAME, conn)
+                    PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + schema)
+                    stmt2.execute()
+                    new ApplyResources().apply(RESOURCE_NAME, (Connection)conn)
                 }
             }
         } catch (Exception e) {

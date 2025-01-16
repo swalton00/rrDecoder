@@ -20,6 +20,9 @@ dependencies {
 // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
     implementation group: 'com.miglayout', name: 'miglayout-swing', version: '11.4.2'
     implementation group: 'org.mybatis', name: 'mybatis', version: '3.5.6'
+    // https://mvnrepository.com/artifact/com.h2database/h2
+    implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+
 }
 
 application {
