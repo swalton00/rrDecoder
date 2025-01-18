@@ -1,5 +1,8 @@
 package com.spw.rr.utilities
 
+import org.apache.ibatis.io.Resources
+import org.apache.ibatis.session.SqlSessionFactory
+import org.apache.ibatis.session.SqlSessionFactoryBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -14,16 +17,21 @@ class DatabaseServices {
     private static final String SCHEMA_TEST = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?"
     private static final String CREATE_SCHEMA = "CREATE SCHEMA "
     private static final String TABLE_TEST =
-            "SELECT COUNT(*) from information_schema.TABLES where table_schema = ? AND  TABLE_NAME IN (?,?,?,?,?,?,?,?)"
+            "SELECT COUNT(*) from information_schema.TABLES where table_schema = ? AND  TABLE_NAME = 'DB_VERSION'"
     private static final Logger log = LoggerFactory.getLogger(DatabaseServices.class)
     static String[] tableList = ['ROSTER', 'DECODERTYPE', 'DECODER', 'FUNCTIONLABELS',
                                'SPEEDPROFILE', 'KEYVALUES', 'DECODERDEF', 'CVVALUES', 'DB_VERSION']
     static final String SET_SCHEMA = "SET SCHEMA "
+    static final String DB_VERSION = "SELECT major, minor, table_count FROM DB_VERSION where id = 1"
     private static final String RESOURCE_NAME = "createTables.sql"
+    private static final String MYBATIS_RESOURCE = "mybatis.xml"
+
+    SqlSessionFactory sqlSessionFactory
 
     public boolean validate(Settings settings) {
         log.debug("validating for  $settings}")
         String schema
+        boolean returnValue = false
         /*
         if url contains schema, remove schema first to validate (schema might not be present in database
         then, connect, check for schemaa (if not present,
@@ -73,23 +81,36 @@ class DatabaseServices {
                     createSchema.execute()
                 }
                 PreparedStatement stmt3 = conn.prepareStatement(TABLE_TEST)
-                stmt3.setString(1, settings.schema)
-                tableList.eachWithIndex{ String entry, int i ->
-                    log.trace("setting parameter #h ${i} with a value of ${entry}")
-                    stmt3.setString(i+1, entry)
-                }
+                stmt3.setString(1, settings.schema.toUpperCase())
                 ResultSet rs2 = stmt3.executeQuery()
                 if (!rs2.next()) {
                     log.error("search for tables didn't return a result set as it should")
                     throw new RuntimeException("Execute query to table count didn't return a result set")
                 }
                 matchCount = rs2.getInt(1)
-                if (matchCount == 0) {
-                    log.debug("tables not found - creating")
-                    PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + schema)
-                    stmt2.execute()
+                PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + schema)
+                stmt2.execute()
+                if (matchCount == 1) {
+                    log.debug("tables found - checking db version")
+                    PreparedStatement stmt4 = conn.prepareStatement(DB_VERSION)
+                    ResultSet rs3 = stmt4.executeQuery()
+                    if (!rs3.next()) {
+                        log.error("search for DB Version didn't return a result set")
+                        throw new RuntimeException("Execute query did not return a result set")
+                    }
+                    int majorVersion = rs3.getInt(1)
+                    int minorVersion = rs3.getInt(2)
+                    int tableCount = rs3.getInt(3)
+                    if (majorVersion != 1 | minorVersion != 1) {
+                        log.error("mismatch on minor and major versions - Major = ${majorVersion} Minor = ${minorVersion}")
+                    }
+                } else if (matchCount == 0) {
+                    log.debug("DB version not found - creating tables")
                     new ApplyResources().apply(RESOURCE_NAME, (Connection)conn)
+
                 }
+                returnValue = true
+                settings.settingsValid = true
             }
         } catch (Exception e) {
             log.error("exception working with the database", e)
@@ -100,5 +121,23 @@ class DatabaseServices {
                 conn.close()
             }
         }
+        return returnValue
+
+    }
+
+    void dbStart(Settings settings) {
+        log.debug("starting the datasouce with settings ${settings}")
+        Properties dbProps = new Properties()
+        dbProps.put("url", settings.url)
+        dbProps.put("username", settings.userid)
+        dbProps.put("password", settings.password)
+        dbProps.put("driver", "org.h2.Driver")
+        InputStream inputStream = Resources.getResourceAsStream(MYBATIS_RESOURCE)
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream, dbProps)
+        settings.databaseOpen = true
+    }
+
+    void dbClose() {
+        log.debug("closing the Mybatis database")
     }
 }

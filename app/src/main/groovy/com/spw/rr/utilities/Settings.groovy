@@ -10,6 +10,7 @@ class Settings {
     private static final PropertySaver saver = PropertySaver.getInstance()
     boolean settingsComplete = false
     boolean settingsValid = false
+    boolean databaseOpen = false
 
     private static final String NAME_URL = "URL"
     private static final String NAME_USERID = "Userid"

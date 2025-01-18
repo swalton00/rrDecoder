@@ -56,11 +56,12 @@ class PropsController {
 
     def backgroundSave = { ->
         log.debug("validating the settings in ${newSettings}")
-        boolean goodSettigns = database.validate(newSettings)
-        if (goodSettigns) {
+        boolean goodSettings = database.validate(newSettings)
+        if (goodSettings) {
             log.debug("settings determined to be good - saving them")
             settings = newSettings
             settings.saveSettings()
+            database.dbStart(settings)
             SwingUtilities.invokeLater {
                 view.thisWindow.setVisible(false)
             }

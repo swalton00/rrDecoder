@@ -28,6 +28,7 @@ class MainController {
     void init() {
         saver.init()
         model = new MainModel(this)
+        model.init()
         view = new MainView(this, model)
         settings.loadSettings()
         SwingUtilities.invokeAndWait {
@@ -36,6 +37,9 @@ class MainController {
         if (settings.settingsComplete) {
             log.debug("settings are now complete - calling validate to verify")
             settings.settingsValid = databaseServices.validate((settings))
+            if (settings.settingsValid) {
+                databaseServices.dbStart(settings)
+            }
         }
         if (!settings.settingsValid | !settings.settingsComplete) {
             log.debug("don't have a valid settings yet - going directly to prefs")
@@ -60,11 +64,20 @@ class MainController {
 
     def settingsAction = { ActionEvent event ->
         log.debug("settings edit requested")
+        worker.execute(backgroundSettings)
+    }
 
+    Runnable backgroundSettings = { ->
+        createProps()
     }
 
     def viewAction = { ActionEvent event ->
         log.debug("view action requested")
+
+    }
+
+    def viewAllAction = { ActionEvent event ->
+        log.debug("view all requested")
     }
 
     def helpAction= { ActionEvent event ->

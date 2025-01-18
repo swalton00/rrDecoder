@@ -4,20 +4,22 @@ import com.spw.rr.controllers.MainController
 import com.spw.rr.views.MainView
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 import javax.swing.JFrame
+import javax.swing.JMenuItem
 import javax.swing.JTable
 
-class MainModel {
-
+class MainModel extends RrBaseModel {
     private static final Logger log = LoggerFactory.getLogger(MainModel.class)
+
     MainController controller
     MainView view
     Vector<String> dataList
     JTable theTable
     JFrame baseFrame
-    public MainModel() {
 
-    }
+    JMenuItem viewItem
+    boolean elementSelected = false
 
     public MainModel(MainController controller) {
         this.controller = controller
@@ -25,7 +27,11 @@ class MainModel {
 
     void init() {
         log.debug("initializing the main model")
+        columnNames.addAll(["Id", "System", "# Decoders", "Full Path"])
+        preferredWidths.addAll([10,20,300])
+
     }
+
 
 
 
