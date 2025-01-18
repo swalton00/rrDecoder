@@ -101,6 +101,7 @@ class MainView {
         model.theTable.setAutoCreateRowSorter(true)
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         model.theTable.setPreferredSize(new Dimension(1000, 2000))
+        model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
 
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         scrollPane.setPreferredSize(new Dimension(1500, 1200))

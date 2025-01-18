@@ -1,4 +1,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
 <mapper namespace="com.spw.rr.database.Mapper">
+    <select id="listRosters" resultType="RosterEntry">
+        SELECT id,
+               entered as entryTime,
+               fullpath,
+               dateupdated,
+               systemname,
+               coalesce(decCount, 0) as decCount
+        from roster r
+                 LEFT OUTER JOIN
+             (   SELECT
+                     d.rosterId AS rosterEntry,
+                     COUNT(*)   AS decCount
+                 FROM
+                     decoder d
+                 GROUP BY
+                     rosterId)
+             ON
+                 r.id = rosterEntry
+        order by systemname
+    </select>
+    
 </mapper>

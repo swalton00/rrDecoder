@@ -1,6 +1,9 @@
 package com.spw.rr.utilities
 
+import com.spw.rr.database.Mapper
+import com.spw.rr.database.RosterEntry
 import org.apache.ibatis.io.Resources
+import org.apache.ibatis.session.SqlSession
 import org.apache.ibatis.session.SqlSessionFactory
 import org.apache.ibatis.session.SqlSessionFactoryBuilder
 import org.slf4j.Logger
@@ -140,4 +143,13 @@ class DatabaseServices {
     void dbClose() {
         log.debug("closing the Mybatis database")
     }
+
+    List<RosterEntry> listRosters() {
+        log.debug("getting a list of the rosters")
+        SqlSession  session = sqlSessionFactory.openSession(true)
+        Mapper map = session.getMapper(Mapper.class)
+        List<RosterEntry> entries = map.listRosters()
+        log.debug("got a list of size ${entries.size()}")
+    }
+
 }

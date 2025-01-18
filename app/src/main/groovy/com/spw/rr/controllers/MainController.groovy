@@ -1,5 +1,6 @@
 package com.spw.rr.controllers
 
+import com.spw.rr.database.RosterEntry
 import com.spw.rr.models.MainModel
 import com.spw.rr.utilities.BackgroundWorker
 import com.spw.rr.utilities.DatabaseServices
@@ -44,6 +45,19 @@ class MainController {
         if (!settings.settingsValid | !settings.settingsComplete) {
             log.debug("don't have a valid settings yet - going directly to prefs")
             createProps()
+        }
+        if (settings.databaseOpen) {
+            log.debug("loading the data for the main view")
+            List<RosterEntry> entries = databaseServices.listRosters()
+            entries.each {
+                ArrayList<String> nextLine = new ArrayList()
+                nextLine.add(it.id.toString())
+                nextLine.add(it.systemName)
+                nextLine.add(it.decCount)
+                nextLine.add(it.fullPath)
+                model.tableList.add(nextLine)
+                view.tableModel.fireTableDataChanged()
+            }
         }
     }
 
