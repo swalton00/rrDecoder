@@ -1,7 +1,6 @@
 package com.spw.rr.utilities
 
-import com.spw.rr.database.Mapper
-import com.spw.rr.database.RosterEntry
+import com.spw.rr.database.*
 import org.apache.ibatis.io.Resources
 import org.apache.ibatis.session.SqlSession
 import org.apache.ibatis.session.SqlSessionFactory
@@ -22,16 +21,15 @@ class DatabaseServices {
     private static final String TABLE_TEST =
             "SELECT COUNT(*) from information_schema.TABLES where table_schema = ? AND  TABLE_NAME = 'DB_VERSION'"
     private static final Logger log = LoggerFactory.getLogger(DatabaseServices.class)
-    static String[] tableList = ['ROSTER', 'DECODERTYPE', 'DECODER', 'FUNCTIONLABELS',
-                               'SPEEDPROFILE', 'KEYVALUES', 'DECODERDEF', 'CVVALUES', 'DB_VERSION']
     static final String SET_SCHEMA = "SET SCHEMA "
     static final String DB_VERSION = "SELECT major, minor, table_count FROM DB_VERSION where id = 1"
     private static final String RESOURCE_NAME = "createTables.sql"
     private static final String MYBATIS_RESOURCE = "mybatis.xml"
 
     SqlSessionFactory sqlSessionFactory
+    SqlSession session
 
-    public boolean validate(Settings settings) {
+    boolean validate(Settings settings) {
         log.debug("validating for  $settings}")
         String schema
         boolean returnValue = false
@@ -43,14 +41,10 @@ class DatabaseServices {
         String tempURL = settings.url
         if (tempURL.contains(";SCHEMA=")) {
             int schemaStart = tempURL.indexOf(";SCHEMA=")
-            int schemaEnd = tempURL.indexOf(";",schemaStart+1)
+            int schemaEnd = tempURL.indexOf(";", schemaStart + 1)
             schema = tempURL.substring(schemaStart + ";SCHEMA=".size())
-            int tempSch = schema.indexOf(";")
-            tempSch = tempSch == -1 ? schema.size() : tempSch
-            schema = settings.schema == null ? schema : settings.schema
-
             if (schemaEnd == -1) {
-                tempURL = tempURL.substring(0, schemaStart -1)
+                tempURL = tempURL.substring(0, schemaStart - 1)
                 log.trace("URL without the schema is ${tempURL}")
             } else {
                 String front = tempURL.substring(0, schemaStart)
@@ -58,7 +52,7 @@ class DatabaseServices {
                 tempURL = front + back
                 log.trace("URL schema removed is ${tempURL}")
             }
-        } else  if (setting.schema == null) {
+        } else if (setting.schema == null) {
             log.error("no schema passed")
         } else {
             schema = settings.schema
@@ -91,7 +85,7 @@ class DatabaseServices {
                     throw new RuntimeException("Execute query to table count didn't return a result set")
                 }
                 matchCount = rs2.getInt(1)
-                PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + schema)
+                PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + settings.schema)
                 stmt2.execute()
                 if (matchCount == 1) {
                     log.debug("tables found - checking db version")
@@ -103,13 +97,12 @@ class DatabaseServices {
                     }
                     int majorVersion = rs3.getInt(1)
                     int minorVersion = rs3.getInt(2)
-                    int tableCount = rs3.getInt(3)
                     if (majorVersion != 1 | minorVersion != 1) {
                         log.error("mismatch on minor and major versions - Major = ${majorVersion} Minor = ${minorVersion}")
                     }
                 } else if (matchCount == 0) {
                     log.debug("DB version not found - creating tables")
-                    new ApplyResources().apply(RESOURCE_NAME, (Connection)conn)
+                    new ApplyResources().apply(RESOURCE_NAME, (Connection) conn)
 
                 }
                 returnValue = true
@@ -143,13 +136,192 @@ class DatabaseServices {
     void dbClose() {
         log.debug("closing the Mybatis database")
     }
+    void close() {
+        log.debug("closing the session from the transaction")
+        if (session == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        session.close()
+        session = null
+    }
 
     List<RosterEntry> listRosters() {
         log.debug("getting a list of the rosters")
-        SqlSession  session = sqlSessionFactory.openSession(true)
-        Mapper map = session.getMapper(Mapper.class)
+        SqlSession mySession
+        if (session != null) {
+            log.debug("using an existing session for list Rosters")
+            mySession = session
+        } else {
+            mySession = sqlSessionFactory.openSession(true)
+
+        }
+        Mapper map = mySession.getMapper(Mapper.class)
         List<RosterEntry> entries = map.listRosters()
         log.debug("got a list of size ${entries.size()}")
     }
 
+    List<DecoderType> listDecoderTypes() {
+        log.debug("listing the decoder types in the database")
+        SqlSession mySession
+        if (session != null) {
+            log.debug("using an existing session for list Decoder types")
+            mySession = session
+        } else {
+            mySession = sqlSessionFactory.openSession(true)
+
+        }
+        Mapper map = mySession.getMapper(Mapper.class)
+        List<DecoderType> typeList = map.listDecoderTypes()
+        log.debug("got a list of size ${typeList.size()}")
+        return typeList
+    }
+
+    DecoderType insertDecoderTypeEntry(DecoderType type) {
+        log.debug("inserting a new decoder type - ${type}")
+        SqlSession mySession
+        if (session != null) {
+            log.debug("using an existing session for insert Decoder type entry")
+            mySession = session
+        } else {
+            mySession = sqlSessionFactory.openSession(true)
+
+        }
+        Mapper map = mySession.getMapper(Mapper.class)
+        map.insertDecoderTypeEntry(type)
+        log.debug("result was ${type}")
+        return type
+    }
+
+    void beginTransaction() {
+        log.debug("starting a new Transaction")
+        session = sqlSessionFactory.openSession(false)
+    }
+
+    RosterEntry addRoster(RosterEntry entry) {
+        log.debug("adding a new RosterEntry ${entry}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.insertRosterEntry(entry)
+        return entry
+    }
+
+    RosterEntry getRosterEntry(String systemName, String fullPath) {
+        log.debug("Retrieving roster for ${systemName} with path of ${fullPath}")
+        SqlSession mySession
+        if (session != null) {
+            log.debug("using an existing session for getRosterEntry")
+            mySession = session
+        } else {
+            mySession = sqlSessionFactory.openSession(true)
+
+        }
+        Mapper map = mySession.getMapper(Mapper.class)
+        RosterEntry result = map.findRosterEntry(systemName, fullPath)
+        log.debug("result found was ${result}")
+        return result
+
+    }
+
+
+    List<DecoderEntry> decodersForRoster(int rosterID) {
+        log.debug("listing decoders for rosterID ${rosterID}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        List<DecoderEntry> result = map.listDecodersByRosterID(rosterID)
+        log.debug("result was ${result}")
+        return result
+    }
+
+    DecoderEntry addDecoderEntry(DecoderEntry entry) {
+        log.debug("adding a decoder entry ${entry}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.insertDecoderEntry(entry)
+        log.debug("returning decoder with id of ${entry.id}")
+        return entry
+    }
+
+    void updateDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("updating decoder entry ${decoderEntry}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.updateDecoderEntry(decoderEntry)
+
+    }
+
+    FunctionLabel insertFunctionLabel(FunctionLabel newValue) {
+        log.debug("inserting new FunctionLabel as part of a transaction - ${newValue}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.insertFunctionLabel(newValue)
+        log.debug("returning result: ${newValue}")
+        return newValue
+    }
+
+    KeyValuePairs insertKeyValuePair(KeyValuePairs kvp) {
+        log.debug("adding a new KeyValuePair: ${kvp}")
+        if (session == null) {
+            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.insertKeyValuePairs(kvp)
+        log.debug("inserted value was ${kvp}")
+        return kvp
+    }
+
+    SpeedProfile insertSpeedProfile(SpeedProfile sp) {
+        log.debug("adding a new SpeedProfile: ${sp}")
+        if (session == null) {
+            throw new RuntimeException("attempting to add a speed profile outside a transaction")
+        }
+        Mapper mapper = session.getMapper(Mapper.class)
+        mapper.insertSpeedProfile(sp)
+        log.debug("inserted value was ${sp}")
+        return sp
+    }
+
+    void updateRosterEntry(RosterEntry entry) {
+        log.debug("updating the roster ${entry}")
+        if (session == null) {
+            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.updateRosterEntry(entry)
+    }
+
+    int deleteDecoderEntry(DecoderEntry decoderEntry) {
+        log.debug("Deleting decoder with id of ${decoderEntry.id} within a transaction")
+        if (session == null) {
+            throw new RuntimeException("transaction but current session is null")
+        }
+        Mapper mapper = session.getMapper(Mapper.class)
+        int result = mapper.deleteDecoderEntry(decoderEntry)
+        log.debug("return result of ${result}")
+        return result
+    }
+
+    void commitWork() {
+        log.debug("committing the transaction")
+        if (session == null) {
+            throw new RuntimeException("Attempting to commit work when not in a transaction")
+        }
+        session.commit()
+    }
+
+    void rollbackAll() {
+        if (session == null) {
+            throw new RuntimeException("Attempting to rollback work when not in a transaction")
+        }
+        session.rollback()
+    }
 }

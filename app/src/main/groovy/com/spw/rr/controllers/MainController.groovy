@@ -4,12 +4,14 @@ import com.spw.rr.database.RosterEntry
 import com.spw.rr.models.MainModel
 import com.spw.rr.utilities.BackgroundWorker
 import com.spw.rr.utilities.DatabaseServices
+import com.spw.rr.utilities.ImportService
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.Settings
 import com.spw.rr.views.MainView
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import java.awt.event.ActionEvent
 
@@ -23,6 +25,7 @@ class MainController {
     BackgroundWorker worker = BackgroundWorker.getInstance()
     DatabaseServices databaseServices = DatabaseServices.getInstance()
     PropsController pc
+    ImportService imports = ImportService.getInstance()
 
     PropertySaver saver = PropertySaver.getInstance()
 
@@ -67,8 +70,23 @@ class MainController {
         System.exit(0)
     }
 
+    Runnable importBackgrounnd = {  ->
+        log.debug("importing roster at location ${chosen}")
+        boolean exists = imports.doesRosterExist(chosen)
+        RosterEntry entry = imports.setParent(model.baseFrame)
+        imports.importRoster(chosen)
+    }
+
+    File chosen
     def importAction = { ActionEvent event ->
         log.debug("import requested")
+        JFileChooser chooser = new JFileChooser()
+        chooser.setDialogTitle("Select appropriate roster.xml")
+        int retVal = chooser.showOpenDialog(null)
+        if (retVal == JFileChooser.APPROVE_OPTION) {
+            chosen = chooser.getSelectedFile()
+            worker.execute(importBackgrounnd)
+        }
     }
 
     def createProps = { ->

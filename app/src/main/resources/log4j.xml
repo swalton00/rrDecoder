@@ -52,7 +52,7 @@
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>
-    <logger name="org.mybatis">
+    <logger name="com.spw.rr.database.Mapper">
         <level value="trace"/>
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>

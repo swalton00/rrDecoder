@@ -20,5 +20,204 @@
                  r.id = rosterEntry
         order by systemname
     </select>
-    
+    <select id="getRosterEntry" resultType="RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM roster
+        WHERE systemName = #{param1}
+          AND fullPath = #{param2}
+    </select>
+    <insert id="insertRosterEntry" parameterType="RosterEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO roster
+        (entered,
+         fullpath,
+         systemName)
+        VALUES (CURRENT_TIMESTAMP,
+                        #{fullPath},
+                        #{systemName})
+    </insert>
+    <select id="listDecoderTypes" resultType="DecoderType">
+        SELECT id,
+               decoderFamily,
+               decoderModel,
+               dateUpdated AS updated
+        FROM decoderType
+        ORDER BY decoderFamily,
+                 decoderModel
+    </select>
+    <insert id="insertDecoderTypeEntry" parameterType="DecoderType" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO decoderType
+        (decoderfamily,
+         decodermodel,
+         dateupdated)
+        VALUES (#{decoderFamily},
+                #{decoderModel},
+                   CURRENT_TIMESTAMP)
+    </insert>
+    <select id="listDecodersByRosterID" parameterType="Integer" resultType="DecoderEntry">
+        SELECT
+        p.id,
+        p.decoderId,
+        p.fileName,
+        p.roadNumber,
+        p.roadName,
+        p.manufacturer,
+        p.owner,
+        p.model,
+        p.dccAddress,
+        p.manufacturerId,
+        p.productId,
+        p.dateUpdated,
+        p.decoderTypeId,
+        p.detailTime,
+        p.rosterId,
+        hasSpeedProfile,
+        hasDetail
+        FROM decoder p
+        LEFT OUTER JOIN
+        (   SELECT
+        '1' AS hasSpeedProfile,
+        t1.Id
+        FROM
+        decoder t1
+        WHERE
+        EXISTS (   SELECT * FROM speedprofile sp
+        WHERE sp.decoderid = t1.id)) AS t11
+        ON p.id = t11.id
+        LEFT OUTER JOIN
+        (   SELECT
+        '1' AS hasdetail,
+        t1.id
+        FROM
+        decoder t1
+        WHERE
+        EXISTS (   SELECT * FROM cvvalues cv
+        WHERE cv.decoderid = t1.id)
+        OR  EXISTS (   SELECT * FROM decoderdef de
+        WHERE de.decoderid = t1.id)) AS t21
+        ON t21.id = p.id
+        <where>
+            <foreach collection="array" index="index" item="item"
+                     open = "rosterid IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        ORDER BY id
+    </select>
+    <insert id="insertDecoderEntry" parameterType="com.spw.rr.database.DecoderEntry" useGeneratedKeys="true" keyColumn="id"
+            keyProperty="id">
+        INSERT INTO Decoder
+        (decoderid,
+         filename,
+         roadnumber,
+         roadname,
+         manufacturer,
+         owner,
+         dccaddress,
+         productid,
+         decoderTypeId,
+         rosterid,
+         dateUpdated)
+        VALUES (#{decoderId},
+                #{fileName},
+                #{roadNumber},
+                #{roadName},
+                #{manufacturer},
+                #{owner},
+                #{dccAddress},
+                #{productId},
+                #{decoderTypeId},
+                #{rosterId},
+                #{dateUpdated})
+    </insert>
+    <update id="updateDecoderEntry" parameterType="com.spw.rr.database.DecoderEntry">
+        UPDATE
+            Decoder
+        SET decoderid     = #{decoderId},
+            filename      = #{fileName},
+            roadnumber    = #{roadNumber},
+            roadname      = #{roadName},
+            manufacturer  = #{manufacturer},
+            owner         = #{owner},
+            dccaddress    = #{dccAddress},
+            productId     = #{productId},
+            decoderTypeId = #{decoderTypeId},
+            dateUpdated   = #{dateUpdated}
+        WHERE id = #{id}
+    </update>
+    <select id="findRosterEntry" resultType="com.spw.rr.database.RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM roster
+        WHERE systemName = #{param1}
+          AND fullPath = #{param2};
+    </select>
+    <insert id="insertFunctionLabel" parameterType="com.spw.rr.database.FunctionLabel" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO
+            FunctionLabels
+        (
+            decoderID,
+            FunctionNumber,
+            FunctionLabel
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{functionNum},
+                #{functionLabel}
+            );
+
+    </insert>
+    <insert id="insertKeyValuePairs" parameterType="com.spw.rr.database.KeyValuePairs" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT    INTO
+            KeyValues
+        (
+            decoderId,
+            Pair_key,
+            Pair_value
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{pair_key},
+                #{pair_value}
+            )
+    </insert>
+    <insert id="insertSpeedProfile" parameterType="com.spw.rr.database.SpeedProfile" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO
+            speedProfile
+        (
+            decoderId,
+            STEP,
+            forward,
+            reverse
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{speedStep},
+                #{forwardValue},
+                #{reverseValue}
+            )
+    </insert>
+    <delete id="deleteDecoderEntry" parameterType="com.spw.rr.database.DecoderEntry">
+        DELETE
+        FROM Decoder
+        WHERE id = #{id};
+    </delete>
+    <update id="updateRosterEntry" parameterType="com.spw.rr.database.RosterEntry">
+        UPDATE
+            roster
+        SET fullpath=#{fullPath},
+            systemName = #{systemName},
+            dateUpdated = CURRENT_TIMESTAMP
+        WHERE
+            id = #{id}
+    </update>
 </mapper>
