@@ -22,7 +22,7 @@ class ListenerForTables implements ListSelectionListener{
         }
         model.selectedRows.clear()
         if (lsm.isSelectionEmpty()) {
-            model.tableIsSelected = false
+            model.tableIsSelected.setValue(false)
         } else  {
             int min = lsm.getMinSelectionIndex()
             int max = lsm.getMaxSelectionIndex()
@@ -35,7 +35,7 @@ class ListenerForTables implements ListSelectionListener{
                     model.selectedRows.add(thisId)
                 }
             }
-            model.tableIsSelected = true
+            model.tableIsSelected.setValue(true)
         }
     }
 }

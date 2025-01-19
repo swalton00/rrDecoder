@@ -53,15 +53,19 @@ class MainController {
             log.debug("loading the data for the main view")
             List<RosterEntry> entries = databaseServices.listRosters()
             entries.each {
-                ArrayList<String> nextLine = new ArrayList()
-                nextLine.add(it.id.toString())
-                nextLine.add(it.systemName)
-                nextLine.add(it.decCount)
-                nextLine.add(it.fullPath)
-                model.tableList.add(nextLine)
-                view.tableModel.fireTableDataChanged()
+                addEntry(it)
             }
         }
+    }
+
+    void addEntry(RosterEntry newEntry) {
+        ArrayList<String> nextLine = new ArrayList()
+        nextLine.add(newEntry.id.toString())
+        nextLine.add(newEntry.systemName)
+        nextLine.add(newEntry.decCount)
+        nextLine.add(newEntry.fullPath)
+        model.tableList.add(nextLine)
+        view.tableModel.fireTableDataChanged()
     }
 
     def closeAtion = { ActionEvent event ->
@@ -74,7 +78,10 @@ class MainController {
         log.debug("importing roster at location ${chosen}")
         boolean exists = imports.doesRosterExist(chosen)
         RosterEntry entry = imports.setParent(model.baseFrame)
-        imports.importRoster(chosen)
+        RosterEntry newEntry = imports.importRoster(chosen)
+        SwingUtilities.invokeLater { ->
+            addEntry(newEntry)
+        }
     }
 
     File chosen

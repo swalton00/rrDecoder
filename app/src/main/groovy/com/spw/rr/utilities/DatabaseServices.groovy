@@ -158,6 +158,7 @@ class DatabaseServices {
         Mapper map = mySession.getMapper(Mapper.class)
         List<RosterEntry> entries = map.listRosters()
         log.debug("got a list of size ${entries.size()}")
+        return entries
     }
 
     List<DecoderType> listDecoderTypes() {

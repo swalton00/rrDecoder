@@ -14,8 +14,6 @@ class MainModel extends RrBaseModel {
 
     MainController controller
     MainView view
-    Vector<String> dataList
-    JTable theTable
     JFrame baseFrame
 
     JMenuItem viewItem

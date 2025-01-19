@@ -2,6 +2,7 @@ package com.spw.rr.models
 
 import ca.odell.glazedlists.BasicEventList
 import ca.odell.glazedlists.EventList
+import com.spw.rr.utilities.ObservableBean
 
 import javax.swing.JTable
 import javax.swing.table.TableModel
@@ -16,5 +17,6 @@ class RrBaseModel {
     ArrayList<Integer> selectedRows = new ArrayList<>()
     TableModel tableModel
 
-    boolean tableIsSelected = false
+    ObservableBean  tableIsSelected = new ObservableBean(value: false)
+
 }
