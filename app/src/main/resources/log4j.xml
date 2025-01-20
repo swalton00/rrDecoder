@@ -32,7 +32,6 @@
         <level value="trace"/>
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
-
     </logger>
     <logger name="com.spw.rr.models" additivity="false">
         <level value="trace"/>
@@ -43,21 +42,21 @@
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>
-    <logger name="org">
+    <logger name="org" additivity="false">
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>
-    <logger name="org,h2">
+    <logger name="org,h2" additivity="false">
         <level value="trace"/>
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>
-    <logger name="com.spw.rr.database.Mapper">
+    <logger name="com.spw.rr.database.Mapper" additivity="false">
         <level value="trace"/>
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>
-    <logger name="org.perf4j.TimingLogger">
+    <logger name="org.perf4j.TimingLogger" additivity="false">
         <appender-ref ref="timers"/>
     </logger>
     <root>

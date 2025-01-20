@@ -183,11 +183,14 @@ class ImportService {
             log.error("Caught an exception working with the import", e)
             database.rollbackAll()
         } finally {
+            log.trace("closing the progress monitor")
+            monitor.setProgress(arraySize)
+            monitor.close()
             database.close()  // free up the session
             importTime.stop()
         }
-        monitor.close()
         log.debug("there are ${arraySize} entries in this roster")
+        thisEntry.decCount = arraySize
         return thisEntry
     }
 

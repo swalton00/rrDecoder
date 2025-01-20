@@ -147,48 +147,38 @@ class DatabaseServices {
 
     List<RosterEntry> listRosters() {
         log.debug("getting a list of the rosters")
-        SqlSession mySession
-        if (session != null) {
-            log.debug("using an existing session for list Rosters")
-            mySession = session
-        } else {
-            mySession = sqlSessionFactory.openSession(true)
-
-        }
-        Mapper map = mySession.getMapper(Mapper.class)
+        SqlSession session = sqlSessionFactory.openSession(true)
+        Mapper map = session.getMapper(Mapper.class)
         List<RosterEntry> entries = map.listRosters()
         log.debug("got a list of size ${entries.size()}")
+        session.close()
         return entries
     }
 
     List<DecoderType> listDecoderTypes() {
         log.debug("listing the decoder types in the database")
-        SqlSession mySession
-        if (session != null) {
-            log.debug("using an existing session for list Decoder types")
-            mySession = session
-        } else {
-            mySession = sqlSessionFactory.openSession(true)
-
-        }
-        Mapper map = mySession.getMapper(Mapper.class)
+        SqlSession session  = sqlSessionFactory.openSession(true)
+        Mapper map = session.getMapper(Mapper.class)
         List<DecoderType> typeList = map.listDecoderTypes()
         log.debug("got a list of size ${typeList.size()}")
+        session.close()
         return typeList
     }
 
     DecoderType insertDecoderTypeEntry(DecoderType type) {
         log.debug("inserting a new decoder type - ${type}")
+        boolean sessionOpened
         SqlSession mySession
         if (session != null) {
             log.debug("using an existing session for insert Decoder type entry")
             mySession = session
         } else {
             mySession = sqlSessionFactory.openSession(true)
-
+            sessionOpened = true
         }
         Mapper map = mySession.getMapper(Mapper.class)
         map.insertDecoderTypeEntry(type)
+        if (sessionOpened)  session.close()
         log.debug("result was ${type}")
         return type
     }
@@ -210,16 +200,10 @@ class DatabaseServices {
 
     RosterEntry getRosterEntry(String systemName, String fullPath) {
         log.debug("Retrieving roster for ${systemName} with path of ${fullPath}")
-        SqlSession mySession
-        if (session != null) {
-            log.debug("using an existing session for getRosterEntry")
-            mySession = session
-        } else {
-            mySession = sqlSessionFactory.openSession(true)
-
-        }
-        Mapper map = mySession.getMapper(Mapper.class)
+        SqlSession session = sqlSessionFactory.openSession(true)
+        Mapper map = session.getMapper(Mapper.class)
         RosterEntry result = map.findRosterEntry(systemName, fullPath)
+        session.close()
         log.debug("result found was ${result}")
         return result
 
@@ -229,7 +213,7 @@ class DatabaseServices {
     List<DecoderEntry> decodersForRoster(int rosterID) {
         log.debug("listing decoders for rosterID ${rosterID}")
         if (session == null) {
-            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+            throw new RuntimeException("attempting to run decoderss for roster outside of a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
         List<DecoderEntry> result = map.listDecodersByRosterID(rosterID)
@@ -240,7 +224,7 @@ class DatabaseServices {
     DecoderEntry addDecoderEntry(DecoderEntry entry) {
         log.debug("adding a decoder entry ${entry}")
         if (session == null) {
-            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+            throw new RuntimeException("attempting to run addDecoderEntry outside of a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
         map.insertDecoderEntry(entry)
@@ -251,7 +235,7 @@ class DatabaseServices {
     void updateDecoderEntry(DecoderEntry decoderEntry) {
         log.debug("updating decoder entry ${decoderEntry}")
         if (session == null) {
-            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+            throw new RuntimeException("attempting to run updateDecoderEntry outside of a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
         map.updateDecoderEntry(decoderEntry)
@@ -261,7 +245,7 @@ class DatabaseServices {
     FunctionLabel insertFunctionLabel(FunctionLabel newValue) {
         log.debug("inserting new FunctionLabel as part of a transaction - ${newValue}")
         if (session == null) {
-            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+            throw new RuntimeException("attempting to run insertFunctionLabels outside of a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
         map.insertFunctionLabel(newValue)
@@ -294,7 +278,7 @@ class DatabaseServices {
     void updateRosterEntry(RosterEntry entry) {
         log.debug("updating the roster ${entry}")
         if (session == null) {
-            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+            throw new RuntimeException("attempting to update a Roster entry outside a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
         map.updateRosterEntry(entry)
