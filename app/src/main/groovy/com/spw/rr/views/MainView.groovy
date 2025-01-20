@@ -8,7 +8,6 @@ import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
 import net.miginfocom.swing.MigLayout
 
-import javax.swing.Action
 import javax.swing.JFrame
 import javax.swing.JMenu
 import javax.swing.JMenuBar
@@ -18,14 +17,10 @@ import javax.swing.JTable
 import javax.swing.KeyStroke
 import javax.swing.ListSelectionModel
 import javax.swing.WindowConstants
-import javax.swing.event.ListSelectionEvent
-import javax.swing.event.ListSelectionListener
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
-import java.lang.annotation.Target
-
 
 class MainView {
 
@@ -61,7 +56,7 @@ class MainView {
         fileMenu.add(fileImportMenu)
         JMenuItem closeMenuItem = new JMenuItem("Close")
         closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK))
-        closeMenuItem.addActionListener(controller.closeAtion)
+        closeMenuItem.addActionListener(controller.closeAction)
         fileMenu.add(closeMenuItem)
 
         JMenu settingsMenu = new JMenu("Settings")
@@ -74,6 +69,7 @@ class MainView {
         JMenu viewMenu = new JMenu("View")
         menuBar.add(viewMenu)
         JMenuItem viewAllItem = new JMenuItem("View ALL Decoders")
+        viewAllItem.addActionListener(controller.viewAllAction)
         viewMenu.add(viewAllItem)
         model.viewItem = new JMenuItem("View Selected Decoders")
         model.viewItem.setEnabled(false)

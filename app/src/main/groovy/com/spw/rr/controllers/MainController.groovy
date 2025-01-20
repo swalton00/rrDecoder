@@ -68,7 +68,7 @@ class MainController {
         view.tableModel.fireTableDataChanged()
     }
 
-    def closeAtion = { ActionEvent event ->
+    def closeAction = { ActionEvent event ->
         log.info("shutting down the RRdecoder application")
         saver.writeValues()
         System.exit(0)
@@ -110,13 +110,33 @@ class MainController {
         createProps()
     }
 
+    ArrayList<Integer> rosterIds = new ArrayList<>()
+    void backgroundView() {
+        DecController decController = new DecController(model.baseFrame, rosterIds)
+        decController.init()
+    }
+
     def viewAction = { ActionEvent event ->
         log.debug("view action requested")
-
+        if (model.selectedRows.size() == 0) {
+            log.debug("view action but selected rows is empty")
+            return
+        }
+        rosterIds.clear()
+        model.selectedRows.each {
+            rosterIds.add(it)
+        }
+        worker.execute(backgroundView())
     }
 
     def viewAllAction = { ActionEvent event ->
         log.debug("view all requested")
+        rosterIds.clear()
+        model.tableList.each {
+            Integer thisId = Integer.valueOf(it.get(0))
+            rosterIds.add(thisId)
+        }
+        worker.execute(backgroundView())
     }
 
     def helpAction= { ActionEvent event ->

@@ -14,6 +14,7 @@ class RrBaseModel {
     public ArrayList<Integer> preferredWidths = new ArrayList<>()
     EventList<ArrayList<String>> tableList = new BasicEventList<ArrayList<String>>()
     JTable theTable
+    // the id's of the rows selected (ID's are always the first element in the row
     ArrayList<Integer> selectedRows = new ArrayList<>()
     TableModel tableModel
 
