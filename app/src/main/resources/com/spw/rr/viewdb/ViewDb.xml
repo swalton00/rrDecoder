@@ -1,3 +1,53 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.spw.rr.database.Mapper">
+<mapper namespace="com.spw.rr.viewdb.ViewDb">
+    <select id="listDecodersByRosterID" resultType="DecoderEntry">
+        SELECT
+        p.id,
+        p.decoderId,
+        p.fileName,
+        p.roadNumber,
+        p.roadName,
+        p.manufacturer,
+        p.owner,
+        p.model,
+        p.dccAddress,
+        p.manufacturerId,
+        p.productId,
+        p.dateUpdated,
+        p.decoderTypeId,
+        p.detailTime,
+        p.rosterId,
+        COALESCE(hasSpeedProfile, '0'),
+        COALESCE(hasDetail, '0')
+        FROM decoder p
+        LEFT OUTER JOIN
+        (   SELECT
+        '1' AS hasSpeedProfile,
+        t1.Id
+        FROM
+        decoder t1
+        WHERE
+        EXISTS (   SELECT * FROM speedprofile sp
+        WHERE sp.decoderid = t1.id)) AS t11
+        ON p.id = t11.id
+        LEFT OUTER JOIN
+        (   SELECT
+        '1' AS hasdetail,
+        t1.id
+        FROM
+        decoder t1
+        WHERE
+        EXISTS (   SELECT * FROM cvvalues cv
+        WHERE cv.decoderid = t1.id)
+        OR  EXISTS (   SELECT * FROM decoderdef de
+        WHERE de.decoderid = t1.id)) AS t21
+        ON t21.id = p.id
+        <where>
+            <foreach collection="list" index="index" item="item"
+                     open = "rosterid IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        ORDER BY id
+    </select>
 </mapper>

@@ -12,8 +12,16 @@ import java.awt.Component
 class DecModel extends RrBaseModel{
 
     {
-        columnNames.addAll(["Id" , "RosterId", "Address", "Speeds?", "Details?",
-                            "XML File:", "Road Name", "Road Number", "Manufacturer", "Owner", "Updated"])
+        columnNames.addAll(["Id" , "RosterId",
+                            "Address",
+                            "Speeds?",
+                            "Details?",
+                            "XML File:",
+                            "Road Name",
+                            "Road Number",
+                            "Manufacturer",
+                            "Owner",
+                            "Updated"])
         preferredWidths.addAll([10, 10, 10, 5, 5, 30, 20, 10, 10, 15, 20])
     }
 

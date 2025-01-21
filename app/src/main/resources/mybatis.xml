@@ -5,6 +5,7 @@
 <configuration>
     <typeAliases>
         <package name="com.spw.rr.database"/>
+        <package name="com.spw.rr.viewdb"/>
     </typeAliases>
     <environments default="development">
         <environment id="development">
@@ -19,5 +20,6 @@
     </environments>
     <mappers>
         <mapper resource="com/spw/rr/database/Mapper.xml"/>
+        <mapper resource="com/spw/rr/viewdb/ViewDb.xml"/>
     </mappers>
 </configuration>

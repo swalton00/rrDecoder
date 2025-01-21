@@ -31,9 +31,7 @@ class DecView {
     PropertySaver saver = PropertySaver.getInstance()
 
     RrTableModel tableModel
-    JMenuItem[] itemList = [model.viewSpeedProfileItem, model.viewSpeedGraphItem,
-            model.viewDecDetailItem, model.viewFunctionItem,
-            model.viewKeyPairsItem, model.viewStandCvItem, model.viewSelCvItem]
+    ArrayList<JMenuItem> itemList = new ArrayList<>()
 
     DecView(Component parent, DecController controller, DecModel model) {
         this.parent = parent
@@ -99,7 +97,11 @@ class DecView {
         helpMenu.add(helpMenuItem)
         menuBar.add(helpMenu)
         tempDialog.setJMenuBar(menuBar)
-
+        JMenuItem[] addList = [model.viewSpeedProfileItem, model.viewSpeedGraphItem,
+                                   model.viewDecDetailItem, model.viewFunctionItem,
+                                   model.viewKeyPairsItem, model.viewStandCvItem, model.viewSelCvItem]
+        addList.each {
+            itemList.add(it)}
         tableModel = new RrTableModel(model)
         model.theTable = new JTable(tableModel)
         model.theTable.setCellSelectionEnabled(false)

@@ -117,7 +117,7 @@ class MainController {
     }
 
     def viewAction = { ActionEvent event ->
-        log.debug("view action requested")
+        log.debug("view action requested from main")
         if (model.selectedRows.size() == 0) {
             log.debug("view action but selected rows is empty")
             return
@@ -126,6 +126,7 @@ class MainController {
         model.selectedRows.each {
             rosterIds.add(it)
         }
+        log.trace("list of roster ids is ${rosterIds}")
         worker.execute(backgroundView())
     }
 
@@ -136,6 +137,7 @@ class MainController {
             Integer thisId = Integer.valueOf(it.get(0))
             rosterIds.add(thisId)
         }
+        log.trace("Roster ids are ${rosterIds}")
         worker.execute(backgroundView())
     }
 
