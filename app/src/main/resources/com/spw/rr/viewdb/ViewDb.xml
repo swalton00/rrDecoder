@@ -17,12 +17,12 @@
         p.decoderTypeId,
         p.detailTime,
         p.rosterId,
-        COALESCE(hasSpeedProfile, '0'),
-        COALESCE(hasDetail, '0')
+        COALESCE(hasSpeedProfile, 'No') as hasSpeedProfile,
+        COALESCE(hasDetail, 'No') as hasDetail
         FROM decoder p
         LEFT OUTER JOIN
         (   SELECT
-        '1' AS hasSpeedProfile,
+        'Yes' AS hasSpeedProfile,
         t1.Id
         FROM
         decoder t1
@@ -32,7 +32,7 @@
         ON p.id = t11.id
         LEFT OUTER JOIN
         (   SELECT
-        '1' AS hasdetail,
+        'Yes' AS hasdetail,
         t1.id
         FROM
         decoder t1

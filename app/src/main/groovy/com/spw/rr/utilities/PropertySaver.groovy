@@ -74,8 +74,21 @@ class PropertySaver {
         throw new RuntimeException("call to PropertySaver without an initial init call")
     }
 
+    void putField(String prefix, String name, String value) {
+        log.debug("saving a value for ${prefix} name of ${name} value ${value} ")
+        checkLoaded()
+        properties.put(prefix + "." + name, value)
+        dirty = true
+    }
+
+    String getField(String prefix, String name) {
+        log.trace("Retrieving a value for ${prefix} ${name}")
+        checkLoaded()
+        return properties.get(prefix + "." + name)
+    }
+
     void putInt(String prefix, String name, int value) {
-        log.debug("saving an integer for${prefix} - ${name}")
+        //log.trace("saving an integer for${prefix} - ${name}")
         checkLoaded()
         properties.put(prefix + "." + name, Integer.toString(value))
         dirty = true

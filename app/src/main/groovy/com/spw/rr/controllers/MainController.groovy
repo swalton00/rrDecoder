@@ -77,12 +77,13 @@ class MainController {
     Runnable importBackgrounnd = {  ->
         log.debug("importing roster at location ${chosen}")
         boolean exists = imports.doesRosterExist(chosen)
-        RosterEntry entry = imports.setParent(model.baseFrame)
-        RosterEntry newEntry = imports.importRoster(chosen)
+        RosterEntry newEntry = imports.importRoster(model.baseFrame, chosen)
         SwingUtilities.invokeLater { ->
             addEntry(newEntry)
         }
     }
+
+
 
     File chosen
     def importAction = { ActionEvent event ->
@@ -108,6 +109,21 @@ class MainController {
 
     Runnable backgroundSettings = { ->
         createProps()
+    }
+
+    def importDetailAction = { ActionEvent e ->
+        log.debug("Import detail has been requested")
+        if (model.selectedRows.size() == 0) {
+            log.debug("import detail requested, but no rows selected")
+            return
+        }
+        rosterIds.clear()
+        model.selectedRows.each {
+            rosterIds.add(it)
+        }
+        worker.execute { ->
+            imports.importDetailRoster(model.baseFrame, rosterIds)
+        }
     }
 
     ArrayList<Integer> rosterIds = new ArrayList<>()

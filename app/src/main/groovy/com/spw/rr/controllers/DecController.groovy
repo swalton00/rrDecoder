@@ -3,6 +3,8 @@ package com.spw.rr.controllers
 import com.spw.rr.database.DecoderEntry
 import com.spw.rr.database.RosterEntry
 import com.spw.rr.models.DecModel
+import com.spw.rr.utilities.BackgroundWorker
+import com.spw.rr.utilities.ImportService
 import com.spw.rr.viewdb.ViewDbService
 import com.spw.rr.views.DecView
 import org.slf4j.Logger
@@ -18,6 +20,8 @@ class DecController {
     DecView view
     Component parent
 
+    ImportService imports = ImportService.getInstance()
+    BackgroundWorker worker = BackgroundWorker.getInstance()
     ViewDbService dbService = ViewDbService.getInstance()
     List<Integer> idList
 
@@ -65,6 +69,13 @@ class DecController {
 
     def importDetailAction = { ActionEvent e ->
         log.debug("Import detail action requested")
+        ArrayList<Integer> importRows = new ArrayList<>()
+        model.selectedRows.each( {
+            importRows.add(it)
+        } )
+        worker.execute { ->
+            imports.importDetail(model.thisDialog, importRows)
+        }
     }
 
     def viewSpeedProfileAction = { ActionEvent e ->

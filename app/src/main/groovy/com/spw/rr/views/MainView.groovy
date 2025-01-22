@@ -54,6 +54,10 @@ class MainView {
         fileImportMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.ALT_MASK))
         fileImportMenu.addActionListener(controller.importAction)
         fileMenu.add(fileImportMenu)
+        model.importDetailItem = new JMenuItem("Import Details")
+        model.importDetailItem.addActionListener(controller.importDetailAction)
+        model.importDetailItem.setEnabled(false)
+        fileMenu.add(model.importDetailItem)
         JMenuItem closeMenuItem = new JMenuItem("Close")
         closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK))
         closeMenuItem.addActionListener(controller.closeAction)
@@ -97,8 +101,10 @@ class MainView {
         model.tableIsSelected.addPropertyChangeListener {
             if (it.newValue) {
                 model.viewItem.setEnabled(true)
+                model.importDetailItem.setEnabled(true)
             } else if (!it.newValue) {
                 model.viewItem.setEnabled(false)
+                model.importDetailItem.setEnabled(false)
             }
         }
         model.theTable.setAutoCreateRowSorter(true)

@@ -17,7 +17,9 @@ class MainModel extends RrBaseModel {
     JFrame baseFrame
 
     JMenuItem viewItem
+    JMenuItem importDetailItem
     boolean elementSelected = false
+
 
     public MainModel(MainController controller) {
         this.controller = controller

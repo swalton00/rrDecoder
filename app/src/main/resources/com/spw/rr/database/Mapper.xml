@@ -20,6 +20,28 @@
                  r.id = rosterEntry
         order by systemname
     </select>
+    <select id="getDecoderEntry" resultType="DecoderEntry" parameterType="int">
+        SELECT
+            id,
+            decoderId,
+            fileName,
+            roadNumber,
+            roadName,
+            manufacturer,
+            owner,
+            model,
+            dccAddress,
+            manufacturerId,
+            productId,
+            dateUpdated,
+            decoderTypeId,
+            detailTime,
+            rosterId
+        FROM
+            decoder
+        WHERE
+            id = #{id}
+    </select>
     <select id="getRosterEntry" resultType="RosterEntry">
         SELECT id,
                entered AS entryTime,
@@ -29,6 +51,15 @@
         FROM roster
         WHERE systemName = #{param1}
           AND fullPath = #{param2}
+    </select>
+    <select id="getRosterEntryById" parameterType="integer" resultType="RosterEntry">
+        SELECT id,
+               entered AS entryTime,
+               fullpath,
+               dateupdated,
+               systemname
+        FROM roster
+        WHERE id = #{id}
     </select>
     <insert id="insertRosterEntry" parameterType="RosterEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         INSERT INTO roster
@@ -57,7 +88,7 @@
                 #{decoderModel},
                    CURRENT_TIMESTAMP)
     </insert>
-    <insert id="insertDecoderEntry" parameterType="com.spw.rr.database.DecoderEntry" useGeneratedKeys="true" keyColumn="id"
+    <insert id="insertDecoderEntry" parameterType="DecoderEntry" useGeneratedKeys="true" keyColumn="id"
             keyProperty="id">
         INSERT INTO Decoder
         (decoderid,
@@ -83,7 +114,7 @@
                 #{rosterId},
                 #{dateUpdated})
     </insert>
-    <update id="updateDecoderEntry" parameterType="com.spw.rr.database.DecoderEntry">
+    <update id="updateDecoderEntry" parameterType="DecoderEntry">
         UPDATE
             Decoder
         SET decoderid     = #{decoderId},
@@ -98,7 +129,42 @@
             dateUpdated   = #{dateUpdated}
         WHERE id = #{id}
     </update>
-    <select id="findRosterEntry" resultType="com.spw.rr.database.RosterEntry">
+    <insert id="insertDecoderDef" parameterType="DecoderDef" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO
+            decoderDef
+        (
+            decoderID,
+            varValue,
+            item
+        )
+        VALUES
+            (
+                #{parent},
+                #{varValue},
+                #{item}
+            )
+    </insert>
+    <insert id="insertCVs" parameterType="CVvalues" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO
+            CvValues
+        (
+            decoderId,
+            cvvalue,
+            value
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{cvNumber},
+                #{cvValue}
+            )
+    </insert>
+    <update id="updateDecoderDetailTime" parameterType="Integer">
+        UPDATE Decoder
+        set detailTime = CURRENT_TIMESTAMP
+        WHERE ID = #{Id}
+    </update>
+    <select id="findRosterEntry" resultType="RosterEntry">
         SELECT id,
                entered AS entryTime,
                fullpath,
@@ -108,7 +174,7 @@
         WHERE systemName = #{param1}
           AND fullPath = #{param2};
     </select>
-    <insert id="insertFunctionLabel" parameterType="com.spw.rr.database.FunctionLabel" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    <insert id="insertFunctionLabel" parameterType="FunctionLabel" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         INSERT INTO
             FunctionLabels
         (
@@ -124,7 +190,7 @@
             );
 
     </insert>
-    <insert id="insertKeyValuePairs" parameterType="com.spw.rr.database.KeyValuePairs" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    <insert id="insertKeyValuePairs" parameterType="KeyValuePairs" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         INSERT    INTO
             KeyValues
         (
@@ -139,7 +205,7 @@
                 #{pair_value}
             )
     </insert>
-    <insert id="insertSpeedProfile" parameterType="com.spw.rr.database.SpeedProfile" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+    <insert id="insertSpeedProfile" parameterType="SpeedProfile" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO
             speedProfile
         (
@@ -156,12 +222,12 @@
                 #{reverseValue}
             )
     </insert>
-    <delete id="deleteDecoderEntry" parameterType="com.spw.rr.database.DecoderEntry">
+    <delete id="deleteDecoderEntry" parameterType="DecoderEntry">
         DELETE
         FROM Decoder
         WHERE id = #{id};
     </delete>
-    <update id="updateRosterEntry" parameterType="com.spw.rr.database.RosterEntry">
+    <update id="updateRosterEntry" parameterType="RosterEntry">
         UPDATE
             roster
         SET fullpath=#{fullPath},
@@ -170,4 +236,36 @@
         WHERE
             id = #{id}
     </update>
+    <select id="listDecodersFor" resultType="DecoderEntry">
+        SELECT
+            p.id,
+            p.decoderId,
+            p.fileName,
+            p.roadNumber,
+            p.roadName,
+            p.manufacturer,
+            p.owner,
+            p.model,
+            p.dccAddress,
+            p.manufacturerId,
+            p.productId,
+            p.dateUpdated,
+            p.decoderTypeId,
+            p.detailTime,
+            p.rosterId
+        FROM decoder p
+        <where>
+            <foreach collection="list" index="index" item="item"
+                     open = "rosterid IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        ORDER BY id
+    </select>
+    <delete id="deleteCVs" parameterType="Integer">
+        DELETE FROM CVValues WHERE decoderId = #{decoderId}
+    </delete>
+    <delete id="deleteDecoderDef" parameterType="Integer">
+        DELETE FROM DecoderDef WHERE decoderId = #{decoderId}
+    </delete>
 </mapper>

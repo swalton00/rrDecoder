@@ -18,7 +18,7 @@ import java.util.List
 @Singleton
 class ImportService {
     DatabaseServices database = DatabaseServices.getInstance()
-    private static final Logger log = LoggerFactory.getLogger(com.spw.rr.utilities.ImportService.class)
+    private static final Logger log = LoggerFactory.getLogger(ImportService.class)
     Component parent
     List<DecoderType> decoderList = null
 
@@ -32,10 +32,6 @@ class ImportService {
             log.debug("no roster found -- returning false")
             return false
         }
-    }
-
-    void setParent(Component parent) {
-        this.parent = parent
     }
 
     RosterEntry getRosterEntry(String fullPath) {
@@ -65,7 +61,7 @@ class ImportService {
     }
 
 
-    RosterEntry importRoster(File rosterFile) {
+    RosterEntry importRoster(Component parent, File rosterFile) {
         log.debug("importing from ${rosterFile.path}")
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
@@ -184,8 +180,10 @@ class ImportService {
             database.rollbackAll()
         } finally {
             log.trace("closing the progress monitor")
-            monitor.setProgress(arraySize)
-            monitor.close()
+            SwingUtilities.invokeLater {
+                monitor.setProgress(arraySize)
+                monitor.close()
+            }
             database.close()  // free up the session
             importTime.stop()
         }
@@ -278,5 +276,115 @@ class ImportService {
             }
         }
         return new Timestamp(new Date().getTime())
+    }
+
+    void importDetail(Component parent, List<Integer> decoders) {
+        log.debug("importing details for ${decoders.size()} decoders")
+        HashMap<Integer, RosterEntry> rosterEntries = new HashMap<>()
+        HashMap<Integer, String> rosterFiles = new HashMap<>()
+        ProgressMonitor monitor1 = new ProgressMonitor(parent, "Import Decoder Details",
+                "", 0, decoders.size())
+        monitor1.setMinimum(0)
+        monitor1.setMaximum(decoders.size())
+        monitor1.setMillisToDecideToPopup(10)
+        Log4JStopWatch detailStopWatch = new Log4JStopWatch("detail", "Importing details for ${decoders.size()}")
+        int entryCounter = 0
+        decoders.each { Integer decoderId ->
+            entryCounter++
+            SwingUtilities.invokeLater {
+                monitor1.setProgress(entryCounter)
+                monitor1.setNote("Read XML file")
+            }
+            log.debug("processing details for decoder id of ${decoderId}")
+            Log4JStopWatch decoderDetail = new Log4JStopWatch("decoderDetail", "processing decoder id of ${decoderId}")
+            DecoderEntry decoderEntry = database.getDecoderEntry(decoderId)
+            RosterEntry thisEntry = null
+            if (rosterEntries.containsKey(decoderEntry.rosterId)) {
+                thisEntry = rosterEntries.get(decoderEntry.rosterId)
+            } else {
+                thisEntry = database.getRosterEntry(decoderEntry.rosterId)
+                rosterEntries.put(thisEntry.id, thisEntry)
+                String path = thisEntry.fullPath.substring(0, thisEntry.fullPath.lastIndexOf(File.separator))
+                rosterFiles.put(thisEntry.id, path)
+            }
+            String decoderFileName = rosterFiles.get(decoderEntry.rosterId) +
+                    File.separator + "roster" + File.separator + decoderEntry.fileName
+            boolean fileFound = false
+            String decoderText
+            try {
+                File xmlDecoderFile = new File(decoderFileName)
+                decoderText = xmlDecoderFile.text
+                fileFound = true
+            } catch (FileNotFoundException fe) {
+                log.error "File ${decoderFileName} was not found"
+            }
+            if (fileFound) {
+                log.debug("found roster xml for id ${decoderEntry.id}")
+                groovy.util.XmlSlurper slurper = new groovy.util.XmlSlurper()
+                slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+                slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+                def decoderXML = slurper.parseText(decoderText)
+                try {
+                    Log4JStopWatch individualStopWatch = new Log4JStopWatch("details1", "decoder id = ${decoderId}")
+                    database.beginTransaction()
+                    int varSize = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'.size()
+                    // clean out any old CV values and DecoderDef rows first
+
+                    database.prepareDetail(decoderEntry.id)
+                    SwingUtilities.invokeLater {
+                        monitor1.setNote("Process decoder XML")
+                    }
+                    log.debug("decoderDef size is ${varSize}")
+                    for (j in 0..<varSize) {
+                        String itemString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@item'
+                        String valueString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@value'
+                        log.debug("value is ${valueString} and item is ${itemString}")
+                        DecoderDef decoderDef = new DecoderDef()
+                        decoderDef.parent = decoderId
+                        decoderDef.item = itemString
+                        decoderDef.varValue = valueString
+                        database.insertDecoderDef(decoderDef)
+                    }
+                    int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
+                    log.debug("CV size is ${cvSize}")
+                    SwingUtilities.invokeLater {
+                        monitor1.setNote("Process cvvalues")
+                    }
+                    for (j in 0..<cvSize) {
+                        String name = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@name'
+                        String cvValue = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@value'
+                        log.debug("adding a CV number ${name} with value ${cvValue}")
+                        CVvalues cVvalues = new CVvalues()
+                        cVvalues.cvNumber = name
+                        cVvalues.cvValue = cvValue
+                        cVvalues.decoderId = decoderId
+                        database.insertCVs(cVvalues)
+                    }
+                    database.updateDetailTime(decoderId)
+                    database.commitWork()
+                    individualStopWatch.stop()
+                } catch (Exception dbEx) {
+                    log.error("exception processing the data -- rolling back", dbEx)
+                    database.rollbackAll()
+                }
+            }
+        }
+        SwingUtilities.invokeLater {
+            monitor1.setMaximum(entryCounter -1)
+            monitor1.setProgress(entryCounter)
+            monitor1.close()
+        }
+        detailStopWatch.stop()
+        log.debug("detail import complete")
+    }
+
+    void importDetailRoster(Component parent, ArrayList<Integer> rosterNumbers) {
+        log.debug("Importing details for ${rosterNumbers.size()} roster entries")
+        List<DecoderEntry> rosterEntries = database.decodersForRosterList(rosterNumbers)
+        ArrayList<Integer> decoderList = new ArrayList<>()
+        rosterEntries.each {
+            decoderList.add(it.id)
+        }
+       importDetail(parent, decoderList)
     }
 }

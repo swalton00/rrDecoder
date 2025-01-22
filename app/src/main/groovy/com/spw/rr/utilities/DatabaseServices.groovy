@@ -136,6 +136,7 @@ class DatabaseServices {
     void dbClose() {
         log.debug("closing the Mybatis database")
     }
+
     void close() {
         log.debug("closing the session from the transaction")
         if (session == null) {
@@ -157,7 +158,7 @@ class DatabaseServices {
 
     List<DecoderType> listDecoderTypes() {
         log.debug("listing the decoder types in the database")
-        SqlSession session  = sqlSessionFactory.openSession(true)
+        SqlSession session = sqlSessionFactory.openSession(true)
         Mapper map = session.getMapper(Mapper.class)
         List<DecoderType> typeList = map.listDecoderTypes()
         log.debug("got a list of size ${typeList.size()}")
@@ -178,7 +179,7 @@ class DatabaseServices {
         }
         Mapper map = mySession.getMapper(Mapper.class)
         map.insertDecoderTypeEntry(type)
-        if (sessionOpened)  session.close()
+        if (sessionOpened) session.close()
         log.debug("result was ${type}")
         return type
     }
@@ -200,15 +201,50 @@ class DatabaseServices {
 
     RosterEntry getRosterEntry(String systemName, String fullPath) {
         log.debug("Retrieving roster for ${systemName} with path of ${fullPath}")
-        SqlSession session = sqlSessionFactory.openSession(true)
-        Mapper map = session.getMapper(Mapper.class)
-        RosterEntry result = map.findRosterEntry(systemName, fullPath)
-        session.close()
+        SqlSession session
+        RosterEntry result
+        try {
+
+
+            session = sqlSessionFactory.openSession(true)
+            Mapper map = session.getMapper(Mapper.class)
+            result = map.findRosterEntry(systemName, fullPath)
+        } finally {
+            session.close()
+
+        }
         log.debug("result found was ${result}")
         return result
-
     }
 
+    RosterEntry getRosterEntry(int rosterId) {
+        log.debug("Retrieving roster with id of ${rosterId}")
+        RosterEntry entry
+        SqlSession session
+        try {
+            session = sqlSessionFactory.openSession(true)
+            Mapper mapper = session.getMapper(Mapper.class)
+            entry = mapper.getRosterEntryById(rosterId)
+            log.debug("result found was ${entry}")
+        } finally {
+            session.close()
+        }
+        log.trace("returned entry is ${entry}")
+        return entry
+    }
+
+
+    void prepareDetail(Integer decoderId) {
+        log.debug("preparing for Detail import by deleting CvValue and DecoderDef where decoderId = ${decoderId}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run decoderss for roster outside of a transaction")
+        }
+        Mapper mapper = session.getMapper(Mapper.class)
+        int rowsDeleted = mapper.deleteCVs(decoderId)
+        log.debug("CVvalues rows deleted = ${rowsDeleted}")
+        rowsDeleted = mapper.deleteDecoderDef(decoderId)
+        log.debug("DecoderDef rows deleted = ${rowsDeleted}")
+    }
 
     List<DecoderEntry> decodersForRoster(int rosterID) {
         log.debug("listing decoders for rosterID ${rosterID}")
@@ -219,6 +255,34 @@ class DatabaseServices {
         List<DecoderEntry> result = map.listDecodersByRosterID(rosterID)
         log.debug("result was ${result}")
         return result
+    }
+
+    List<DecoderEntry> decodersForRosterList(List<Integer> rosters) {
+        log.debug("Getting a list of decoders for ${rosters.size()}")
+        SqlSession session
+        List<DecoderEntry> results
+        try {
+            session = sqlSessionFactory.openSession(true)
+            Mapper map = session.getMapper(Mapper.class)
+            results = map.listDecodersFor(rosters)
+        } finally {
+            session.close()
+        }
+    }
+
+    DecoderEntry getDecoderEntry(int id) {
+        log.debug("Finding a decoder with id of ${id}")
+        SqlSession session
+        DecoderEntry decoder
+        try {
+            session = sqlSessionFactory.openSession(true)
+            Mapper mapper = session.getMapper(Mapper.class)
+            decoder = mapper.getDecoderEntry(id)
+        } finally {
+            session.close()
+        }
+
+        return decoder
     }
 
     DecoderEntry addDecoderEntry(DecoderEntry entry) {
@@ -284,6 +348,38 @@ class DatabaseServices {
         map.updateRosterEntry(entry)
     }
 
+    DecoderDef insertDecoderDef(DecoderDef decoderDef) {
+        log.debug("adding new decoder defininiton: ${decoderDef} inside a transaction")
+        if (session == null) {
+            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+        }
+        Mapper mapper = session.getMapper(Mapper.class)
+        mapper.insertDecoderDef(decoderDef)
+        log.debug("result was ${decoderDef}")
+        return decoderDef
+    }
+
+
+    CVvalues insertCVs(CVvalues cVvalues) {
+        log.debug("adding new CV value: ${cVvalues} for a transaction")
+        if (session == null) {
+            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+        }
+        Mapper mapper = session.getMapper(Mapper.class)
+        mapper.insertCVs(cVvalues)
+        log.debug("result was ${cVvalues}")
+        return cVvalues
+    }
+
+    int updateDetailTime(Integer decoderId) {
+        log.debug("update detail timestamp for decoder id ${decoderId} in a transaction")
+        if (session == null) {
+            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+        }
+        Mapper mapper = session.getMapper(Mapper.class)
+        return mapper.updateDecoderDetailTime(decoderId)
+    }
+
     int deleteDecoderEntry(DecoderEntry decoderEntry) {
         log.debug("Deleting decoder with id of ${decoderEntry.id} within a transaction")
         if (session == null) {
@@ -309,4 +405,5 @@ class DatabaseServices {
         }
         session.rollback()
     }
+
 }

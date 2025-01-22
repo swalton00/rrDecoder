@@ -8,17 +8,8 @@ import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
 import net.miginfocom.swing.MigLayout
 
-import javax.swing.JDialog
-import javax.swing.JMenu
-import javax.swing.JMenuBar
-import javax.swing.JMenuItem
-import javax.swing.JScrollPane
-import javax.swing.JTable
-import javax.swing.KeyStroke
-import javax.swing.ListSelectionModel
-import java.awt.Component
-import java.awt.Dimension
-import java.awt.Toolkit
+import javax.swing.*
+import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 
@@ -28,6 +19,7 @@ class DecView {
     DecController controller
     DecModel model
     static final String D_NAME = "decoders"
+    static final String D_CVLIST = "cvList"
     PropertySaver saver = PropertySaver.getInstance()
 
     RrTableModel tableModel
@@ -37,13 +29,14 @@ class DecView {
         this.parent = parent
         this.controller = controller
         this.model = model
+        model.view = this
     }
 
     void init() {
         model.thisDialog = (Component) (new JDialog(parent, "Decoder View", true))
         model.thisDialog.setName(D_NAME)
         model.thisDialog.addComponentListener(new FrameHelper())
-        JDialog tempDialog =   (JDialog)(model.thisDialog)
+        JDialog tempDialog = (JDialog) (model.thisDialog)
         tempDialog.setLayout(new MigLayout("fill"))
         JMenuBar menuBar = new JMenuBar()
         JMenu fileMenu = new JMenu("File")
@@ -65,29 +58,28 @@ class DecView {
         model.viewSpeedGraphItem = new JMenuItem("Graph Speed Profiles")
         model.viewSpeedGraphItem.setEnabled(false)
         model.viewSpeedGraphItem.addActionListener(controller.viewSpeedGraphAction)
-        viewMenu.add(model.viewSpeedProfileItem)
-        model.viewSpeedProfileItem.addActionListener(controller.viewSpeedProfileAction)
+        viewMenu.add(model.viewSpeedGraphItem)
         model.viewDecDetailItem = new JMenuItem("View Decoder Details")
         model.viewDecDetailItem.setEnabled(false)
         model.viewDecDetailItem.addActionListener(controller.viewDecDetailAction)
         viewMenu.add(model.viewDecDetailItem)
-        model.viewFunctionItem = new JMenuItem("View Decoder Details")
+        model.viewFunctionItem = new JMenuItem("View Function Labels")
         model.viewFunctionItem.setEnabled(false)
         viewMenu.add(model.viewFunctionItem)
         model.viewFunctionItem.addActionListener(controller.viewFunctionAction)
-        model.viewKeyPairsItem = new JMenuItem("View Decoder Details")
+        model.viewKeyPairsItem = new JMenuItem("View Key Value Pairs")
         model.viewKeyPairsItem.setEnabled(false)
         viewMenu.add(model.viewKeyPairsItem)
         model.viewKeyPairsItem.addActionListener(controller.viewSKeyPairsAction)
-        model.viewStandCvItem = new JMenuItem("View Decoder Details")
+        model.viewStandCvItem = new JMenuItem("View Standard CV Contents")
         model.viewStandCvItem.setEnabled(false)
         viewMenu.add(model.viewStandCvItem)
         model.viewStandCvItem.addActionListener(controller.viewStandCvAction)
-        model.viewSelCvItem = new JMenuItem("View Decoder Details")
+        model.viewSelCvItem = new JMenuItem("View Selected CV Contents")
         model.viewSelCvItem.setEnabled(false)
         viewMenu.add(model.viewSelCvItem)
         model.viewSelCvItem.addActionListener(controller.viewSelCvAction)
-        model.viewAllCvItem = new JMenuItem("View Decoder Details")
+        model.viewAllCvItem = new JMenuItem("View All CV Contents")
         model.viewAllCvItem.setEnabled(false)
         viewMenu.add(model.viewAllCvItem)
         model.viewAllCvItem.addActionListener(controller.viewAllCvAction)
@@ -98,10 +90,12 @@ class DecView {
         menuBar.add(helpMenu)
         tempDialog.setJMenuBar(menuBar)
         JMenuItem[] addList = [model.viewSpeedProfileItem, model.viewSpeedGraphItem,
-                                   model.viewDecDetailItem, model.viewFunctionItem,
-                                   model.viewKeyPairsItem, model.viewStandCvItem, model.viewSelCvItem]
+                               model.viewDecDetailItem, model.viewFunctionItem,
+                               model.viewKeyPairsItem, model.viewStandCvItem,
+                               model.viewAllCvItem, model.importDetailItem]
         addList.each {
-            itemList.add(it)}
+            itemList.add(it)
+        }
         tableModel = new RrTableModel(model)
         model.theTable = new JTable(tableModel)
         model.theTable.setCellSelectionEnabled(false)
@@ -110,13 +104,27 @@ class DecView {
         model.theTable.getSelectionModel().addListSelectionListener(new ListenerForTables(model))
         model.tableIsSelected.addPropertyChangeListener {
             itemList.each { item ->
-                item.setEnabled((boolean)it.newValue)
+                item.setEnabled((boolean) it.newValue)
             }
         }
         model.theTable.setAutoCreateRowSorter(true)
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         JScrollPane scrollPane = new JScrollPane(model.theTable)
-        tempDialog.add(scrollPane, "grow")
+        tempDialog.add(scrollPane, "h 8in:8in:, grow, wrap")
+        JPanel cvPanel = new JPanel(new MigLayout("fill"))
+        JLabel cvLabel = new JLabel("CVs: ID, ")
+        cvPanel.add(cvLabel, "h 30px:30px:30px, left")
+        model.cvListField = new JTextField("")
+        model.cvListField.setColumns(40)
+        model.cvListField.setName("cvlist")
+        model.cvListField.addFocusListener(model)
+        String cvList = saver.getField(D_NAME, "cvList")
+        if (cvList != null) {
+            model.cvListField.setText(cvList)
+        }
+        cvPanel.add(model.cvListField, "h 30px:30px:30px, left, growx")
+        tempDialog.add(cvPanel, "h 30px:30px:30px, wrap")
+
         Integer dialogWidth = saver.getInt(D_NAME, FrameHelper.WIDTH_NAME)
         Integer dialogHeight = saver.getInt(D_NAME, FrameHelper.HEIGHT_NAME)
         Dimension dialogSize = model.thisDialog.getSize()
