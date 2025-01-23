@@ -10,6 +10,8 @@ import com.spw.rr.views.DecView
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import javax.swing.SwingUtilities
+import javax.swing.SwingWorker
 import java.awt.Component
 import java.awt.event.ActionEvent
 
@@ -32,9 +34,20 @@ class DecController {
         idList = rosterIds
     }
 
-    void init() {
+    void rebuildList() {
         List<DecoderEntry> entries = dbService.listDecoderByRosterId(idList)
-        buildList(entries)
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater {
+                buildList(entries)
+            }
+        } else {
+            buildList(entries)
+        }
+
+    }
+
+    void init() {
+        rebuildList()
         view.init()
     }
 
@@ -46,8 +59,8 @@ class DecController {
             nextLine.add(entry.id.toString())
             nextLine.add(entry.rosterId.toString())
             nextLine.add(entry.dccAddress)
-            nextLine.add(entry.hasDetail)
             nextLine.add(entry.hasSpeedProfile)
+            nextLine.add(entry.hasDetail)
             nextLine.add(entry.fileName)
             nextLine.add(entry.roadName)
             nextLine.add(entry.roadNumber)
@@ -75,8 +88,11 @@ class DecController {
         } )
         worker.execute { ->
             imports.importDetail(model.thisDialog, importRows)
+            rebuildList()
         }
     }
+
+
 
     def viewSpeedProfileAction = { ActionEvent e ->
         log.debug("view Speed Profile action requested")

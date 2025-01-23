@@ -2,49 +2,50 @@
 <mapper namespace="com.spw.rr.viewdb.ViewDb">
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
-        p.id,
-        p.decoderId,
-        p.fileName,
-        p.roadNumber,
-        p.roadName,
-        p.manufacturer,
-        p.owner,
-        p.model,
-        p.dccAddress,
-        p.manufacturerId,
-        p.productId,
-        p.dateUpdated,
-        p.decoderTypeId,
-        p.detailTime,
-        p.rosterId,
-        COALESCE(hasSpeedProfile, 'No') as hasSpeedProfile,
-        COALESCE(hasDetail, 'No') as hasDetail
+            p.id,
+            p.decoderId,
+            p.fileName,
+            p.roadNumber,
+            p.roadName,
+            p.manufacturer,
+            p.owner,
+            p.model,
+            p.dccAddress,
+            p.manufacturerId,
+            p.productId,
+            p.dateUpdated,
+            p.decoderTypeId,
+            p.detailTime,
+            p.rosterId,
+            COALESCE(hasSpeedProfile, '-') as hasSpeedProfile,
+            COALESCE(hasDetail, '-') as hasDetail
         FROM decoder p
-        LEFT OUTER JOIN
-        (   SELECT
-        'Yes' AS hasSpeedProfile,
-        t1.Id
+            LEFT OUTER JOIN
+        ( SELECT
+            'Yes' AS hasSpeedProfile,
+            t1.Id
         FROM
         decoder t1
         WHERE
-        EXISTS (   SELECT * FROM speedprofile sp
-        WHERE sp.decoderid = t1.id)) AS t11
+            EXISTS ( SELECT * FROM speedprofile sp
+        WHERE
+            sp.decoderid = t1.id)) AS t11
         ON p.id = t11.id
         LEFT OUTER JOIN
-        (   SELECT
-        'Yes' AS hasdetail,
-        t1.id
-        FROM
-        decoder t1
-        WHERE
-        EXISTS (   SELECT * FROM cvvalues cv
-        WHERE cv.decoderid = t1.id)
-        OR  EXISTS (   SELECT * FROM decoderdef de
-        WHERE de.decoderid = t1.id)) AS t21
+            ( SELECT
+                'Yes' AS hasdetail,
+                t1.id
+            FROM
+                decoder t1
+            WHERE
+                EXISTS ( SELECT * FROM cvvalues cv
+                WHERE cv.decoderid = t1.id)
+                OR EXISTS ( SELECT * FROM decoderdef de
+                    WHERE de.decoderid = t1.id)) AS t21
         ON t21.id = p.id
         <where>
             <foreach collection="list" index="index" item="item"
-                     open = "rosterid IN (" separator="," close=")">
+                     open="rosterid IN (" separator="," close=")">
                 #{item}
             </foreach>
         </where>

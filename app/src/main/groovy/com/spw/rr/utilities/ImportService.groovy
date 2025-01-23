@@ -288,7 +288,10 @@ class ImportService {
 
     void importDetail(Component parent, List<Integer> decoders) {
         log.debug("importing details for ${decoders.size()} decoders")
-        if (!detailLock.tryAcquire()) {
+        if (detailLock.tryAcquire()) {
+            log.debug("lock acquired XXXXX")
+        } else {
+            log.error("second import requested")
             throw new RuntimeException("attempt to run a second import")
         }
         HashMap<Integer, RosterEntry> rosterEntries = new HashMap<>()
@@ -378,8 +381,9 @@ class ImportService {
                     database.rollbackAll()
                 }
             }
-            detailLock.release()
         }
+        log.debug("lock released - YYYY")
+        detailLock.release()
         monitor.view.setComplete()
         detailStopWatch.stop()
         log.debug("detail import complete")

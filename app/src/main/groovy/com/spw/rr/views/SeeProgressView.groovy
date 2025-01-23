@@ -18,6 +18,9 @@ class SeeProgressView {
     SeeProgressModel model
     Component parent
 
+    private static final int D_WIDTH = 300
+    private static final int D_HEIGHT = 400
+
     SeeProgressView(Component parent, SeeProgressController controller, SeeProgressModel model) {
         this.parent = parent
         this.controller = controller
@@ -27,7 +30,8 @@ class SeeProgressView {
     void init() {
         SwingUtilities.invokeLater {
             model.theDialog = new JDialog(parent, "Import Progress", true)
-            model.theDialog.setLayout(new MigLayout())
+            model.theDialog.getContentPane().setLayout(new MigLayout("fill"))
+            model.theDialog.setLayout(new MigLayout("fill"))
             JPanel mainPanel = new JPanel(new MigLayout())
             JLabel panelTitle = new JLabel("Import Progress")
             Font currentFont = panelTitle.getFont()
@@ -40,11 +44,11 @@ class SeeProgressView {
             mainPanel.add(model.label2, "center, wrap")
             mainPanel.add(model.bar3, "center, wrap")
             mainPanel.add(model.label3, "center, wrap")
-            model.theDialog.getContentPane().add(mainPanel, "grow")
-            model.theDialog.setSize(500, 600)
+            model.theDialog.getContentPane().add(mainPanel, "center, grow")
+            model.theDialog.setSize(D_WIDTH, D_HEIGHT)
             Toolkit toolkit = Toolkit.getDefaultToolkit()
-            int x = (toolkit.getScreenSize().width - 500) / 2
-            int y = (toolkit.getScreenSize().height - 600) / 2
+            int x = (toolkit.getScreenSize().width - D_WIDTH) / 2
+            int y = (toolkit.getScreenSize().height - D_HEIGHT) / 2
             model.theDialog.setLocation(x, y)
             model.theDialog.setVisible(true)
         }
