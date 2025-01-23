@@ -1,5 +1,6 @@
 package com.spw.rr.utilities
 
+import com.spw.rr.controllers.SeeProgressController
 import com.spw.rr.database.*
 import groovy.xml.XmlSlurper
 import org.perf4j.log4j.Log4JStopWatch
@@ -13,12 +14,15 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.List
+import java.util.concurrent.Semaphore
 
 
 @Singleton
 class ImportService {
     DatabaseServices database = DatabaseServices.getInstance()
     private static final Logger log = LoggerFactory.getLogger(ImportService.class)
+    private static Semaphore importLock = new Semaphore(1)
+    private static Semaphore detailLock = new Semaphore(1)
     Component parent
     List<DecoderType> decoderList = null
 
@@ -62,7 +66,10 @@ class ImportService {
 
 
     RosterEntry importRoster(Component parent, File rosterFile) {
-        log.debug("importing from ${rosterFile.path}")
+        log.debug("importing from ${rosterFile.path} - getting the lock")
+        if (!importLock.tryAcquire()) {
+            throw new RuntimeException("attempting to import a file while an import is in progress")
+        }
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
         int arraySize = rosterValues.roster.locomotive.size()
@@ -187,8 +194,9 @@ class ImportService {
             database.close()  // free up the session
             importTime.stop()
         }
-        log.debug("there are ${arraySize} entries in this roster")
+        log.debug("there are ${arraySize} entries in this roster - releasing the lock")
         thisEntry.decCount = arraySize
+        importLock.release()
         return thisEntry
     }
 
@@ -280,23 +288,21 @@ class ImportService {
 
     void importDetail(Component parent, List<Integer> decoders) {
         log.debug("importing details for ${decoders.size()} decoders")
+        if (!detailLock.tryAcquire()) {
+            throw new RuntimeException("attempt to run a second import")
+        }
         HashMap<Integer, RosterEntry> rosterEntries = new HashMap<>()
         HashMap<Integer, String> rosterFiles = new HashMap<>()
-        ProgressMonitor monitor1 = new ProgressMonitor(parent, "Import Decoder Details",
-                "", 0, decoders.size())
-        monitor1.setMinimum(0)
-        monitor1.setMaximum(decoders.size())
-        monitor1.setMillisToDecideToPopup(10)
+        SeeProgressController monitor = new SeeProgressController(parent)
+        monitor.setMainOverall(0, decoders.size())
         Log4JStopWatch detailStopWatch = new Log4JStopWatch("detail", "Importing details for ${decoders.size()}")
         int entryCounter = 0
         decoders.each { Integer decoderId ->
             entryCounter++
-            SwingUtilities.invokeLater {
-                monitor1.setProgress(entryCounter)
-                monitor1.setNote("Read XML file")
-            }
+            monitor.setMainProgress(entryCounter, "Decoder ${entryCounter} of ${decoders.size()}")
             log.debug("processing details for decoder id of ${decoderId}")
             Log4JStopWatch decoderDetail = new Log4JStopWatch("decoderDetail", "processing decoder id of ${decoderId}")
+            monitor.setIntermediateOverall(1, 5, "Read Decoder Entry", "Step 1 of 5")
             DecoderEntry decoderEntry = database.getDecoderEntry(decoderId)
             RosterEntry thisEntry = null
             if (rosterEntries.containsKey(decoderEntry.rosterId)) {
@@ -307,6 +313,7 @@ class ImportService {
                 String path = thisEntry.fullPath.substring(0, thisEntry.fullPath.lastIndexOf(File.separator))
                 rosterFiles.put(thisEntry.id, path)
             }
+            monitor.setIntermediateProgress(2, "Read XML File", "Step 2 of 5")
             String decoderFileName = rosterFiles.get(decoderEntry.rosterId) +
                     File.separator + "roster" + File.separator + decoderEntry.fileName
             boolean fileFound = false
@@ -319,6 +326,7 @@ class ImportService {
                 log.error "File ${decoderFileName} was not found"
             }
             if (fileFound) {
+                monitor.setIntermediateProgress(3, "Parse XML File", "Setep 3 of 5")
                 log.debug("found roster xml for id ${decoderEntry.id}")
                 groovy.util.XmlSlurper slurper = new groovy.util.XmlSlurper()
                 slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
@@ -331,11 +339,12 @@ class ImportService {
                     // clean out any old CV values and DecoderDef rows first
 
                     database.prepareDetail(decoderEntry.id)
-                    SwingUtilities.invokeLater {
-                        monitor1.setNote("Process decoder XML")
-                    }
+                    monitor.setIntermediateProgress(4, "Add Decoder Definition records", "Step 4 of 5")
+                    monitor.setDetailOverall(0, varSize)
+
                     log.debug("decoderDef size is ${varSize}")
                     for (j in 0..<varSize) {
+                        monitor.setDetailProgress(j, "Step ${j} of ${varSize}")
                         String itemString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@item'
                         String valueString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@value'
                         log.debug("value is ${valueString} and item is ${itemString}")
@@ -346,11 +355,11 @@ class ImportService {
                         database.insertDecoderDef(decoderDef)
                     }
                     int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
+                    monitor.setIntermediateProgress(5, "Add CV records", "Step 5 of 5")
                     log.debug("CV size is ${cvSize}")
-                    SwingUtilities.invokeLater {
-                        monitor1.setNote("Process cvvalues")
-                    }
+                    monitor.setDetailOverall(0, cvSize)
                     for (j in 0..<cvSize) {
+                        monitor.setDetailProgress(j, "${j} of ${cvSize}")
                         String name = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@name'
                         String cvValue = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@value'
                         log.debug("adding a CV number ${name} with value ${cvValue}")
@@ -362,18 +371,16 @@ class ImportService {
                     }
                     database.updateDetailTime(decoderId)
                     database.commitWork()
+                    log.trace("work now committed")
                     individualStopWatch.stop()
                 } catch (Exception dbEx) {
                     log.error("exception processing the data -- rolling back", dbEx)
                     database.rollbackAll()
                 }
             }
+            detailLock.release()
         }
-        SwingUtilities.invokeLater {
-            monitor1.setMaximum(entryCounter -1)
-            monitor1.setProgress(entryCounter)
-            monitor1.close()
-        }
+        monitor.view.setComplete()
         detailStopWatch.stop()
         log.debug("detail import complete")
     }
@@ -385,6 +392,7 @@ class ImportService {
         rosterEntries.each {
             decoderList.add(it.id)
         }
-       importDetail(parent, decoderList)
+        importDetail(parent, decoderList)
     }
+
 }
