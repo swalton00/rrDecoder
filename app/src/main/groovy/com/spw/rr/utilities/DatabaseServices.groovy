@@ -360,7 +360,7 @@ class DatabaseServices {
     }
 
 
-    CVvalues insertCVs(CVvalues cVvalues) {
+    CvValues insertCVs(CvValues cVvalues) {
         log.debug("adding new CV value: ${cVvalues} for a transaction")
         if (session == null) {
             throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")

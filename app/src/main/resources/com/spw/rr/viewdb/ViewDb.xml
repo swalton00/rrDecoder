@@ -51,4 +51,58 @@
         </where>
         ORDER BY id
     </select>
+    <select id="listStandardCVs" resultMap="decoderMap">
+        SELECT
+        b.id,
+        b.decoderid,
+        a.dccAddress,
+        a.roadName as roadName,
+        a.roadNumber as roadNumber,
+        cvvalue as cvNumber,
+        value as cvValue
+        FROM
+        decoder a
+        INNER JOIN
+        cvvalues b
+        ON a.id = b.decoderid
+        <where>
+            <foreach collection="arg0" index="index" item="item"
+                     open = "b.decoderid IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        AND cvvalue IN ('1',
+        '2',
+        '3',
+        '4',
+        '5' ,
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19')
+        ORDER BY
+        b.decoderid,
+        cvvalue
+    </select>
+    <resultMap id="decoderMap" type="DecoderEntry">
+        <id property="id" column="decoderId"/>
+        <result property="roadName" column="roadName"/>
+        <result property="roadNumber" column="roadNumber"/>
+        <result property="dccAddress" column="dccAddress"/>
+        <collection property="cvValues" ofType="CvValues">
+            <id column="id" property="id"/>
+            <result property="cvNumber" column="cvNumber"/>
+            <result property="cvValue" column="cvValue"/>
+        </collection>
+    </resultMap>
 </mapper>

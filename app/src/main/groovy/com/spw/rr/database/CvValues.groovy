@@ -3,7 +3,7 @@ package com.spw.rr.database
 import groovy.transform.ToString
 
 @ToString(includeFields = true, includePackage = false, includeNames = true)
-class CVvalues {
+class CvValues {
     Integer id
     Integer decoderId
     String  cvNumber

@@ -10,6 +10,7 @@ import com.spw.rr.views.DecView
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import javax.swing.JDialog
 import javax.swing.SwingUtilities
 import javax.swing.SwingWorker
 import java.awt.Component
@@ -20,7 +21,6 @@ class DecController {
     private static final Logger log = LoggerFactory.getLogger(DecController.class)
     DecModel model
     DecView view
-    Component parent
 
     ImportService imports = ImportService.getInstance()
     BackgroundWorker worker = BackgroundWorker.getInstance()
@@ -92,7 +92,19 @@ class DecController {
         }
     }
 
+    List<Integer> buildSelectedList() {
+        log.debug("building a list from a selected list of size ${model.selectedRows}")
+        ArrayList<Integer> retList = new ArrayList<>()
+        model.selectedRows.each {
+            retList.add(it)
+        }
+        log.debug("returning a list of size ${retList.size()}")
+        return retList
+    }
 
+    void doDataView(DataController.ViewType viewType, List<Integer> selList) {
+        new DataController((JDialog)model.thisDialog, viewType, selList)
+    }
 
     def viewSpeedProfileAction = { ActionEvent e ->
         log.debug("view Speed Profile action requested")
@@ -116,6 +128,9 @@ class DecController {
 
     def viewStandCvAction = { ActionEvent e ->
         log.debug("view Standard CV action requested")
+        List<Integer> selList = buildSelectedList()
+        doDataView( DataController.ViewType.STANDARD_CVS, selList)
+
     }
 
     def viewSelCvAction = { ActionEvent e ->

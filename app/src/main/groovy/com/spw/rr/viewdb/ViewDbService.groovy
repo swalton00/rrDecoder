@@ -1,5 +1,6 @@
 package com.spw.rr.viewdb
 
+import com.spw.rr.database.CvValues
 import com.spw.rr.database.DecoderEntry
 import com.spw.rr.utilities.DatabaseServices
 import org.apache.ibatis.session.SqlSession
@@ -29,5 +30,21 @@ class ViewDbService {
             }
         }
         return entries
+    }
+
+    List<DecoderEntry> listStandardCVs(Vector<Integer> decoderIds) {
+        log.debug("retrieving CVs for ${decoderIds}")
+        SqlSession session
+        List<DecoderEntry> retvals
+         try {
+            session = baseDb.sqlSessionFactory.openSession(true)
+             ViewDb map = session.getMapper(ViewDb.class)
+             retvals = map.listStandardCVs(decoderIds)
+        } finally {
+            session.close()
+         }
+        log.trace("returned list is ${retvals}")
+        log.debug("returning a list of ${retvals.size()}")
+        return retvals
     }
 }

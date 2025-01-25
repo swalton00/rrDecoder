@@ -24,6 +24,6 @@ class DecoderEntry {
     String hasDetail
     String hasSpeedProfile
 
-    List<CVvalues> cvValues
+    List<CvValues> cvValues
 }
 

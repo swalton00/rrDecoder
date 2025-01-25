@@ -366,7 +366,7 @@ class ImportService {
                         String name = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@name'
                         String cvValue = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@value'
                         log.debug("adding a CV number ${name} with value ${cvValue}")
-                        CVvalues cVvalues = new CVvalues()
+                        CvValues cVvalues = new CvValues()
                         cVvalues.cvNumber = name
                         cVvalues.cvValue = cvValue
                         cVvalues.decoderId = decoderId

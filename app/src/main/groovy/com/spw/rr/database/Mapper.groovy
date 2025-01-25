@@ -24,6 +24,6 @@ interface Mapper {
     int deleteCVs(Integer decoderId)
     int deleteDecoderDef(Integer decoderId)
     void insertDecoderDef(DecoderDef decoderDef)
-    void insertCVs(CVvalues cVvalues)
+    void insertCVs(CvValues cVvalues)
     int updateDecoderDetailTime(Integer decoderId)
 }
