@@ -106,6 +106,9 @@ class DecView {
             itemList.each { item ->
                 item.setEnabled((boolean) it.newValue)
             }
+            if (it.newValue & model.testCvList()) {
+                model.viewSelCvItem.setEnabled(true)
+            }
         }
         model.theTable.setAutoCreateRowSorter(true)
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)

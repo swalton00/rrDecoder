@@ -102,8 +102,15 @@ class DecController {
         return retList
     }
 
-    void doDataView(DataController.ViewType viewType, List<Integer> selList) {
-        new DataController((JDialog)model.thisDialog, viewType, selList)
+    void doDataView(DataController.ViewType viewType, List<Integer> selList, String cvList) {
+        worker.execute {
+            if (viewType.equals( DataController.ViewType.SELECTED_CVS)) {
+                new DataController((JDialog) model.thisDialog, viewType, selList, cvList)
+            } else {
+                new DataController((JDialog) model.thisDialog, viewType, selList)
+            }
+            log.trace("worker finished executing view std cvs")
+        }
     }
 
     def viewSpeedProfileAction = { ActionEvent e ->
@@ -129,16 +136,22 @@ class DecController {
     def viewStandCvAction = { ActionEvent e ->
         log.debug("view Standard CV action requested")
         List<Integer> selList = buildSelectedList()
-        doDataView( DataController.ViewType.STANDARD_CVS, selList)
+        doDataView( DataController.ViewType.STANDARD_CVS, selList, null)
 
     }
 
     def viewSelCvAction = { ActionEvent e ->
         log.debug("view Selected CV action requested")
+        List<Integer> selList = buildSelectedList()
+        String cvList = model.cvListField.getText()
+        doDataView( DataController.ViewType.SELECTED_CVS, selList, cvList)
     }
 
     def viewAllCvAction = { ActionEvent e ->
         log.debug("view All CV action requested")
+        List<Integer> selList = buildSelectedList()
+        String cvList = model.cvListField.getText()
+        doDataView( DataController.ViewType.ALL_CVS, selList, null)
     }
 
     def helpAction = { ActionEvent e ->

@@ -58,14 +58,19 @@ class DecModel extends RrBaseModel implements  FocusListener {
 
     }
 
+    boolean testCvList() {
+        Pattern regexPattern = Pattern.compile("[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}(?:\\,\\s{0,2}[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}){0,15}+\$")
+        Matcher match = regexPattern.matcher(cvListField.getText())
+        return match.matches()
+    }
+
     @Override
     void focusLost(FocusEvent e) {
         if (e.getComponent().getName().equals("cvlist")) {
             if (importDetailItem != null & importDetailItem.isEnabled()) {
                 viewSelCvItem.setEnabled(false)
-                Pattern regexPattern = Pattern.compile("[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}(?:\\,\\s{0,2}[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}){0,15}+\$")
-                Matcher match = regexPattern.matcher(cvListField.getText())
-                if (match.matches()) {
+                boolean goodValue = testCvList()
+                if (goodValue) {
                     viewSelCvItem.setEnabled(true)
                     view.saver.putField(DecView.D_NAME, DecView.D_CVLIST, cvListField.getText())
                 }

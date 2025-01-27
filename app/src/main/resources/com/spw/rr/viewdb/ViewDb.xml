@@ -51,15 +51,15 @@
         </where>
         ORDER BY id
     </select>
-    <select id="listStandardCVs" resultMap="decoderMap">
+    <select id="ListWithCvs" resultMap="decoderMap">
         SELECT
         b.id,
         b.decoderid,
         a.dccAddress,
         a.roadName as roadName,
         a.roadNumber as roadNumber,
-        cvvalue as cvNumber,
-        value as cvValue
+        cvNumber as cvNumber,
+        cvValue as cvValue
         FROM
         decoder a
         INNER JOIN
@@ -70,8 +70,8 @@
                      open = "b.decoderid IN (" separator="," close=")">
                 #{item}
             </foreach>
-        </where>
-        AND cvvalue IN ('1',
+        <if test="arg1 == null &amp; !arg2">
+        AND cvNumber IN ('1',
         '2',
         '3',
         '4',
@@ -92,7 +92,15 @@
         '19')
         ORDER BY
         b.decoderid,
-        cvvalue
+        cvNumber
+        </if>
+        <if test="arg1 != null">
+            <foreach collection="arg1" index="index" item="item"
+                     open="AND cvNumber IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        </where>
     </select>
     <resultMap id="decoderMap" type="DecoderEntry">
         <id property="id" column="decoderId"/>

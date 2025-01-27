@@ -149,8 +149,8 @@
             CvValues
         (
             decoderId,
-            cvvalue,
-            value
+            cvNumber,
+            cvValue
         )
         VALUES
             (

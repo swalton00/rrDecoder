@@ -42,13 +42,19 @@ class DataController {
     DataView view
 
     DataController(JDialog parent, ViewType viewType, List<Integer> decIds) {
+        this(parent, viewType, decIds, null)
+
+    }
+
+    DataController(JDialog parent, ViewType viewType, List<Integer> decIds, String cvList) {
+        this.cvList = cvList
         this.parent = parent
         this.viewType = viewType
         this.decoderIds = new Vector<>()
         decIds.each {
-            decoderIds.add(it)
+            this.decoderIds.add(it)
         }
-        log.debug("added ${this.decoderIds.size()}")
+        log.debug("added ${decoderIds.size()}")
         model = new DataModel(this)
         model.init()
         switch (viewType) {
@@ -67,27 +73,31 @@ class DataController {
         }
     }
 
-    DataController(JDialog parent, ViewType viewType, List<Integer> decoderIds, String cvList) {
-        this.cvList = cvList
-        DataController(parent, viewType, decoderIds)
-    }
-
-    void buildSelectedCvs() {
-
-    }
-
     void buildAllCvs() {
 
     }
 
-    void buildStdCvs() {
-        view = new DataView(parent, this, model, "Standard CV View", "stdview")
-        STD_TITLE.each {
+    void buildSelectedCvs() {
+        view = new DataView(parent, this, model, "Selected CV View", "selview")
+        List<String> cvSplit = cvList.split(",")
+        cvSplit.each {
+            it.trim()
+        }
+        model.columnNames.add("Decoder ID")
+        model.columnNames.add("DCC Address")
+        cvSplit.each {
             model.columnNames.add(it)
         }
-        log.debug("creating a list of Standard CVs for the decoders: ${decoderIds}")
+        List<DecoderEntry> cvelements = database.listStandardCVs(decoderIds, cvSplit, false)
+        String[] tempString = new StringBuffer[cvSplit.size()]
+        cvSplit.eachWithIndex{ String entry, int i ->
+            tempString[i] = cvSplit.get(i)
+        }
+        cvRest(cvelements, tempString)
+    }
+
+    void cvRest(List<DecoderEntry> cvelements, String[] cvList) {
         ArrayList<ArrayList<String>> lineList = new ArrayList<>()
-        List<DecoderEntry> cvelements = database.listStandardCVs(decoderIds)
         log.debug("cvevelements is ${cvelements}")
         Hashtable<String, String> cvHash = new Hashtable<>()
         cvelements.each { entry ->
@@ -97,7 +107,8 @@ class DataController {
             }
             ArrayList thisLine = new ArrayList()
             thisLine.add(entry.roadName + entry.roadNumber)
-            STD_CVS.each { nextCV ->
+            thisLine.add(entry.dccAddress)
+            cvList.each { nextCV ->
                 String thisValue = cvHash.get(nextCV)
                 String value = thisValue == null ? " " : thisValue
                 thisLine.add(value)
@@ -112,6 +123,16 @@ class DataController {
             log.debug("invoking the view init")
             view.init()
         }
+    }
+
+    void buildStdCvs() {
+        view = new DataView(parent, this, model, "Standard CV View", "stdview")
+        STD_TITLE.each {
+            model.columnNames.add(it)
+        }
+        log.debug("creating a list of Standard CVs for the decoders: ${decoderIds}")
+        List<DecoderEntry> cvelements = database.listStandardCVs(decoderIds, null, false)
+        cvRest(cvelements, STD_CVS)
     }
 
     void buildFunctionLabels() {
