@@ -1,8 +1,9 @@
 package com.spw.rr.controllers
 
-
+import com.spw.rr.database.CvValues
 import com.spw.rr.database.DecoderEntry
 import com.spw.rr.models.DataModel
+import com.spw.rr.utilities.CvNameComparator
 import com.spw.rr.viewdb.ViewDbService
 import com.spw.rr.views.DataView
 import org.slf4j.Logger
@@ -74,7 +75,48 @@ class DataController {
     }
 
     void buildAllCvs() {
+        view = new DataView(parent, this, model, "All CV View", "allview")
+        List<DecoderEntry> decoders = database.listStandardCVs(decoderIds, null, true)
+        log.debug("decoder list is ${decoders}")
+        model.columnNames.add("CV Number")
+        Hashtable<String, String> allCvs = new Hashtable()
+        decoders.each {dec ->
+            String title = dec.roadName + dec.roadNumber
+            if (title.isBlank()) {
+                title = dec.dccAddress
+            }
+            model.columnNames.add(title)
+            dec.metaClass.cvHash = new Hashtable<String, String>()
+            dec.cvValues.each { CvValues  cvVals->
+                dec.cvHash.put(cvVals.cvNumber, cvVals.cvValue)
+                if (!allCvs.contains(cvVals.cvNumber)) {
+                    allCvs.put(cvVals.cvNumber, cvVals.cvValue)
+                }
+            }
+        }
+        log.debug("there are ${allCvs.size()} entries in the overall hashtable")
+        ArrayList<String> theKeys = new ArrayList<>(allCvs.keySet())
+        log.debug("the keys list is ${theKeys}")
+        theKeys.sort(new CvNameComparator())
+        ArrayList<ArrayList<String>> allLines  = new ArrayList<>()
+        theKeys.each {String cvNum ->
+            ArrayList<String> thisLine = new ArrayList<>()
+            thisLine.add(cvNum)
+            decoders.each {DecoderEntry dec ->
+                String val = dec.cvHash.get(cvNum)
+                if (val == null) {
+                    val = " "
+                }
+                thisLine.add(val)
+            }
+            allLines.add(thisLine)
+        }
 
+        model.tableList.addAll(allLines)
+        SwingUtilities.invokeLater {
+            log.debug("build all CVs now invoking view.init")
+            view.init()
+        }
     }
 
     void buildSelectedCvs() {
@@ -94,6 +136,7 @@ class DataController {
             tempString[i] = cvSplit.get(i)
         }
         cvRest(cvelements, tempString)
+
     }
 
     void cvRest(List<DecoderEntry> cvelements, String[] cvList) {

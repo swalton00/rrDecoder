@@ -52,55 +52,47 @@
         ORDER BY id
     </select>
     <select id="ListWithCvs" resultMap="decoderMap">
+
         SELECT
-        b.id,
-        b.decoderid,
-        a.dccAddress,
-        a.roadName as roadName,
-        a.roadNumber as roadNumber,
-        cvNumber as cvNumber,
-        cvValue as cvValue
+            b.id,
+            b.decoderid,
+            a.dccAddress,
+            a.roadName   AS roadName,
+            a.roadNumber AS roadNumber,
+            cvNumber     AS cvNumber,
+            cvValue      AS cvValue
         FROM
-        decoder a
+            (   SELECT
+                *
+                    FROM
+                    cvvalues
+            <where>
+                <foreach collection="arg0" index="index" item="item"
+                         open = "decoderid IN (" separator="," close=")">
+                    #{item}
+                </foreach>
+                <if test="arg1 == null &amp; !arg2">
+                    AND cvNumber IN ('1',
+                    '2', '3', '4', '5' , '6',
+                    '7', '8', '9', '10', '11',
+                    '12', '13', '14', '15', '16',
+                    '17', '18', '19')
+                </if>
+                <if test="arg1 != null">
+                    <foreach collection="arg1" index="index" item="item"
+                             open="AND cvNumber IN (" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+            </where>
+        ) AS b
         INNER JOIN
-        cvvalues b
-        ON a.id = b.decoderid
-        <where>
-            <foreach collection="arg0" index="index" item="item"
-                     open = "b.decoderid IN (" separator="," close=")">
-                #{item}
-            </foreach>
-        <if test="arg1 == null &amp; !arg2">
-        AND cvNumber IN ('1',
-        '2',
-        '3',
-        '4',
-        '5' ,
-        '6',
-        '7',
-        '8',
-        '9',
-        '10',
-        '11',
-        '12',
-        '13',
-        '14',
-        '15',
-        '16',
-        '17',
-        '18',
-        '19')
-        ORDER BY
-        b.decoderid,
-        cvNumber
-        </if>
-        <if test="arg1 != null">
-            <foreach collection="arg1" index="index" item="item"
-                     open="AND cvNumber IN (" separator="," close=")">
-                #{item}
-            </foreach>
-        </if>
-        </where>
+            decoder a
+        ON
+            a.id = b.decoderId
+         ORDER BY
+            b.decoderid,
+            cvNumber
     </select>
     <resultMap id="decoderMap" type="DecoderEntry">
         <id property="id" column="decoderId"/>
