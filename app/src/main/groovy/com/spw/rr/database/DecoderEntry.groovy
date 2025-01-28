@@ -24,6 +24,10 @@ class DecoderEntry {
     String hasDetail
     String hasSpeedProfile
 
+    List<DecoderDef> defValues
+    List<FunctionLabel> labelValues
+    List<SpeedProfile> speedValues
+    List<KeyValuePairs> keyPairs
     List<CvValues> cvValues
 }
 

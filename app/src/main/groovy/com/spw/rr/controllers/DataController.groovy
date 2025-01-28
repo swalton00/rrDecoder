@@ -30,7 +30,7 @@ class DataController {
         SELECTED_CVS,       // Decoders down, CVs across
         ALL_CVS,            // Decoders aaross, CVs down
         STANDARD_CVS,       // CVs across, 3 lines, decoders down
-        FUNCTION_LABELS,    //  ?
+        FUNCTION_LABELS,    // decoderrs down, label across
         SPEED_PROFILE,      //  decoders across, profiles down
         KEY_PAIRS,          // decoders down, pairs across
         DECODER_DETAIL      // decoders across, defs down
@@ -68,6 +68,10 @@ class DataController {
             case ViewType.FUNCTION_LABELS: buildFunctionLabels()
                 break
             case ViewType.DECODER_DETAIL: buildDecPetail()
+                break
+            case ViewType.SPEED_PROFILE: buildSpeedProfile()
+                break
+            case ViewType.KEY_PAIRS: buildKeyPairs()
                 break
             default:
                 throw new RuntimeException("Unrecognized View type ${viewType}")
@@ -179,10 +183,11 @@ class DataController {
     }
 
     void buildFunctionLabels() {
-
+        view = new DataView(parent, this, model, "Function Label View", "labelview")
+        log.debug("creating a list of function labels for decoders")
     }
 
-    void buildSpredProfile() {
+    void buildSpeedProfile() {
 
     }
 

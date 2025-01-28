@@ -56,6 +56,11 @@
         <appender-ref ref="logfile"/>
         <appender-ref ref="console"/>
     </logger>
+    <logger name="com.spw.rr.viewdb.ViewDb" additivity="false">
+        <level value="trace"/>
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="console"/>
+    </logger>
     <logger name="org.perf4j.TimingLogger" additivity="false">
         <appender-ref ref="timers"/>
     </logger>

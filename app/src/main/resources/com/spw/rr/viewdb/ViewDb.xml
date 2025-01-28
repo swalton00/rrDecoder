@@ -81,7 +81,7 @@
                 <if test="arg1 != null">
                     <foreach collection="arg1" index="index" item="item"
                              open="AND cvNumber IN (" separator="," close=")">
-                        #{item}
+                        #{item,jdbcType=VARCHAR}
                     </foreach>
                 </if>
             </where>
