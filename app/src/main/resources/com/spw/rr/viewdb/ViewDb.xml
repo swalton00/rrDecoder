@@ -1,9 +1,89 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spw.rr.viewdb.ViewDb">
+    <select id="listValues" resultMap="decoderMap">
+        SELECT
+            a.id as decid,
+            a.dccAddress,
+            a.roadName   AS roadName,
+            a.roadNumber AS roadNumber
+               <if test="arg0.name() == 'SELECT_ALL_CVS' | arg0.name() == 'SELECT_FXD_CVS' | arg0.name() == 'SELECT_SEL_CVS'">
+        ,   cvNumber     AS cvNumber,
+            cvValue      AS cvValue,
+            cv.id        as cvid,
+            cv.decoderid as cvdecoderId
+               </if>
+        <if test="arg0.name() == 'SELECT_FUNC'">
+        , functionnumber ,
+          functionLabel  ,
+          fn.id   as fnid,
+          fn.decoderid as fndecoderId
+        </if>
+        <if test="arg0.name() == 'SELECT_DEF'">
+        , varvalue as varValue,
+          item,
+          de.id as deid,
+          de.decoderid as dedecoderId
+        </if>
+        <if test="arg0.name() == 'SELECT_SPD'">
+        , step ,
+          forward,
+          reverse,
+          spd.id as spdid,
+          spd.decoderid as spddecoderId
+        </if>
+        <if test="arg0.name() == 'SELECT_KEY'">
+        , pair_key,
+          pair_value,
+          kv.id as kvid,
+          kv.decodereid as kvdecoderId
+        </if>
+        FROM
+            decoder a
+        INNER JOIN
+        <if test="arg0.name() == 'SELECT_ALL_CVS' | arg0.name() == 'SELECT_FXD_CVS' | arg0.name() == 'SELECT_SEL_CVS'">
+            cvvalues cv
+        on a.id = cv.decoderid
+        </if>
+        <if test="arg0.name() == 'SELECT_FUNC'">
+            functionlabels fn
+        on a.id = fn.decoderid
+        </if>
+        <if test="arg0.name() == 'SELECT_DEF'">
+            decoderdef de
+            on a.id = de.decoderid
+        </if>
+        <if test="arg0.name() == 'SELECT_SPD'">
+            speedprofile spd
+            on a.id = sp.ddecoderid
+        </if>
+        <if test="arg0.name() == 'SELECT_KEY'">
+            keyvalues kv
+            on a.id = kv.decoderid
+        </if>
+        <where>
+            <foreach collection="arg1" index="index" item="item"
+                     open = "a.id IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        <if test="arg0.name() == 'SELECT_FXD_CVS'">
+            AND cvNumber IN ('1',
+            '2', '3', '4', '5' , '6',
+            '7', '8', '9', '10', '11',
+            '12', '13', '14', '15', '16',
+            '17', '18', '19')
+        </if>
+        <if test="arg0.name() == 'SELECT_SEL_CVS'">
+            <foreach collection="arg2" index="index" item="item"
+                     open="AND cvNumber IN (" separator="," close=")">
+                #{item,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        </where>
+    </select>
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
-            p.id,
-            p.decoderId,
+            p.id as decid,
+            p.decoderId  as cvdecoderId,
             p.fileName,
             p.roadNumber,
             p.roadName,
@@ -52,10 +132,10 @@
         ORDER BY id
     </select>
     <select id="listWithCvs" resultMap="decoderMap">
-
         SELECT
-            b.id,
-            b.decoderid,
+            b.id as cvid,
+            b.decoderid as cvdecoderId,
+            a.id as decid,
             a.dccAddress,
             a.roadName   AS roadName,
             a.roadNumber AS roadNumber,
@@ -95,14 +175,40 @@
             cvNumber
     </select>
     <resultMap id="decoderMap" type="DecoderEntry">
-        <id property="id" column="decoderId"/>
+        <id property="id" column="decid"/>
         <result property="roadName" column="roadName"/>
         <result property="roadNumber" column="roadNumber"/>
         <result property="dccAddress" column="dccAddress"/>
         <collection property="cvValues" ofType="CvValues">
-            <id column="id" property="id"/>
+            <id column="cvid" property="id"/>
+            <result property="decoderId" column="cvdecoderId"/>
             <result property="cvNumber" column="cvNumber"/>
             <result property="cvValue" column="cvValue"/>
         </collection>
+        <collection property="labelValues" ofType="FunctionLabel">
+               <id column="fnid" property="id"/>
+               <result property="decoderId" column="fndecocerId"/>
+               <result property="functionNum" column="functionNumber"/>
+               <result property="functionLabel" column="functionLabel"/>
+        </collection>
+           <collection property="speedValues" ofType="SpeedProfile">
+               <id column="spdid" property="id"/>
+               <result property="speedStep" column="step"/>
+               <result property="decoderId" column="spddecoderId"/>
+               <result property="forwardValue" column="forward"/>
+               <result property="reverseValue" column="reverse"/>
+           </collection>
+           <collection property="keyPairs" ofType="KeyValuePairs">
+               <id column="kvid" property="id"/>
+               <result property="decoderId" column="kvdecoderId"/>
+               <result property="pair_key" column="pair_key"/>
+               <result property="pair_value" column="pair_value"/>
+           </collection>
+           <collection property="defValues" ofType="DecoderDef">
+               <id column="deid" property="id"/>
+               <result column="dedecoderId" property="decoderId"/>
+               <result property="varValue" column="varValue"/>
+               <result property="item" column="item"/>
+           </collection>
     </resultMap>
 </mapper>

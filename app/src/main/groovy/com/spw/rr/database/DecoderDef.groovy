@@ -6,6 +6,7 @@ import groovy.transform.ToString
 class DecoderDef {
     Integer parent
     Integer id
+    Integer decoderId
     String  varValue
     String  item
 }

@@ -65,6 +65,19 @@ class DbService {
         return returnValues
     }
 
-
+    List<DecoderEntry> listValues(ViewDb.SelectType selectType, Vector<Integer> ids, List<String> cvs) {
+        log.debug("select list of type ${selectType} for ids ${ids}")
+        SqlSession session
+        List<DecoderEntry> results
+        try {
+            session = sqlSessionFactory.openSession()
+            ViewDb mapper = session.getMapper(ViewDb.class)
+            results = mapper.listValues(selectType, ids, cvs)
+        } finally {
+            session.close()
+        }
+        log.debug("returning ${results.size()} rows")
+        return  results
+    }
 
 }
