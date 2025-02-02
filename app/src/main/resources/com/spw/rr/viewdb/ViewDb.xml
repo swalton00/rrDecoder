@@ -82,7 +82,7 @@
     </select>
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
-            p.id as decid,
+            p.id,
             p.decoderId  as cvdecoderId,
             p.fileName,
             p.roadNumber,
@@ -129,7 +129,7 @@
                 #{item}
             </foreach>
         </where>
-        ORDER BY id
+        ORDER BY p.id
     </select>
     <select id="listWithCvs" resultMap="decoderMap">
         SELECT

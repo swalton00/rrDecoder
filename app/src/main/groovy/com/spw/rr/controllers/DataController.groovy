@@ -2,6 +2,9 @@ package com.spw.rr.controllers
 
 import com.spw.rr.database.CvValues
 import com.spw.rr.database.DecoderEntry
+import com.spw.rr.database.FunctionLabel
+import com.spw.rr.database.KeyValuePairs
+import com.spw.rr.database.SpeedProfile
 import com.spw.rr.models.DataModel
 import com.spw.rr.utilities.CvNameComparator
 import com.spw.rr.viewdb.ViewDbService
@@ -78,36 +81,70 @@ class DataController {
         }
     }
 
-    void buildAllCvs() {
-        view = new DataView(parent, this, model, "All CV View", "allview")
-        List<DecoderEntry> decoders = database.listStandardCVs(decoderIds, null, true)
-        log.debug("decoder list is ${decoders}")
-        model.columnNames.add("CV Number")
-        Hashtable<String, String> allCvs = new Hashtable()
-        decoders.each {dec ->
+    void restDecoderDown(List<DecoderEntry> entries, ViewType listType) {
+        Hashtable<String, String> hashList = new Hashtable()
+        entries.each { dec ->
             String title = dec.roadName + dec.roadNumber
             if (title.isBlank()) {
                 title = dec.dccAddress
             }
             model.columnNames.add(title)
-            dec.metaClass.cvHash = new Hashtable<String, String>()
-            dec.cvValues.each { CvValues  cvVals->
-                dec.cvHash.put(cvVals.cvNumber, cvVals.cvValue)
-                if (!allCvs.contains(cvVals.cvNumber)) {
-                    allCvs.put(cvVals.cvNumber, cvVals.cvValue)
+            dec.metaClass.keyHash = new Hashtable<String, String>()
+            List arrayObject
+            switch (listType) {
+                case ViewType.ALL_CVS: arrayObject = dec.cvValues
+                    break
+                case ViewType.FUNCTION_LABELS: arrayObject = dec.labelValues
+                    break
+                case ViewType.SPEED_PROFILE: arrayObject = dec.speedValues
+                    break
+                case ViewType.KEY_PAIRS: arrayObject = dec.keyPairs
+                    break
+                default:
+                    log.error("unkonwn type in restDecdoerDown - ${listType}")
+            }
+            arrayObject.each { Object thisObject ->
+                if (thisObject instanceof CvValues) {
+                    dec.keyHash.put(thisObject.cvNumber, thisObject.cvValue)
+                    if (!hashList.contains(thisObject.cvNumber)) {
+                        hashList.put(thisObject.cvNumber, thisObject.cvValue)
+                    }
+                } else if (thisObject instanceof FunctionLabel) {
+                    dec.keyHash.put(thisObject.functionNum, thisObject.functionLabel)
+                    if (!hashList.contains(thisObject.functionNum)) {
+                        hashList.put(thisObject.functionNum, thisObject.functionLabel)
+                    }
+                } else if (thisObject instanceof KeyValuePairs) {
+                    dec.keyHash.put(thisObject.pair_key, thisObject.pair_value)
+                    if (!hashList.contains(thisObject.functionNum)) {
+                        hashList.put(thisObject.pair_key, thisObject.pair_value)
+                    }
+                } else if (thisObject instanceof SpeedProfile) {
+                    dec.keyHash.put(thisObject.pair_key, thisObject.pair_value)
+                    if (!hashList.contains(thisObject.functionNum)) {
+                        hashList.put(thisObject.pair_key, thisObject.pair_value)
+                    }
                 }
             }
         }
-        log.debug("there are ${allCvs.size()} entries in the overall hashtable")
-        ArrayList<String> theKeys = new ArrayList<>(allCvs.keySet())
+        log.debug("there are ${hashList.size()} entries in the overall hashtable")
+        ArrayList<String> theKeys = new ArrayList<>(hashList.keySet())
         log.debug("the keys list is ${theKeys}")
-        theKeys.sort(new CvNameComparator())
-        ArrayList<ArrayList<String>> allLines  = new ArrayList<>()
-        theKeys.each {String cvNum ->
+        switch (listType) {
+            case ViewType.ALL_CVS: theKeys.sort(new CvNameComparator())
+                break
+            case ViewType.FUNCTION_LABELS :
+                theKeys.sort((s1, s2) -> Integer.compare(Integer.valueOf(s1), Integer.valueOf(s2)))
+                break
+            default:
+                theKeys.sort((s1, s2) -> String.compare(s1, s2))
+        }
+        ArrayList<ArrayList<String>> allLines = new ArrayList<>()
+        theKeys.each { String keyVal ->
             ArrayList<String> thisLine = new ArrayList<>()
-            thisLine.add(cvNum)
-            decoders.each {DecoderEntry dec ->
-                String val = dec.cvHash.get(cvNum)
+            thisLine.add(keyVal)
+            entries.each { DecoderEntry dec ->
+                String val = dec.keyHash.get(keyVal)
                 if (val == null) {
                     val = " "
                 }
@@ -123,21 +160,35 @@ class DataController {
         }
     }
 
+    void buildAllCvs() {
+        view = new DataView(parent, this, model, "All CV View", "allview")
+        List<DecoderEntry> decoders = database.getList(ViewDbService.ListType.ALL_CV, decoderIds, null)
+        log.debug("decoder list is ${decoders}")
+        model.columnNames.add("CV Number")
+        restDecoderDown(decoders, ViewType.ALL_CVS)
+
+    }
+
     void buildSelectedCvs() {
         view = new DataView(parent, this, model, "Selected CV View", "selview")
         List<String> cvSplit = cvList.split(",")
+        ArrayList<String> newCvList = new ArrayList<>()
         cvSplit.each {
-            it.trim()
+            log.trace("before trim - ${it} - ${it.size()}")
+            String newVal = it.strip()
+            newCvList.add(newVal)
+            log.trace("after trim - ${newVal} - ${newVal.size()}")
         }
         model.columnNames.add("Decoder ID")
         model.columnNames.add("DCC Address")
-        cvSplit.each {
+        newCvList.each {
             model.columnNames.add(it)
+            log.trace("size of ${it} - ${it.size()}")
         }
-        List<DecoderEntry> cvelements = database.listStandardCVs(decoderIds, cvSplit, false)
+        List<DecoderEntry> cvelements = database.getList(ViewDbService.ListType.CV_LIST, decoderIds, newCvList)
         String[] tempString = new StringBuffer[cvSplit.size()]
-        cvSplit.eachWithIndex{ String entry, int i ->
-            tempString[i] = cvSplit.get(i)
+        newCvList.eachWithIndex { String entry, int i ->
+            tempString[i] = newCvList.get(i)
         }
         cvRest(cvelements, tempString)
 
@@ -178,13 +229,16 @@ class DataController {
             model.columnNames.add(it)
         }
         log.debug("creating a list of Standard CVs for the decoders: ${decoderIds}")
-        List<DecoderEntry> cvelements = database.listStandardCVs(decoderIds, null, false)
+        List<DecoderEntry> cvelements = database.getList(ViewDbService.ListType.FIXED_CVS, decoderIds, null)
         cvRest(cvelements, STD_CVS)
     }
 
     void buildFunctionLabels() {
         view = new DataView(parent, this, model, "Function Label View", "labelview")
         log.debug("creating a list of function labels for decoders")
+        List<DecoderEntry> decs = database.getList(ViewDbService.ListType.LABEL_LIST, decoderIds)
+        model.columnNames.add("Function Number")
+        restDecoderDown(decs, ViewType.FUNCTION_LABELS)
     }
 
     void buildSpeedProfile() {

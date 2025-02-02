@@ -209,6 +209,8 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper map = session.getMapper(Mapper.class)
             result = map.findRosterEntry(systemName, fullPath)
+        } catch (Exception e) {
+            log.error("Exception process the SQL", e)
         } finally {
             session.close()
 
@@ -226,6 +228,8 @@ class DatabaseServices {
             Mapper mapper = session.getMapper(Mapper.class)
             entry = mapper.getRosterEntryById(rosterId)
             log.debug("result found was ${entry}")
+        } catch (Exception e) {
+            log.error("Exception process the SQL", e)
         } finally {
             session.close()
         }
@@ -265,6 +269,8 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper map = session.getMapper(Mapper.class)
             results = map.listDecodersFor(rosters)
+        } catch (Exception e) {
+            log.error("Exception process the SQL", e)
         } finally {
             session.close()
         }
@@ -278,6 +284,8 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper mapper = session.getMapper(Mapper.class)
             decoder = mapper.getDecoderEntry(id)
+        } catch (Exception e) {
+            log.error("Exception process the SQL", e)
         } finally {
             session.close()
         }
