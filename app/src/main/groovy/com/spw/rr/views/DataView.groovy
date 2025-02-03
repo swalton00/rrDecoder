@@ -65,7 +65,7 @@ class DataView {
         JMenuItem helpItem = new JMenuItem("Help")
         helpItem.addActionListener(controller.helpActiom)
         helpMenu.add(helpItem)
-        model.dialog.getContentPane().add(menuBar, "wrap")
+        model.dialog.setJMenuBar(menuBar)
         tableModel = new RrTableModel(model)
         tableModel = new RrTableModel(model)
         model.theTable = new JTable(tableModel)

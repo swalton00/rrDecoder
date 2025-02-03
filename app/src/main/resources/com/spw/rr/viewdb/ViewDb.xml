@@ -35,7 +35,7 @@
         , pair_key,
           pair_value,
           kv.id as kvid,
-          kv.decodereid as kvdecoderId
+          kv.decoderid as kvdecoderId
         </if>
         FROM
             decoder a
@@ -54,7 +54,7 @@
         </if>
         <if test="arg0.name() == 'SELECT_SPD'">
             speedprofile spd
-            on a.id = sp.ddecoderid
+            on a.id = spd.decoderid
         </if>
         <if test="arg0.name() == 'SELECT_KEY'">
             keyvalues kv

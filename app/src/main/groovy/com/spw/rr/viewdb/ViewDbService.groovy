@@ -80,7 +80,7 @@ class ViewDbService {
                     retVal = map.listValues(ViewDb.SelectType.SELECT_KEY, decoderIds, null)
                     break
                 case ListType.DEF_LIST :
-                    retVal = map.listValues(ViewDb.SelectType.SELECT_DEF, decoderIds, )
+                    retVal = map.listValues(ViewDb.SelectType.SELECT_DEF, decoderIds,null )
                     break
                 case ListType.FIXED_CVS :
                     retVal = map.listValues(ViewDb.SelectType.SELECT_FXD_CVS, decoderIds, null)

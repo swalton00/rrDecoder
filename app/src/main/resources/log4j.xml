@@ -20,7 +20,7 @@
         <param name="append" value="false"/>
         <param name="threshold" value="TRACE"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%p %d %c{2} %m%n"/>
+            <param name="ConversionPattern" value="%t %p %d %c{2} %m%n"/>
         </layout>
     </appender>
     <logger name="com.spw" additivity="false">

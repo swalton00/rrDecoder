@@ -115,6 +115,8 @@ class DecController {
 
     def viewSpeedProfileAction = { ActionEvent e ->
         log.debug("view Speed Profile action requested")
+        List<Integer> selList = buildSelectedList()
+        doDataView(DataController.ViewType.SPEED_PROFILE, selList, null)
     }
 
     def viewSpeedGraphAction = { ActionEvent e ->
@@ -123,14 +125,20 @@ class DecController {
 
     def viewDecDetailAction = { ActionEvent e ->
         log.debug("view Decoder Detail action requested")
+        List<Integer> selList = buildSelectedList()
+        doDataView(DataController.ViewType.DECODER_DETAIL, selList, null)
     }
 
     def viewFunctionAction = { ActionEvent e ->
         log.debug("view Function action requested")
+        List<Integer> selList = buildSelectedList()
+        doDataView(DataController.ViewType.FUNCTION_LABELS, selList, null)
     }
 
     def viewSKeyPairsAction = { ActionEvent e ->
+        List<Integer> selList = buildSelectedList()
         log.debug("view Key Value Pairs action requested")
+        doDataView(DataController.ViewType.KEY_PAIRS, selList, null)
     }
 
     def viewStandCvAction = { ActionEvent e ->
