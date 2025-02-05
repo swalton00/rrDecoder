@@ -26,6 +26,8 @@ dependencies {
     implementation group: 'org.mybatis', name: 'mybatis', version: '3.5.19'
     // https://mvnrepository.com/artifact/com.glazedlists/glazedlists
     implementation group: 'com.glazedlists', name: 'glazedlists', version: '1.11.0'
+    // https://mvnrepository.com/artifact/org.jfree/jfreechart
+    implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.5'
 }
 
 application {

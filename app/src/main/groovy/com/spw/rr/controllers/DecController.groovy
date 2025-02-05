@@ -93,7 +93,7 @@ class DecController {
     }
 
     List<Integer> buildSelectedList() {
-        log.debug("building a list from a selected list of size ${model.selectedRows}")
+        log.debug("building a list from a selected list of values  ${model.selectedRows}")
         ArrayList<Integer> retList = new ArrayList<>()
         model.selectedRows.each {
             retList.add(it)
@@ -121,6 +121,11 @@ class DecController {
 
     def viewSpeedGraphAction = { ActionEvent e ->
         log.debug("view Speed Graph action requested")
+        List<Integer> selList = buildSelectedList()
+        worker.execute( {
+            log.debug("starting a task to build a graph")
+            GraphController graphController = new GraphController(model.thisDialog, selList)
+        })
     }
 
     def viewDecDetailAction = { ActionEvent e ->
