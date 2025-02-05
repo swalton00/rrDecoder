@@ -25,6 +25,8 @@ class DatabaseServices {
     static final String DB_VERSION = "SELECT major, minor, table_count FROM DB_VERSION where id = 1"
     private static final String RESOURCE_NAME = "createTables.sql"
     private static final String MYBATIS_RESOURCE = "mybatis.xml"
+    private static final Integer DB_MAJOR = 1
+    private static final Integer DB_MINOR = 2
 
     SqlSessionFactory sqlSessionFactory
     SqlSession session
@@ -97,7 +99,8 @@ class DatabaseServices {
                     }
                     int majorVersion = rs3.getInt(1)
                     int minorVersion = rs3.getInt(2)
-                    if (majorVersion != 1 | minorVersion != 1) {
+                    if (majorVersion != DB_MAJOR | minorVersion != DB_MINOR)
+                    {
                         log.error("mismatch on minor and major versions - Major = ${majorVersion} Minor = ${minorVersion}")
                     }
                 } else if (matchCount == 0) {

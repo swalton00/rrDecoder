@@ -79,7 +79,9 @@ class MainController {
         boolean exists = imports.doesRosterExist(chosen)
         RosterEntry newEntry = imports.importRoster(model.baseFrame, chosen)
         SwingUtilities.invokeLater { ->
-            addEntry(newEntry)
+            if (!exists) {
+                addEntry(newEntry)
+            }
         }
     }
 

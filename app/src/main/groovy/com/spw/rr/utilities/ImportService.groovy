@@ -70,12 +70,12 @@ class ImportService {
         if (!importLock.tryAcquire()) {
             throw new RuntimeException("attempting to import a file while an import is in progress")
         }
+        Timestamp rosterUpdate = new Timestamp(rosterFile.lastModified())
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
         int arraySize = rosterValues.roster.locomotive.size()
         def entryList = rosterValues.roster.locomotive
         ProgressMonitor monitor = new ProgressMonitor(parent, "Importing Decoders", "Reading XML", 0, 1)
-        monitor.setMillisToDecideToPopup(10)
         buildDecoderList()
         RosterEntry thisEntry = getRosterEntry(rosterFile.path)
         boolean rosterFound = false
@@ -88,10 +88,12 @@ class ImportService {
                 thisEntry = new RosterEntry()
                 thisEntry.fullPath = rosterFile.path
                 thisEntry.systemName = getSystemName()
+                thisEntry.fileDate = rosterUpdate
                 thisEntry = database.addRoster(thisEntry)
                 log.debug("this entry is now ${thisEntry}")
             } else {
                 rosterFound = true
+                thisEntry.fileDate = rosterUpdate
                 existingList = updateRosterEntries(thisEntry)
             }
             SwingUtilities.invokeLater {

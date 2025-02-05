@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS
         entered     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ,
         fullpath    VARCHAR(256) DEFAULT '' NOT NULL ,
         dateUpdated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ,
+        fileDate    TIMESTAMP,
         systemName  VARCHAR(64) DEFAULT '' NOT NULL
     );
 CREATE UNIQUE INDEX IF NOT EXISTS
@@ -48,6 +49,8 @@ CREATE TABLE IF NOT EXISTS
         dccaddress     VARCHAR(256),
         manufacturerID VARCHAR(256),
         productid      VARCHAR(256),
+        decoderDate    TIMESTAMP,
+        dateImported   TIMESTAMP,
         dateUpdated    TIMESTAMP,
         detailTime     TIMESTAMP,
         decoderTypeID  INTEGER NOT NULL CONSTRAINT loco_decoder REFERENCES decoderType(id)
@@ -125,5 +128,5 @@ CREATE TABLE IF NOT EXISTS
     );
 INSERT INTO
     DB_VERSION
-        (id, major, minor, table_count) VALUES ( 1, 1, 1, 9 )
+        (id, major, minor, table_count) VALUES ( 1, 1, 2, 9 )
 ;

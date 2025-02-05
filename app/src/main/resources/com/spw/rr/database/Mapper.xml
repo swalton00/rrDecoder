@@ -61,13 +61,37 @@
         FROM roster
         WHERE id = #{id}
     </select>
+    <select id="listDecodersByRosterID" parameterType="Integer" resultType="DecoderEntry">
+        SELECT
+        p.id,
+        p.decoderId,
+        p.fileName,
+        p.roadNumber,
+        p.roadName,
+        p.manufacturer,
+        p.owner,
+        p.model,
+        p.dccAddress,
+        p.manufacturerId,
+        p.productId,
+        p.dateUpdated,
+        p.decoderTypeId,
+        p.detailTime,
+        p.rosterId
+        FROM decoder p
+        WHERE
+            rosterID = #{arg0}
+        ORDER BY id
+    </select>
     <insert id="insertRosterEntry" parameterType="RosterEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         INSERT INTO roster
         (entered,
          fullpath,
+         fileDate,
          systemName)
         VALUES (CURRENT_TIMESTAMP,
                         #{fullPath},
+                        #{fileDate},
                         #{systemName})
     </insert>
     <select id="listDecoderTypes" resultType="DecoderType">
@@ -232,6 +256,7 @@
             roster
         SET fullpath=#{fullPath},
             systemName = #{systemName},
+            fileDate = #{fileDate},
             dateUpdated = CURRENT_TIMESTAMP
         WHERE
             id = #{id}
