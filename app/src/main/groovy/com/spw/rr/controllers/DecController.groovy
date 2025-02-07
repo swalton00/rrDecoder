@@ -65,8 +65,12 @@ class DecController {
             nextLine.add(entry.roadName)
             nextLine.add(entry.roadNumber)
             nextLine.add(entry.manufacturer)
+            nextLine.add(entry.decoderFamily)
+            nextLine.add(entry.decoderModel)
             nextLine.add(entry.owner)
             nextLine.add(entry.dateUpdated.toString())
+            nextLine.add(  entry.importDate == null ? " " : entry.importDate.toString() )
+            nextLine.add(  entry.detailTime == null ? " " : entry.detailTime.toString() )
             model.tableList.add(nextLine)
             if (view.tableModel != null) {
                 // view.tableModel will be null since we haven't done view.init yet

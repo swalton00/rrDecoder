@@ -27,7 +27,7 @@ class MainModel extends RrBaseModel {
 
     void init() {
         log.debug("initializing the main model")
-        columnNames.addAll(["Id", "System", "# Decoders", "Full Path"])
+        columnNames.addAll(["Id", "System", "# Decoders", "Full Path", "File Date", "Import Date"])
         preferredWidths.addAll([10,20,300])
 
     }

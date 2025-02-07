@@ -12,7 +12,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.JFileChooser
+import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
+import javax.swing.table.DefaultTableCellRenderer
+import javax.swing.table.TableCellRenderer
+import javax.swing.table.TableColumn
+import javax.swing.table.TableColumnModel
+import javax.swing.table.TableModel
 import java.awt.event.ActionEvent
 
 class MainController {
@@ -52,6 +58,7 @@ class MainController {
         if (settings.databaseOpen) {
             log.debug("loading the data for the main view")
             List<RosterEntry> entries = databaseServices.listRosters()
+
             entries.each {
                 addEntry(it)
             }
@@ -64,6 +71,8 @@ class MainController {
         nextLine.add(newEntry.systemName)
         nextLine.add(newEntry.decCount)
         nextLine.add(newEntry.fullPath)
+        nextLine.add(newEntry.fileDate.toString())
+        nextLine.add(newEntry.dateUpdated.toString())
         model.tableList.add(nextLine)
         view.tableModel.fireTableDataChanged()
     }

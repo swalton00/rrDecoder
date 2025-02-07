@@ -34,4 +34,13 @@ class RrTableModel extends AbstractTableModel{
     Object getValueAt(int rowIndex, int columnIndex) {
         return model.tableList.getAt(rowIndex).getAt(columnIndex)
     }
+
+    @Override
+    Class getColumnClass(int columnNumber) {
+        if (columnNumber == 0) {
+            return Integer.class
+        } else {
+            return String.class
+        }
+    }
 }

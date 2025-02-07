@@ -94,12 +94,18 @@
             p.manufacturerId,
             p.productId,
             p.dateUpdated,
+            p.dateImported as importDate,
+            p.detailTime,
             p.decoderTypeId,
             p.detailTime,
             p.rosterId,
             COALESCE(hasSpeedProfile, '-') as hasSpeedProfile,
-            COALESCE(hasDetail, '-') as hasDetail
+            COALESCE(hasDetail, '-') as hasDetail,
+            t.decoderFamily,
+            t.decoderModel
         FROM decoder p
+            INNER JOIN DecoderType t
+            ON p.decoderTypeId = t.id
             LEFT OUTER JOIN
         ( SELECT
             'Yes' AS hasSpeedProfile,

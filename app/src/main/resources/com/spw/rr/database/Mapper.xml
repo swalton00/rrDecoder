@@ -6,7 +6,9 @@
                fullpath,
                dateupdated,
                systemname,
-               coalesce(decCount, 0) as decCount
+               coalesce(decCount, 0) as decCount,
+               fileDate,
+               dateUpdated
         from roster r
                  LEFT OUTER JOIN
              (   SELECT

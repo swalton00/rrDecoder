@@ -18,7 +18,8 @@ import java.util.regex.Pattern
 class DecModel extends RrBaseModel implements  FocusListener {
 
     {
-        columnNames.addAll(["Id" , "RosterId",
+        columnNames.addAll(["Id" ,
+                            "RosterId",
                             "Address",
                             "Speeds?",
                             "Details?",
@@ -26,8 +27,12 @@ class DecModel extends RrBaseModel implements  FocusListener {
                             "Road Name",
                             "Road Number",
                             "Manufacturer",
+                            "Decoder Family",
+                            "Decoder Model",
                             "Owner",
-                            "Updated"])
+                            "Updated",
+                            "Imported",
+                            "Details Read"])
         preferredWidths.addAll([10, 10, 10, 5, 5, 30, 20, 10, 10, 15, 20])
     }
 

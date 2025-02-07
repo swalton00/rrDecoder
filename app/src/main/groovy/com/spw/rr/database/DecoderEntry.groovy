@@ -18,6 +18,8 @@ class DecoderEntry {
     String dccAddress
     String manufacturerId
     String productId
+    String decoderFamily
+    String decoderModel
     Timestamp decoderDate
     Timestamp importDate
     Timestamp dateUpdated
