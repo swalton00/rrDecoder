@@ -7,6 +7,8 @@ import com.spw.rr.utilities.ListenerForTables
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
 import net.miginfocom.swing.MigLayout
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import javax.swing.JFrame
 import javax.swing.JMenu
@@ -21,12 +23,15 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 
 class MainView {
 
     MainModel model
     MainController controller
     PropertySaver saver = PropertySaver.getInstance()
+    private static final Logger log = LoggerFactory.getLogger(MainView.class)
 
     RrTableModel tableModel
 
@@ -44,6 +49,14 @@ class MainView {
         model.baseFrame.setName("main")
         model.baseFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
         model.baseFrame.addComponentListener(new FrameHelper())
+        model.baseFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            void windowClosing(WindowEvent e) {
+                super.windowClosed(e)
+                log.debug("Window cloaing - saving values")
+                saver.writeValues()
+            }
+        })
         model.baseFrame.getContentPane().setLayout(new MigLayout("fill"))
         JMenuBar menuBar = new JMenuBar()
 
@@ -113,32 +126,10 @@ class MainView {
         //model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
 
         JScrollPane scrollPane = new JScrollPane(model.theTable)
-        scrollPane.setPreferredSize(new Dimension(1500, 1200))
+        //scrollPane.setPreferredSize(new Dimension(1500, 1200))
         model.baseFrame.getContentPane().add(scrollPane, "grow")
 
-        Dimension frameSize = model.baseFrame.getSize()
-        Integer frameWidth = saver.getInt("main", FrameHelper.WIDTH_NAME)
-        Integer frameHeight = saver.getInt("main", FrameHelper.HEIGHT_NAME)
-        if (frameWidth == null) {
-            frameWidth = 1500
-            saver.putInt("main", FrameHelper.WIDTH_NAME)
-        }
-        if (frameHeight == null) {
-            frameHeight = 1200
-            saver.putInt("main", FrameHelper.HEIGHT_NAME, frameHeight)
-        }
-        FrameHelper.setFrameValues(model.baseFrame, "main", frameWidth, frameHeight)
-        Integer frameX = saver.getInt("main", FrameHelper.X_NAME)
-        Integer frameY = saver.getInt("main", FrameHelper.Y_NAME)
-        if (frameX == null | frameY == null) {
-            Toolkit toolkit = Toolkit.getDefaultToolkit()
-            Dimension dim = toolkit.getScreenSize()
-            frameY = (dim.height - frameHeight) / 2
-            frameX = (dim.width - frameWidth) / 2
-            saver.putInt("main", FrameHelper.X_NAME, frameX)
-            saver.putInt("main", FrameHelper.Y_NAME, frameY)
-        }
-        model.baseFrame.setLocation(frameX, frameY)
+        FrameHelper.setFrameValues(model.baseFrame, "main", 1500, 1200)
         model.baseFrame.pack()
         model.baseFrame.setVisible(true)
 

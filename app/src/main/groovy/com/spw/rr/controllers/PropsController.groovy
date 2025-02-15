@@ -3,6 +3,7 @@ package com.spw.rr.controllers
 import com.spw.rr.models.PropsModel
 import com.spw.rr.utilities.BackgroundWorker
 import com.spw.rr.utilities.DatabaseServices
+import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.Settings
 import com.spw.rr.views.PropsView
 import org.slf4j.Logger
@@ -16,6 +17,7 @@ import java.awt.event.ActionEvent
 class PropsController {
     BackgroundWorker worker = BackgroundWorker.getInstance()
     DatabaseServices database = DatabaseServices.getInstance()
+    PropertySaver saver = PropertySaver.getInstance()
     PropsModel model
     PropsView view
     Window parentWidow
@@ -61,6 +63,7 @@ class PropsController {
             log.debug("settings determined to be good - saving them")
             settings = newSettings
             settings.saveSettings()
+            saver.writeValues()
             database.dbStart(settings)
             SwingUtilities.invokeLater {
                 view.thisWindow.setVisible(false)

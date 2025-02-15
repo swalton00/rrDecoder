@@ -38,7 +38,7 @@ class FrameHelper implements ComponentListener{
             high = height
             sizeFound = false
         }
-        window.setPreferredSize(new Dimension(wid, high))
+        window.setSize(new Dimension(wid, high))
         if (!sizeFound) {
             saver.putInt(name, WIDTH_NAME, wid)
             saver.putInt(name, HEIGHT_NAME, high)
@@ -77,11 +77,9 @@ class FrameHelper implements ComponentListener{
 
     @Override
     void componentShown(ComponentEvent e) {
-
     }
 
     @Override
     void componentHidden(ComponentEvent e) {
-
     }
 }

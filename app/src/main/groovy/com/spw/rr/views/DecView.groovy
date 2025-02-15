@@ -37,7 +37,7 @@ class DecView {
         model.thisDialog.setName(D_NAME)
         model.thisDialog.addComponentListener(new FrameHelper())
         JDialog tempDialog = (JDialog) (model.thisDialog)
-        tempDialog.setLayout(new MigLayout("fill"))
+        tempDialog.setLayout(new BorderLayout())
         JMenuBar menuBar = new JMenuBar()
         JMenu fileMenu = new JMenu("File")
         model.importDetailItem = new JMenuItem("Import Detail")
@@ -113,10 +113,10 @@ class DecView {
         model.theTable.setAutoCreateRowSorter(true)
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         JScrollPane scrollPane = new JScrollPane(model.theTable)
-        tempDialog.add(scrollPane, "h 8in:8in:, grow, wrap")
+        tempDialog.add(scrollPane, BorderLayout.CENTER)
         JPanel cvPanel = new JPanel(new MigLayout("fill"))
         JLabel cvLabel = new JLabel("CVs: ID, ")
-        cvPanel.add(cvLabel, "h 30px:30px:30px, left")
+        cvPanel.add(cvLabel, "h 30px:30px:30px, right")
         model.cvListField = new JTextField("")
         model.cvListField.setColumns(40)
         model.cvListField.setName("cvlist")
@@ -125,33 +125,9 @@ class DecView {
         if (cvList != null) {
             model.cvListField.setText(cvList)
         }
-        cvPanel.add(model.cvListField, "h 30px:30px:30px, left, growx")
-        tempDialog.add(cvPanel, "h 30px:30px:30px, wrap")
-
-        Integer dialogWidth = saver.getInt(D_NAME, FrameHelper.WIDTH_NAME)
-        Integer dialogHeight = saver.getInt(D_NAME, FrameHelper.HEIGHT_NAME)
-        Dimension dialogSize = model.thisDialog.getSize()
-        if (dialogWidth == null) {
-            dialogWidth = 1200
-            saver.putInt(D_NAME, FrameHelper.WIDTH_NAME, dialogWidth)
-        }
-        if (dialogHeight == null) {
-            dialogHeight = 900
-            saver.putInt(D_NAME, FrameHelper.HEIGHT_NAME, dialogHeight)
-        }
-        Integer dialogX = saver.getInt(D_NAME, FrameHelper.X_NAME)
-        Integer dialogY = saver.getInt(D_NAME, FrameHelper.Y_NAME)
-        if (dialogX == null | dialogY == null) {
-            Toolkit toolkit = Toolkit.getDefaultToolkit()
-            Dimension dim = toolkit.getScreenSize()
-            dialogX = (dim.width - dialogWidth) / 2
-            dialogY = (dim.height - dialogHeight) / 2
-            saver.putInt(D_NAME, FrameHelper.X_NAME, dialogX)
-            saver.putInt(D_NAME, FrameHelper.Y_NAME, dialogY)
-        }
-        model.thisDialog.setSize(dialogWidth, dialogHeight)
-        model.thisDialog.setLocation(dialogX, dialogY)
+        cvPanel.add(model.cvListField, "h 30px:30px:30px, left, growx, shrink 0")
+        tempDialog.add(cvPanel, BorderLayout.SOUTH)
+        FrameHelper.setFrameValues(model.thisDialog, D_NAME, 1200, 900 )
         model.thisDialog.setVisible(true)
-
     }
 }
