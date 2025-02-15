@@ -85,26 +85,7 @@ class DataView {
         }
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         model.dialog.getContentPane().add(scrollPane, "grow")
-        Integer dWidth = saver.getInt(viewName, FrameHelper.WIDTH_NAME)
-        Integer dHeight = saver.getInt(viewName, FrameHelper.HEIGHT_NAME)
-        if (dWidth == null) {
-            dWidth = D_WIDTH
-            saver.putInt(viewName, FrameHelper.WIDTH_NAME, dWidth)
-        }
-        if (dHeight == null) {
-            dHeight = D_HEIGHT
-            saver.putInt(viewName, FrameHelper.HEIGHT_NAME, dHeight)
-        }
-        model.dialog.setSize(dWidth, dHeight)
-        Integer xPos = saver.getInt(viewName, FrameHelper.X_NAME)
-        Integer yPos = saver.getInt(viewName, FrameHelper.Y_NAME)
-        if (xPos == null | yPos == null) {
-            Toolkit toolkit = Toolkit.getDefaultToolkit()
-            Dimension screen =toolkit.getScreenSize()
-            xPos = (screen.width - dWidth) / 2
-            yPos = (screen.height - dHeight) / 2
-        }
-        model.dialog.setLocation(xPos, yPos)
+        FrameHelper.setFrameValues(model.dialog, viewName, D_WIDTH, D_HEIGHT)
         model.dialog.setVisible(true)
     }
 
