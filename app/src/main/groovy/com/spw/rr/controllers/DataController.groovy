@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory
 
 import javax.swing.*
 import java.awt.event.ActionEvent
+import java.text.MessageFormat
+import java.text.SimpleDateFormat
 
 class DataController {
 
@@ -26,6 +28,7 @@ class DataController {
     String cvList
     Vector<Integer> decoderIds
     JDialog parent
+    String printTitle
 
     public enum ViewType {
         SELECTED_CVS,       // Decoders down, CVs across
@@ -61,18 +64,25 @@ class DataController {
         model.init()
         switch (viewType) {
             case ViewType.SELECTED_CVS: buildSelectedCvs()
+                printTitle = "Selected CV Contents"
                 break
             case ViewType.ALL_CVS: buildAllCvs()
+                printTitle = "Contents of ALL CV's"
                 break
             case ViewType.STANDARD_CVS: buildStdCvs()
+                printTitle = "Standard CV Contents"
                 break
             case ViewType.FUNCTION_LABELS: buildFunctionLabels()
+                printTitle = "Function Lables"
                 break
             case ViewType.DECODER_DETAIL: buildDecPetail()
+                printTitle = "Decoder Details"
                 break
             case ViewType.SPEED_PROFILE: buildSpeedProfile()
+                printTitle = "Speed Profiles"
                 break
             case ViewType.KEY_PAIRS: buildKeyPairs()
+                printTitle = "Key Value pairs"
                 break
             default:
                 throw new RuntimeException("Unrecognized View type ${viewType}")
@@ -257,7 +267,10 @@ class DataController {
 
     def printSAction = { ActionEvent e ->
         log.debug("Print requested")
-        model.theTable.print()
+        SimpleDateFormat sdf = new SimpleDateFormat("mm/dd/yy")
+        MessageFormat header = new MessageFormat(printTitle)
+        MessageFormat footer = new MessageFormat("Page {0,number} Printed " + sdf.format(new Date()))
+        model.theTable.print(JTable.PrintMode.FIT_WIDTH, header, footer)
     }
 
     def closeAction = { ActionEvent e ->

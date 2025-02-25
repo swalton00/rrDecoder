@@ -11,10 +11,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.JDialog
+import javax.swing.JTable
 import javax.swing.SwingUtilities
 import javax.swing.SwingWorker
 import java.awt.Component
 import java.awt.event.ActionEvent
+import java.text.MessageFormat
+import java.text.SimpleDateFormat
 
 class DecController {
 
@@ -81,7 +84,9 @@ class DecController {
 
     def filePrintAction = { ActionEvent e ->
         log.debug("Print requested")
-        model.theTable.print()
+        SimpleDateFormat sdf = new SimpleDateFormat("mm/dd/yy")
+        model.theTable.print(JTable.PrintMode.FIT_WIDTH, new MessageFormat("Decoder List"),
+        new MessageFormat("Printed " + sdf.format(new Date())))
     }
 
     def fileCloseAction = { ActionEvent e ->
