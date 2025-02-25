@@ -79,6 +79,11 @@ class DecController {
         }
     }
 
+    def filePrintAction = { ActionEvent e ->
+        log.debug("Print requested")
+        model.theTable.print()
+    }
+
     def fileCloseAction = { ActionEvent e ->
         log.debug("closing the Decoder dialog")
         model.thisDialog.setVisible(false)

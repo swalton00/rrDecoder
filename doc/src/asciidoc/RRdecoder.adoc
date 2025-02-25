@@ -1,10 +1,46 @@
 = RR Decoder Database Application
 
 == Introduction
-The RR Decoder Database application is a tool to save your JMRI decoder profiles
-in a database. This will allow you to compare the definitions of the various decoders.
+The RR Decoder Database application is a tool that reads the roster.xml files created by DecoderPro, breaks them
+apart and stores them in a relational database (the database software is H2, a pure Java tool included with
+this tool). The tool provides several ways to view the data including severals ways to view CV values (and
+compare those values between locomotives), a view of the labels applied to Functions Keys and Speed profiles
+(if you are using those).
 
 == Installation
+
+The Software is distributed in a zip file including all the needed required software (except Java itself). You
+need a Java version 11 or later to run it (the same as JMRI). Unzip the the software into an empty directory.
+It will create several directories (including one called "app"). Inside the app folder, you will find a
+file called "app.bat" and another simply called "app". The ".bat" file is for Windows and the other for Mac and
+Unix (untested). Double click on the app.bat file and it will run the application.
+
+=== First Usage
+The first time you run the application you will need to provide some values to be used for the database.
+These values will be saved, so you will only need to provide them once. You can change them later, if you want
+(though that will force you to reimport your date).
+
+The database requires a userid and password. Since the database will be created after you have entered all
+the values, the userid id and password are your choice (the first usage sets them). The values are saved
+in an insecure maner so don't repeat these from another application. Security is not an issue with this
+application because it's only accessible from the local machine and the database doesn't hold any
+financially significant data.
+
+The database can be specified either with the full URL, containing all the parts, or be specifying each
+part individually. If you enter the parts, the full URL will be automatically populated and stored.
+The three parts required are: database location, name and the schema for the decoder data.
+The easiest method to select the location is to use the "Choose Location" button and select an empty
+directory.
+The database name is flexible, but must be at least three characters long, begin with a letter and
+contain only letters, numbers and possibly underscores.
+The final choice is for the schema to use for the tables in the database (I used "decoder" for mine).
+
+Once all the values have been entered, the "Save New Settings" button will be enabled. When you click on
+that button, all the settings will be validated and, if all are good, the values will be saved and you
+will see the main window.
+
+=== The Main window
+
 
 == Usage
 

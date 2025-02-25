@@ -4,6 +4,7 @@ import com.spw.rr.database.AbstractItem
 import com.spw.rr.database.DecoderEntry
 import com.spw.rr.models.DataModel
 import com.spw.rr.utilities.CvNameComparator
+import com.spw.rr.utilities.StringCvComparator
 import com.spw.rr.viewdb.ViewDbService
 import com.spw.rr.views.DataView
 import org.slf4j.Logger
@@ -111,6 +112,8 @@ class DataController {
 
         switch (listType) {
             case ViewType.ALL_CVS: theKeys.sort(new CvNameComparator())
+                break
+            case ViewType.DECODER_DETAIL: theKeys.sort(new StringCvComparator())
                 break
             case ViewType.FUNCTION_LABELS:
             case ViewType.SPEED_PROFILE:
@@ -252,6 +255,10 @@ class DataController {
         doColumnHeaders(decs, ViewType.DECODER_DETAIL)
     }
 
+    def printSAction = { ActionEvent e ->
+        log.debug("Print requested")
+        model.theTable.print()
+    }
 
     def closeAction = { ActionEvent e ->
         log.debug("Close action has bee requested")

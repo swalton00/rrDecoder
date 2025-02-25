@@ -31,6 +31,7 @@ class CvNameComparator implements Comparator {
         return 0
     }
 
+    final String match_pattern = "(\\d{1,3})(?:\\.(\\d{1,3}))?(?:\\.(\\d{1,3}))?"
 /**
  *
  * @param left The left String
@@ -53,7 +54,7 @@ class CvNameComparator implements Comparator {
     @Override
     int compare(Object left, Object right) {
 
-        String match_pattern = "(\\d{1,3})(?:\\.(\\d{1,3}))?(?:\\.(\\d{1,3}))?"
+
         Pattern regExPatt = Pattern.compile(match_pattern)
 
         if (!(left instanceof String)) {

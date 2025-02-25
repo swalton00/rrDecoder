@@ -3,14 +3,35 @@ buildscript {
         mavenCentral()
     }
 
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
+        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.9'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
+    }
+    configurations.classpath {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
+                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
+                details.because 'Dependency has moved'
+            }
+        }
+    }
 }
 
 
+
 plugins {
-    id("java")
-    id 'org.asciidoctor.jvm.convert' version '4.0.2'
-    id("org.asciidoctor.jvm.pdf") version "4.0.4"
-    id("org.asciidoctor.jvm.gems") version "4.0.4"
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'org.asciidoctor.jvm.pdf' version '3.3.2'
+    id 'org.asciidoctor.jvm.gems' version '3.3.2'
+}
+
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+    ruby.gems()
 }
 
 dependencies {
@@ -22,34 +43,19 @@ task distribution {
     asciidoctorPdf
 }
 
+
 asciidoctorPdf {
-
-    baseDir "src/docs/asciidoc "
-
-
-    dependsOn asciidoctorGemsPrepare
-
-
-    asciidoctorj {
-        attributes  'build-gradle': file('build.gradle'),
-                'sourcedir': file('src/docs/asciidoc')
-
-        sources {
-            include 'RRdecoder.adoc'
-        }
-    }
-
-}
-
-asciidoctor {
-    attributes  stylesheet: 'src/docs/styles/special.css'
-
-
-    outputOptions {
-        backends = ['html5', 'pdf']
-    }
-
+    sourceDir file('src/asciidoc')
     sources {
         include 'RRdecoder.adoc'
     }
+    outputDir file('build/docs')
+}
+
+asciidoctor {
+    sourceDir file('src/asciidoc')
+    sources {
+        include 'RRdecoder.adoc'
+    }
+    outputDir file('build/docs')
 }

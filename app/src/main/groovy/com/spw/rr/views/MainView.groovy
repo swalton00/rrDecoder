@@ -122,7 +122,15 @@ class MainView {
         }
         model.theTable.setAutoCreateRowSorter(true)
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
-        model.theTable.setPreferredSize(new Dimension(1000, 2000))
+        Integer mainWidth = saver.getInt("main", FrameHelper.WIDTH_NAME)
+        Integer mainHeight = saver.getInt("main", FrameHelper.HEIGHT_NAME)
+        if (mainWidth == null) {
+            mainWidth = 1000
+        }
+        if (mainHeight == null) {
+            mainHeight = 1500
+        }
+        model.baseFrame.setPreferredSize(new Dimension(mainWidth, mainHeight))
         //model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
 
         JScrollPane scrollPane = new JScrollPane(model.theTable)
