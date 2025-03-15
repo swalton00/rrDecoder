@@ -105,16 +105,16 @@ class ImportService {
                 SwingUtilities.invokeLater {
                     monitor.setProgress(i)
                 }
-                log.debug("this entry has an id of ${entryList[i].'@fileName'.text()}")
+                log.debug("this entry has an id of ${entryList[i].'@id'.text()}")
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
                 DecoderEntry newEntry = new DecoderEntry()
                 boolean decoderExists = false
                 if (rosterFound) {
-                    DecoderEntry previous = existingList.get(entryList[i].'@fileName')
+                    DecoderEntry previous = existingList.get(entryList[i].'@id'.text())
                     if (previous != null) {
                         newEntry = previous
                         decoderExists = true
-                        existingList.remove(newEntry.fileName)
+                        existingList.remove(newEntry.decoderId)
                     }
                 }
                 if (!rosterFound | (rosterFound & !decoderExists)) {
@@ -176,8 +176,10 @@ class ImportService {
             }
             if (rosterFound && existingList.size() > 0) {
                 log.debug("still have some old existing decoder entries -- removing them -- ${existingList.size()}")
-                existingList.each {
-                    database.deleteDecoderEntry(it)
+                existingList.each {entry ->
+                    DecoderEntry currentEntry = existingList.get(entry.key)
+                    log.debug("this entry is ${currentEntry}")
+                    database.deleteDecoderEntry(currentEntry)
                 }
             }
             if (rosterFound) {
@@ -207,7 +209,7 @@ class ImportService {
         List<DecoderEntry> existingList = database.decodersForRoster(thisEntry.id)
         HashMap<String, DecoderEntry> oldLocos = new HashMap<>()
         existingList.each {
-            oldLocos.put(it.fileName, it)
+            oldLocos.put(it.decoderId, it)
         }
         return oldLocos
     }
@@ -230,6 +232,7 @@ class ImportService {
         entry.dccAddress = thisEntry.'@dccAddress'
         entry.manufacturerId = thisEntry.'@manufacturerID'
         entry.productId = thisEntry.'@productID'
+        entry.importDate = new Timestamp(new Date().getTime() )
         log.debug("date from XML was ${thisEntry.'dateUpdated'.text()}")
         entry.dateUpdated = doDateModified(thisEntry.'dateUpdated'.text())
         log.debug("dateupdated set to ${entry.dateUpdated}")
@@ -264,7 +267,10 @@ class ImportService {
             return new Timestamp(new Date().getTime())
         }
         try {
-            return new Timestamp(new Date().getTime())
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+            Date date = dateFormat.parse(dateValue)
+            return new Timestamp(date.getTime())
         } catch (ParseException ex) {
             log.debug("data parse exception -- trying SimpleDateFormat")
             try {

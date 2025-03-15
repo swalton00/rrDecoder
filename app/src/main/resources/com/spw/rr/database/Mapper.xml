@@ -127,6 +127,7 @@
          productid,
          decoderTypeId,
          rosterid,
+         dateImported,
          dateUpdated)
         VALUES (#{decoderId},
                 #{fileName},
@@ -138,6 +139,7 @@
                 #{productId},
                 #{decoderTypeId},
                 #{rosterId},
+                current_timestamp,
                 #{dateUpdated})
     </insert>
     <update id="updateDecoderEntry" parameterType="DecoderEntry">
@@ -152,6 +154,7 @@
             dccaddress    = #{dccAddress},
             productId     = #{productId},
             decoderTypeId = #{decoderTypeId},
+            dateImported  = #{importDate},
             dateUpdated   = #{dateUpdated}
         WHERE id = #{id}
     </update>
