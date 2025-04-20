@@ -19,6 +19,8 @@ import javax.swing.JTable
 import javax.swing.KeyStroke
 import javax.swing.ListSelectionModel
 import javax.swing.WindowConstants
+import javax.swing.table.TableModel
+import javax.swing.table.TableRowSorter
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
@@ -53,7 +55,7 @@ class MainView {
             @Override
             void windowClosing(WindowEvent e) {
                 super.windowClosed(e)
-                log.debug("Window cloaing - saving values")
+                log.debug("Window closing - saving values")
                 saver.writeValues()
             }
         })
@@ -120,7 +122,6 @@ class MainView {
                 model.importDetailItem.setEnabled(false)
             }
         }
-        model.theTable.setAutoCreateRowSorter(true)
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         Integer mainWidth = saver.getInt("main", FrameHelper.WIDTH_NAME)
         Integer mainHeight = saver.getInt("main", FrameHelper.HEIGHT_NAME)
@@ -140,6 +141,15 @@ class MainView {
         FrameHelper.setFrameValues(model.baseFrame, "main", 1500, 1200)
         model.baseFrame.pack()
         model.baseFrame.setVisible(true)
-
+        ArrayList<Class> classList = new ArrayList<>()
+        classList.add(0, Integer.class)
+        classList.add(1, String.class)
+        classList.add(2, Integer.class)
+        classList.add(3, String.class)
+        classList.add(4, Date.class)
+        classList.add(5, Date.class)
+        tableModel.tableClasses = classList
+        model.theTable.setRowSorter(new TableRowSorter(tableModel ))
+        //model.theTable.setAutoCreateRowSorter(true)
     }
 }

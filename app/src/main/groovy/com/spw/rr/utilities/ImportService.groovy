@@ -94,6 +94,7 @@ class ImportService {
             } else {
                 rosterFound = true
                 thisEntry.fileDate = rosterUpdate
+                thisEntry.dateUpdated = new Timestamp(new Date().getTime())
                 existingList = updateRosterEntries(thisEntry)
             }
             SwingUtilities.invokeLater {

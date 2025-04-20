@@ -58,23 +58,27 @@ class MainController {
         if (settings.databaseOpen) {
             log.debug("loading the data for the main view")
             List<RosterEntry> entries = databaseServices.listRosters()
-
             entries.each {
                 addEntry(it)
             }
+            view.tableModel.fireTableDataChanged()
         }
     }
 
-    void addEntry(RosterEntry newEntry) {
+    private ArrayList<String> buildEntry(RosterEntry newEntry) {
         ArrayList<String> nextLine = new ArrayList()
-        nextLine.add(newEntry.id.toString())
+        nextLine.add(newEntry.id)
         nextLine.add(newEntry.systemName)
         nextLine.add(newEntry.decCount)
         nextLine.add(newEntry.fullPath)
-        nextLine.add(newEntry.fileDate.toString())
-        nextLine.add(newEntry.dateUpdated.toString())
+        nextLine.add(newEntry.fileDate)
+        nextLine.add(newEntry.dateUpdated)
+        return nextLine
+    }
+
+    void addEntry(RosterEntry newEntry) {
+        ArrayList<Object> nextLine = buildEntry(newEntry)
         model.tableList.add(nextLine)
-        view.tableModel.fireTableDataChanged()
     }
 
     def closeAction = { ActionEvent event ->
@@ -90,6 +94,15 @@ class MainController {
         SwingUtilities.invokeLater { ->
             if (!exists) {
                 addEntry(newEntry)
+                view.tableModel.fireTableDataChanged()
+            } else {
+                log.debug("entry was re-imported - refresh display line")
+                ArrayList<Object> lineEntry = buildEntry(newEntry)
+                for (i in 0..<model.tableList.size()) {
+                    if (model.tableList.get((int)i).get(0).equals(newEntry.id)) {
+                        model.tableList.set((int) i, lineEntry)
+                    }
+                }
             }
         }
     }
@@ -106,6 +119,7 @@ class MainController {
             chosen = chooser.getSelectedFile()
             worker.execute(importBackgrounnd)
         }
+
     }
 
     def createProps = { ->

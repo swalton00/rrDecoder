@@ -6,6 +6,14 @@ import javax.swing.table.AbstractTableModel
 
 class RrTableModel extends AbstractTableModel{
     RrBaseModel model
+    ArrayList<Class> tableClasses = new ArrayList()
+
+    void setClasses(ArrayList<Class> newClasses) {
+        tableClasses.clear()
+        for (i in 0..<newClasses.size()) {
+            tableClasses.add(newClasses(i))
+        }
+    }
 
     RrTableModel(RrBaseModel model) {
         super()
@@ -37,10 +45,10 @@ class RrTableModel extends AbstractTableModel{
 
     @Override
     Class getColumnClass(int columnNumber) {
-        if (columnNumber == 0) {
-            return Integer.class
+        if (columnNumber < tableClasses.size()) {
+            return (Class)tableClasses.get(columnNumber)
         } else {
             return String.class
         }
-    }
+   }
 }
