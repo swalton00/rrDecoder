@@ -1,10 +1,14 @@
 package com.spw.rr.utilities
 
 import com.spw.rr.models.RrBaseModel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
+import javax.swing.JTable
 import javax.swing.table.AbstractTableModel
 
 class RrTableModel extends AbstractTableModel{
+    private static final Logger log = LoggerFactory.getLogger(RrTableModel.class)
     RrBaseModel model
     ArrayList<Class> tableClasses = new ArrayList()
 
@@ -51,4 +55,18 @@ class RrTableModel extends AbstractTableModel{
             return String.class
         }
    }
+
+    public static ArrayList<Integer> getSelectedRows(JTable theTable) {
+        ArrayList<Integer> returnValue = new ArrayList()
+        if (theTable.getSelectedRowCount() == 0) {
+            log.debug("no selected rows - returning an empty Array")
+            return returnValue
+        }
+        int[] selected = theTable.getSelectedRows()
+        for (i in 0..<selected.size()) {
+            int newValue = theTable.convertRowIndexToModel(selected[i])
+            returnValue.add((Integer)newValue)
+        }
+        return returnValue
+    }
 }

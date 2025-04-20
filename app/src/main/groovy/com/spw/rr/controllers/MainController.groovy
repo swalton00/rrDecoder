@@ -6,6 +6,7 @@ import com.spw.rr.utilities.BackgroundWorker
 import com.spw.rr.utilities.DatabaseServices
 import com.spw.rr.utilities.ImportService
 import com.spw.rr.utilities.PropertySaver
+import com.spw.rr.utilities.RrTableModel
 import com.spw.rr.utilities.Settings
 import com.spw.rr.views.MainView
 import org.slf4j.Logger
@@ -27,7 +28,7 @@ class MainController {
 
     MainView view
     MainModel model
-    Settings settings =  new Settings()
+    Settings settings = new Settings()
     BackgroundWorker worker = BackgroundWorker.getInstance()
     DatabaseServices databaseServices = DatabaseServices.getInstance()
     PropsController pc
@@ -87,7 +88,7 @@ class MainController {
         System.exit(0)
     }
 
-    Runnable importBackgrounnd = {  ->
+    Runnable importBackgrounnd = { ->
         log.debug("importing roster at location ${chosen}")
         boolean exists = imports.doesRosterExist(chosen)
         RosterEntry newEntry = imports.importRoster(model.baseFrame, chosen)
@@ -99,14 +100,13 @@ class MainController {
                 log.debug("entry was re-imported - refresh display line")
                 ArrayList<Object> lineEntry = buildEntry(newEntry)
                 for (i in 0..<model.tableList.size()) {
-                    if (model.tableList.get((int)i).get(0).equals(newEntry.id)) {
+                    if (model.tableList.get((int) i).get(0).equals(newEntry.id)) {
                         model.tableList.set((int) i, lineEntry)
                     }
                 }
             }
         }
     }
-
 
 
     File chosen
@@ -138,13 +138,10 @@ class MainController {
 
     def importDetailAction = { ActionEvent e ->
         log.debug("Import detail has been requested")
-        if (model.selectedRows.size() == 0) {
-            log.debug("import detail requested, but no rows selected")
+        rosterIds = RrTableModel.getSelectedRows(model.theTable)
+        if (rosterIds.size() == 0) {
+            log.debug("nothing selected - skipping import detail")
             return
-        }
-        rosterIds.clear()
-        model.selectedRows.each {
-            rosterIds.add(it)
         }
         worker.execute { ->
             imports.importDetailRoster(model.baseFrame, rosterIds)
@@ -152,6 +149,7 @@ class MainController {
     }
 
     ArrayList<Integer> rosterIds = new ArrayList<>()
+
     void backgroundView() {
         DecController decController = new DecController(model.baseFrame, rosterIds)
         decController.init()
@@ -159,13 +157,10 @@ class MainController {
 
     def viewAction = { ActionEvent event ->
         log.debug("view action requested from main")
-        if (model.selectedRows.size() == 0) {
-            log.debug("view action but selected rows is empty")
+        rosterIds = RrTableModel.getSelectedRows(model.theTable)
+        if (rosterIds.size() == 0) {
+            log.debug("nothing selected - skipping view selected")
             return
-        }
-        rosterIds.clear()
-        model.selectedRows.each {
-            rosterIds.add(it)
         }
         log.trace("list of roster ids is ${rosterIds}")
         worker.execute(backgroundView())
@@ -182,11 +177,11 @@ class MainController {
         worker.execute(backgroundView())
     }
 
-    def helpAction= { ActionEvent event ->
+    def helpAction = { ActionEvent event ->
         log.debug("help action requested")
     }
 
-    def aboutAction= { ActionEvent event ->
+    def aboutAction = { ActionEvent event ->
         log.debug("about action requested")
     }
 
