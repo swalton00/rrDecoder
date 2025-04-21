@@ -18,6 +18,7 @@ class FrameHelper implements ComponentListener{
     public static final String Y_NAME = "Y"
     public static final String WIDTH_NAME = "Width"
     public static final String HEIGHT_NAME = "Height"
+    public static final String COL_ORDER_NAME = "Col_order" // will be suffixed with column number
 
     /**
      * get the values from saver and and set location and size

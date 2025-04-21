@@ -21,6 +21,8 @@ import javax.swing.JTable
 import javax.swing.KeyStroke
 import javax.swing.ListSelectionModel
 import javax.swing.WindowConstants
+import javax.swing.table.TableColumn
+import javax.swing.table.TableColumnModel
 import javax.swing.table.TableModel
 import javax.swing.table.TableRowSorter
 import java.awt.Dimension
@@ -37,6 +39,7 @@ class MainView {
     MainController controller
     PropertySaver saver = PropertySaver.getInstance()
     private static final Logger log = LoggerFactory.getLogger(MainView.class)
+    private static final String WINDOW_NAME = "main"
 
     RrTableModel tableModel
 
@@ -51,12 +54,18 @@ class MainView {
 
     void init() {
         model.baseFrame = new JFrame("Model Railroad Decoder Database App")
-        model.baseFrame.setName("main")
+        model.baseFrame.setName(WINDOW_NAME)
         model.baseFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
         model.baseFrame.addComponentListener(new FrameHelper())
         model.baseFrame.addWindowListener(new WindowAdapter() {
             @Override
             void windowClosing(WindowEvent e) {
+                // save the column order
+                TableColumnModel columnModel = model.theTable.getColumnModel()
+                for (i in 0..< columnModel.getColumnCount()) {
+                    TableColumn thisColumn = columnModel.getColumn(i)
+                    saver.putInt(WINDOW_NAME, FrameHelper.COL_ORDER_NAME + i.toString(), thisColumn.getModelIndex())
+                }
                 super.windowClosed(e)
                 log.debug("Window closing - saving values")
                 saver.writeValues()
@@ -134,10 +143,10 @@ class MainView {
             mainHeight = 1500
         }
         model.baseFrame.setPreferredSize(new Dimension(mainWidth, mainHeight))
-        //model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         model.baseFrame.getContentPane().add(scrollPane, "grow")
         FrameHelper.setFrameValues(model.baseFrame, "main", 1500, 1200)
+        model.theTable.setIntercellSpacing(new Dimension(6, 4))
         model.baseFrame.pack()
         model.baseFrame.setVisible(true)
         ArrayList<Class> classList = new ArrayList<>()
@@ -150,5 +159,10 @@ class MainView {
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
         model.theTable.setRowSorter(new TableRowSorter(tableModel ))
+        TableColumnModel tcModel = model.theTable.getColumnModel()
+        for (i in 0..<tcModel.getColumnCount()) {
+            TableColumn thisColumn = tcModel.getColumn(i)
+            thisColumn.setModelIndex(saver.getInt(WINDOW_NAME, FrameHelper.COL_ORDER_NAME + i.toString()))
+        }
     }
 }
