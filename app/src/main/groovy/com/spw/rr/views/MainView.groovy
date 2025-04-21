@@ -6,11 +6,13 @@ import com.spw.rr.utilities.FrameHelper
 import com.spw.rr.utilities.ListenerForTables
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
+import com.spw.rr.utilities.TimestampRenderer
 import net.miginfocom.swing.MigLayout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.JFrame
+import javax.swing.JLabel
 import javax.swing.JMenu
 import javax.swing.JMenuBar
 import javax.swing.JMenuItem
@@ -27,6 +29,7 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.sql.Timestamp
 
 class MainView {
 
@@ -105,7 +108,6 @@ class MainView {
         aboutItem.addActionListener(controller.aboutAction)
         helpMenu.add(aboutItem)
         menuBar.add(helpMenu)
-
         model.baseFrame.getContentPane().add(menuBar, "wrap")
         tableModel = new RrTableModel(model)
         model.theTable = new JTable(tableModel)
@@ -133,11 +135,8 @@ class MainView {
         }
         model.baseFrame.setPreferredSize(new Dimension(mainWidth, mainHeight))
         //model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
-
         JScrollPane scrollPane = new JScrollPane(model.theTable)
-        //scrollPane.setPreferredSize(new Dimension(1500, 1200))
         model.baseFrame.getContentPane().add(scrollPane, "grow")
-
         FrameHelper.setFrameValues(model.baseFrame, "main", 1500, 1200)
         model.baseFrame.pack()
         model.baseFrame.setVisible(true)
@@ -146,10 +145,10 @@ class MainView {
         classList.add(1, String.class)
         classList.add(2, Integer.class)
         classList.add(3, String.class)
-        classList.add(4, Date.class)
-        classList.add(5, Date.class)
+        classList.add(4, Timestamp.class)
+        classList.add(5, Timestamp.class)
+        model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
         model.theTable.setRowSorter(new TableRowSorter(tableModel ))
-        //model.theTable.setAutoCreateRowSorter(true)
     }
 }
