@@ -2,6 +2,9 @@ package com.spw.rr.utilities
 
 import com.sun.javafx.tk.Toolkit
 
+import javax.swing.JTable
+import javax.swing.table.TableColumn
+import javax.swing.table.TableColumnModel
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.Point
@@ -19,6 +22,16 @@ class FrameHelper implements ComponentListener{
     public static final String WIDTH_NAME = "Width"
     public static final String HEIGHT_NAME = "Height"
     public static final String COL_ORDER_NAME = "Col_order" // will be suffixed with column number
+    public static final String COL_WIDTH_NAME = "Col_width" // also appended with column number
+
+    public static  closeAction(Component window, JTable theTable) {
+        TableColumnModel columnModel = theTable.getColumnModel()
+        for (i in 0..<columnModel.getColumnCount()) {
+            TableColumn thisColumn = columnModel.getColumn(i)
+            saver.putInt(window.getName(), COL_ORDER_NAME + i.toString(), thisColumn.getModelIndex())
+            saver.putInt(window.getName(), COL_WIDTH_NAME + i.toString(), thisColumn.getWidth())
+        }
+    }
 
     /**
      * get the values from saver and and set location and size

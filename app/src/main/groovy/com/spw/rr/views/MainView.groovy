@@ -21,6 +21,7 @@ import javax.swing.JTable
 import javax.swing.KeyStroke
 import javax.swing.ListSelectionModel
 import javax.swing.WindowConstants
+import javax.swing.table.JTableHeader
 import javax.swing.table.TableColumn
 import javax.swing.table.TableColumnModel
 import javax.swing.table.TableModel
@@ -31,6 +32,7 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.lang.reflect.WildcardType
 import java.sql.Timestamp
 
 class MainView {
@@ -61,10 +63,12 @@ class MainView {
             @Override
             void windowClosing(WindowEvent e) {
                 // save the column order
+                FrameHelper.closeAction(model.baseFrame, model.theTable)
                 TableColumnModel columnModel = model.theTable.getColumnModel()
-                for (i in 0..< columnModel.getColumnCount()) {
+                for (i in 0..<columnModel.getColumnCount()) {
                     TableColumn thisColumn = columnModel.getColumn(i)
                     saver.putInt(WINDOW_NAME, FrameHelper.COL_ORDER_NAME + i.toString(), thisColumn.getModelIndex())
+                    saver.putInt(WINDOW_NAME, FrameHelper.COL_WIDTH_NAME + i.toString(), thisColumn.getWidth())
                 }
                 super.windowClosed(e)
                 log.debug("Window closing - saving values")
@@ -111,7 +115,7 @@ class MainView {
         helpMenu.setMnemonic(KeyEvent.VK_H)
         JMenuItem showHelpItem = new JMenuItem("Help")
         showHelpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.ALT_MASK))
-        showHelpItem.addActionListener (controller.helpAction)
+        showHelpItem.addActionListener(controller.helpAction)
         helpMenu.add(showHelpItem)
         JMenuItem aboutItem = new JMenuItem("About")
         aboutItem.addActionListener(controller.aboutAction)
@@ -147,8 +151,6 @@ class MainView {
         model.baseFrame.getContentPane().add(scrollPane, "grow")
         FrameHelper.setFrameValues(model.baseFrame, "main", 1500, 1200)
         model.theTable.setIntercellSpacing(new Dimension(6, 4))
-        model.baseFrame.pack()
-        model.baseFrame.setVisible(true)
         ArrayList<Class> classList = new ArrayList<>()
         classList.add(0, Integer.class)
         classList.add(1, String.class)
@@ -158,11 +160,65 @@ class MainView {
         classList.add(5, Timestamp.class)
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
-        model.theTable.setRowSorter(new TableRowSorter(tableModel ))
+        model.theTable.setRowSorter(new TableRowSorter(tableModel))
         TableColumnModel tcModel = model.theTable.getColumnModel()
+        JTableHeader header = model.theTable.getTableHeader()
+        model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
+        TableColumnModel headerModel = header.getColumnModel()
+        Integer[] desiredColumn = new Integer[tcModel.getColumnCount()]
+        boolean widthValid = true
+        int[] viewOrder = new int[tcModel.getColumnCount()]
+        int[] modelOrder = new int[tcModel.getColumnCount()]
+        boolean orderValid = true
         for (i in 0..<tcModel.getColumnCount()) {
             TableColumn thisColumn = tcModel.getColumn(i)
-            thisColumn.setModelIndex(saver.getInt(WINDOW_NAME, FrameHelper.COL_ORDER_NAME + i.toString()))
+            Integer newValue = saver.getInt(WINDOW_NAME, FrameHelper.COL_ORDER_NAME + i.toString())
+            if (newValue != null) {
+                desiredColumn[i] = newValue
+            } else {
+                orderValid = false
+            }
+            newValue = saver.getInt(WINDOW_NAME, FrameHelper.COL_WIDTH_NAME + i.toString())
+            if (newValue != null) {
+                thisColumn.setPreferredWidth(newValue)
+            } else {
+                widthValid = false
+            }
         }
+        if (orderValid) {
+            log.trace("desiredArray is ${desiredColumn}")
+            ArrayList<Integer> resultArray = new ArrayList(tcModel.getColumnCount())
+            ArrayList<Integer> tempArray = new ArrayList(tcModel.getColumnCount())
+            ArrayList<Integer> currentArray = new ArrayList(tcModel.getColumnCount())
+            for (i in 0..<tcModel.getColumnCount()) {
+                currentArray.add(Integer.valueOf( i))
+            }
+            for (i in 0..<desiredColumn.size() - 1) {
+                if (desiredColumn[i].equals(currentArray.get(i))) {
+                    resultArray.add(currentArray.get(i))
+                } else {
+                    for (j in i+1..<currentArray.size()) {
+                        if (desiredColumn[i].equals(currentArray.get(j))) {
+                            tcModel.moveColumn(j, i)
+                            resultArray.add(currentArray.get(j))
+                            log.debug("column ${j} moved to column ${i}")
+                            currentArray.remove(j)
+                            tempArray.clear()
+                            tempArray.addAll(resultArray)
+                            for (k in i..<currentArray.size()) {
+                                tempArray.add(currentArray.get(k))
+                            }
+                            log.trace("tempArray is now ${tempArray}")
+                            currentArray.clear()
+                            currentArray.addAll(tempArray)
+                        }
+                    }
+                }
+                log.trace("after moves currentArray is ${currentArray}")
+            }
+        }
+        model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
+        model.baseFrame.pack()
+        model.baseFrame.setVisible(true)
     }
 }

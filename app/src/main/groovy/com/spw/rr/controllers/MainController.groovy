@@ -4,6 +4,7 @@ import com.spw.rr.database.RosterEntry
 import com.spw.rr.models.MainModel
 import com.spw.rr.utilities.BackgroundWorker
 import com.spw.rr.utilities.DatabaseServices
+import com.spw.rr.utilities.FrameHelper
 import com.spw.rr.utilities.ImportService
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
@@ -84,6 +85,7 @@ class MainController {
 
     def closeAction = { ActionEvent event ->
         log.info("shutting down the RRdecoder application")
+        FrameHelper.closeAction(model.baseFrame, model.theTable)
         saver.writeValues()
         System.exit(0)
     }
