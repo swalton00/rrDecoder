@@ -6,6 +6,7 @@ import com.spw.rr.utilities.FrameHelper
 import com.spw.rr.utilities.ListenerForTables
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
+
 import net.miginfocom.swing.MigLayout
 
 import javax.swing.*
@@ -35,7 +36,9 @@ class DecView {
     void init() {
         model.thisDialog = (Component) (new JDialog(parent, "Decoder View", true))
         model.thisDialog.setName(D_NAME)
-        model.thisDialog.addComponentListener(new FrameHelper())
+        FrameHelper fh = new FrameHelper()
+        model.thisDialog.addComponentListener(fh)
+        (JDialog)(model.thisDialog).addWindowListener(fh)
         JDialog tempDialog = (JDialog) (model.thisDialog)
         tempDialog.setLayout(new BorderLayout())
         JMenuBar menuBar = new JMenuBar()
@@ -102,6 +105,7 @@ class DecView {
         }
         tableModel = new RrTableModel(model)
         model.theTable = new JTable(tableModel)
+        fh.setTable(model.theTable)
         model.theTable.setCellSelectionEnabled(false)
         model.theTable.setColumnSelectionAllowed(false)
         model.theTable.setRowSelectionAllowed(true)

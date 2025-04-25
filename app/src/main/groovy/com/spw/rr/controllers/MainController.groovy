@@ -36,6 +36,7 @@ class MainController {
     ImportService imports = ImportService.getInstance()
 
     PropertySaver saver = PropertySaver.getInstance()
+    ArrayList<Integer> rosterIdList = new ArrayList<>()
 
     void init() {
         saver.init()
@@ -60,8 +61,10 @@ class MainController {
         if (settings.databaseOpen) {
             log.debug("loading the data for the main view")
             List<RosterEntry> entries = databaseServices.listRosters()
+            rosterIdList.clear()
             entries.each {
                 addEntry(it)
+                rosterIdList.add(it.id)
             }
             view.tableModel.fireTableDataChanged()
         }
@@ -97,6 +100,7 @@ class MainController {
         SwingUtilities.invokeLater { ->
             if (!exists) {
                 addEntry(newEntry)
+                rosterIdList.add(newEntry.id)
                 view.tableModel.fireTableDataChanged()
             } else {
                 log.debug("entry was re-imported - refresh display line")
@@ -159,10 +163,15 @@ class MainController {
 
     def viewAction = { ActionEvent event ->
         log.debug("view action requested from main")
-        rosterIds = RrTableModel.getSelectedRows(model.theTable)
-        if (rosterIds.size() == 0) {
+        ArrayList<Integer> tempList = RrTableModel.getSelectedRows(model.theTable)
+        if (tempList.size() == 0) {
             log.debug("nothing selected - skipping view selected")
             return
+        }
+        // these are actually table row ids - need to convert them to actual id of roster entries
+        rosterIds.clear()
+        tempList.each {
+            rosterIds.add(rosterIdList.get(it))
         }
         log.trace("list of roster ids is ${rosterIds}")
         worker.execute(backgroundView())

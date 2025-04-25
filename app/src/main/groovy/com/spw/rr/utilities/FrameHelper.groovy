@@ -14,7 +14,10 @@ import java.awt.event.ComponentListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class FrameHelper implements ComponentListener{
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+
+class FrameHelper extends WindowAdapter implements ComponentListener {
     private static final Logger log = LoggerFactory.getLogger(FrameHelper.class)
     private static final PropertySaver saver = PropertySaver.getInstance()
     public static final String X_NAME = "X"
@@ -24,7 +27,13 @@ class FrameHelper implements ComponentListener{
     public static final String COL_ORDER_NAME = "Col_order" // will be suffixed with column number
     public static final String COL_WIDTH_NAME = "Col_width" // also appended with column number
 
-    public static  closeAction(Component window, JTable theTable) {
+    private JTable theTable
+
+    void setTable(JTable table) {
+        theTable = table
+    }
+
+    public static closeAction(Component window, JTable theTable) {
         TableColumnModel columnModel = theTable.getColumnModel()
         for (i in 0..<columnModel.getColumnCount()) {
             TableColumn thisColumn = columnModel.getColumn(i)
@@ -33,12 +42,30 @@ class FrameHelper implements ComponentListener{
         }
     }
 
+
+    @Override
+    void windowClosing(WindowEvent e) {
+        if (theTable != null) {
+            closeAction(e.getComponent(), theTable)
+        }
+        // save the column order
+        if (e.getComponent().getName().equals("main")) {
+            log.debug("Window closing - saving values")
+            saver.writeValues()
+        }
+        super.windowClosing()
+    }
+
+    void saveColumns(JTable theTable) {
+
+    }
+
     /**
      * get the values from saver and and set location and size
-     * @param window    the window to apply values to
-     * @param name      the name used for reference from saver
-     * @param width     default value for width
-     * @param height    default for heigth
+     * @param window the window to apply values to
+     * @param name the name used for reference from saver
+     * @param width default value for width
+     * @param height default for heigth
      */
     public static void setFrameValues(Window window, String name, int width, int height) {
         Integer wid = saver.getInt(name, WIDTH_NAME)
@@ -76,8 +103,8 @@ class FrameHelper implements ComponentListener{
         Component source = e.getComponent()
         String name = source.getName()
         Dimension dim = source.getSize()
-        saver.putInt(name, WIDTH_NAME, (int)dim.getWidth())
-        saver.putInt(name, HEIGHT_NAME, (int)dim.getHeight())
+        saver.putInt(name, WIDTH_NAME, (int) dim.getWidth())
+        saver.putInt(name, HEIGHT_NAME, (int) dim.getHeight())
     }
 
     @Override

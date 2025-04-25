@@ -4,6 +4,7 @@ import com.spw.rr.database.DecoderEntry
 import com.spw.rr.database.RosterEntry
 import com.spw.rr.models.DecModel
 import com.spw.rr.utilities.BackgroundWorker
+import com.spw.rr.utilities.FrameHelper
 import com.spw.rr.utilities.ImportService
 import com.spw.rr.viewdb.ViewDbService
 import com.spw.rr.views.DecView
@@ -91,6 +92,7 @@ class DecController {
 
     def fileCloseAction = { ActionEvent e ->
         log.debug("closing the Decoder dialog")
+        FrameHelper.closeAction(model.thisDialog, model.theTable)
         model.thisDialog.setVisible(false)
     }
 
