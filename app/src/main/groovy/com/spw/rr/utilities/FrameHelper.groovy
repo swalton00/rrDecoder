@@ -123,7 +123,7 @@ class FrameHelper extends WindowAdapter implements ComponentListener {
                 log.trace("after moves currentArray is ${currentArray}")
             }
         }
-        theTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
+        //theTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
     }
 
     /**

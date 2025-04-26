@@ -6,13 +6,15 @@ import com.spw.rr.utilities.FrameHelper
 import com.spw.rr.utilities.ListenerForTables
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
-
+import com.spw.rr.utilities.TimestampRenderer
 import net.miginfocom.swing.MigLayout
 
 import javax.swing.*
+import javax.swing.table.TableRowSorter
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
+import java.sql.Timestamp
 
 class DecView {
 
@@ -118,7 +120,6 @@ class DecView {
                 model.viewSelCvItem.setEnabled(true)
             }
         }
-        model.theTable.setAutoCreateRowSorter(true)
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         tempDialog.add(scrollPane, BorderLayout.CENTER)
@@ -128,6 +129,25 @@ class DecView {
         model.cvListField = new JTextField("")
         model.cvListField.setColumns(40)
         model.cvListField.setName("cvlist")
+        ArrayList<Class> classList = new ArrayList()
+        classList.add(0, Integer.class)  // id
+        classList.add(1, Integer.class)  //rosterid
+        classList.add(2, Integer.class)  // dcc address
+        classList.add(3, String.class)  //has speed profile
+        classList.add(4, String.class)  //has detail
+        classList.add(5, String.class)  //file name
+        classList.add(6, String.class)  //road name
+        classList.add(7, Integer.class)  //road number
+        classList.add(8, Integer.class)  //manufacturer
+        classList.add(9, String.class)  //decoder Family
+        classList.add(10, String.class)  //decoder model
+        classList.add(11, String.class)  //owner
+        classList.add(12, Timestamp.class)  //Date updated
+        classList.add(13, Timestamp.class)  //import date
+        classList.add(14, Timestamp.class)  //detail time
+        model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
+        tableModel.tableClasses = classList
+        model.theTable.setRowSorter(new TableRowSorter(tableModel))
         model.cvListField.addFocusListener(model)
         String cvList = saver.getField(D_NAME, "cvList")
         if (cvList != null) {

@@ -59,22 +59,29 @@ class DecController {
         log.debug("building the display list from a list of size ${entries.size()}")
         model.tableList.clear()
         entries.each {entry ->
-            ArrayList<String> nextLine = new ArrayList<>()
-            nextLine.add(entry.id.toString())
-            nextLine.add(entry.rosterId.toString())
-            nextLine.add(entry.dccAddress)
+            ArrayList<Object> nextLine = new ArrayList<>()
+            nextLine.add(entry.id)
+            nextLine.add(entry.rosterId)
+            nextLine.add(Integer.valueOf(entry.dccAddress))
             nextLine.add(entry.hasSpeedProfile)
             nextLine.add(entry.hasDetail)
             nextLine.add(entry.fileName)
             nextLine.add(entry.roadName)
-            nextLine.add(entry.roadNumber)
+            Integer tempRoadNumber
+            try {
+                tempRoadNumber = Integer.valueOf(entry.roadNumber)
+            } catch (Exception e) {
+                log.warn("Roadnumber is not a number for ${entry}")
+                tempRoadNumber = null
+            }
+            nextLine.add(tempRoadNumber)
             nextLine.add(entry.manufacturer)
             nextLine.add(entry.decoderFamily)
             nextLine.add(entry.decoderModel)
             nextLine.add(entry.owner)
-            nextLine.add(entry.dateUpdated.toString())
-            nextLine.add(  entry.importDate == null ? " " : entry.importDate.toString() )
-            nextLine.add(  entry.detailTime == null ? " " : entry.detailTime.toString() )
+            nextLine.add(entry.dateUpdated)
+            nextLine.add(entry.importDate )
+            nextLine.add(entry.detailTime)
             model.tableList.add(nextLine)
             if (view.tableModel != null) {
                 // view.tableModel will be null since we haven't done view.init yet
