@@ -13,6 +13,12 @@ class RRdecoder {
     public static void main(String[] args) {
         log.info("RRdecoder started")
         MainController app = new MainController()
-        app.init()
+        try {
+            app.init()
+        } catch (Exception e) {
+            log.error("Error in running the app", e)
+        }
+
+
     }
 }

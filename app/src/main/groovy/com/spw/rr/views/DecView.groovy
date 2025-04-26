@@ -36,9 +36,9 @@ class DecView {
     void init() {
         model.thisDialog = (Component) (new JDialog(parent, "Decoder View", true))
         model.thisDialog.setName(D_NAME)
-        FrameHelper fh = new FrameHelper()
-        model.thisDialog.addComponentListener(fh)
-        (JDialog)(model.thisDialog).addWindowListener(fh)
+        FrameHelper frameHelper = new FrameHelper()
+        model.thisDialog.addComponentListener(frameHelper)
+        (JDialog)(model.thisDialog).addWindowListener(frameHelper)
         JDialog tempDialog = (JDialog) (model.thisDialog)
         tempDialog.setLayout(new BorderLayout())
         JMenuBar menuBar = new JMenuBar()
@@ -105,7 +105,7 @@ class DecView {
         }
         tableModel = new RrTableModel(model)
         model.theTable = new JTable(tableModel)
-        fh.setTable(model.theTable)
+        frameHelper.setTable(model.theTable)
         model.theTable.setCellSelectionEnabled(false)
         model.theTable.setColumnSelectionAllowed(false)
         model.theTable.setRowSelectionAllowed(true)
@@ -133,9 +133,12 @@ class DecView {
         if (cvList != null) {
             model.cvListField.setText(cvList)
         }
+        FrameHelper.restoreColumns(D_NAME, model.theTable)
         cvPanel.add(model.cvListField, "h 30px:30px:30px, left, growx, shrink 0")
         tempDialog.add(cvPanel, BorderLayout.SOUTH)
         FrameHelper.setFrameValues(model.thisDialog, D_NAME, 1200, 900 )
+
+
         model.thisDialog.setVisible(true)
     }
 }

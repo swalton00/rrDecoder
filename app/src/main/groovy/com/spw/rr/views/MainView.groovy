@@ -10,9 +10,7 @@ import com.spw.rr.utilities.TimestampRenderer
 import net.miginfocom.swing.MigLayout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
 import javax.swing.JFrame
-import javax.swing.JLabel
 import javax.swing.JMenu
 import javax.swing.JMenuBar
 import javax.swing.JMenuItem
@@ -21,18 +19,11 @@ import javax.swing.JTable
 import javax.swing.KeyStroke
 import javax.swing.ListSelectionModel
 import javax.swing.WindowConstants
-import javax.swing.table.JTableHeader
-import javax.swing.table.TableColumn
 import javax.swing.table.TableColumnModel
-import javax.swing.table.TableModel
 import javax.swing.table.TableRowSorter
 import java.awt.Dimension
-import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
-import java.lang.reflect.WildcardType
 import java.sql.Timestamp
 
 class MainView {
@@ -58,23 +49,9 @@ class MainView {
         model.baseFrame = new JFrame("Model Railroad Decoder Database App")
         model.baseFrame.setName(WINDOW_NAME)
         model.baseFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-        model.baseFrame.addComponentListener(new FrameHelper())
-        model.baseFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            void windowClosing(WindowEvent e) {
-                // save the column order
-                FrameHelper.closeAction(model.baseFrame, model.theTable)
-                TableColumnModel columnModel = model.theTable.getColumnModel()
-                for (i in 0..<columnModel.getColumnCount()) {
-                    TableColumn thisColumn = columnModel.getColumn(i)
-                    saver.putInt(WINDOW_NAME, FrameHelper.COL_ORDER_NAME + i.toString(), thisColumn.getModelIndex())
-                    saver.putInt(WINDOW_NAME, FrameHelper.COL_WIDTH_NAME + i.toString(), thisColumn.getWidth())
-                }
-                super.windowClosed(e)
-                log.debug("Window closing - saving values")
-                saver.writeValues()
-            }
-        })
+        FrameHelper frameHelper = new FrameHelper()
+        model.baseFrame.addComponentListener(frameHelper)
+        model.baseFrame.addWindowListener(frameHelper)
         model.baseFrame.getContentPane().setLayout(new MigLayout("fill"))
         JMenuBar menuBar = new JMenuBar()
 
@@ -124,6 +101,8 @@ class MainView {
         model.baseFrame.getContentPane().add(menuBar, "wrap")
         tableModel = new RrTableModel(model)
         model.theTable = new JTable(tableModel)
+        frameHelper.setTable(model.theTable)
+        model.theTable.setName("theTable")
         model.theTable.setCellSelectionEnabled(false)
         model.theTable.setColumnSelectionAllowed(false)
         model.theTable.setRowSelectionAllowed(true)
@@ -161,63 +140,7 @@ class MainView {
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
         model.theTable.setRowSorter(new TableRowSorter(tableModel))
-        TableColumnModel tcModel = model.theTable.getColumnModel()
-        JTableHeader header = model.theTable.getTableHeader()
-        model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
-        TableColumnModel headerModel = header.getColumnModel()
-        Integer[] desiredColumn = new Integer[tcModel.getColumnCount()]
-        boolean widthValid = true
-        int[] viewOrder = new int[tcModel.getColumnCount()]
-        int[] modelOrder = new int[tcModel.getColumnCount()]
-        boolean orderValid = true
-        for (i in 0..<tcModel.getColumnCount()) {
-            TableColumn thisColumn = tcModel.getColumn(i)
-            Integer newValue = saver.getInt(WINDOW_NAME, FrameHelper.COL_ORDER_NAME + i.toString())
-            if (newValue != null) {
-                desiredColumn[i] = newValue
-            } else {
-                orderValid = false
-            }
-            newValue = saver.getInt(WINDOW_NAME, FrameHelper.COL_WIDTH_NAME + i.toString())
-            if (newValue != null) {
-                thisColumn.setPreferredWidth(newValue)
-            } else {
-                widthValid = false
-            }
-        }
-        if (orderValid) {
-            log.trace("desiredArray is ${desiredColumn}")
-            ArrayList<Integer> resultArray = new ArrayList(tcModel.getColumnCount())
-            ArrayList<Integer> tempArray = new ArrayList(tcModel.getColumnCount())
-            ArrayList<Integer> currentArray = new ArrayList(tcModel.getColumnCount())
-            for (i in 0..<tcModel.getColumnCount()) {
-                currentArray.add(Integer.valueOf( i))
-            }
-            for (i in 0..<desiredColumn.size() - 1) {
-                if (desiredColumn[i].equals(currentArray.get(i))) {
-                    resultArray.add(currentArray.get(i))
-                } else {
-                    for (j in i+1..<currentArray.size()) {
-                        if (desiredColumn[i].equals(currentArray.get(j))) {
-                            tcModel.moveColumn(j, i)
-                            resultArray.add(currentArray.get(j))
-                            log.debug("column ${j} moved to column ${i}")
-                            currentArray.remove(j)
-                            tempArray.clear()
-                            tempArray.addAll(resultArray)
-                            for (k in i..<currentArray.size()) {
-                                tempArray.add(currentArray.get(k))
-                            }
-                            log.trace("tempArray is now ${tempArray}")
-                            currentArray.clear()
-                            currentArray.addAll(tempArray)
-                        }
-                    }
-                }
-                log.trace("after moves currentArray is ${currentArray}")
-            }
-        }
-        model.theTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
+        FrameHelper.restoreColumns(WINDOW_NAME, model.theTable)
         model.baseFrame.pack()
         model.baseFrame.setVisible(true)
     }

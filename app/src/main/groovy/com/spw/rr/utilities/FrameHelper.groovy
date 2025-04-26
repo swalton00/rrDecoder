@@ -1,8 +1,7 @@
 package com.spw.rr.utilities
 
-import com.sun.javafx.tk.Toolkit
-
 import javax.swing.JTable
+import javax.swing.table.JTableHeader
 import javax.swing.table.TableColumn
 import javax.swing.table.TableColumnModel
 import java.awt.Component
@@ -13,7 +12,6 @@ import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 
@@ -45,10 +43,13 @@ class FrameHelper extends WindowAdapter implements ComponentListener {
 
     @Override
     void windowClosing(WindowEvent e) {
+        log.debug("Closing the window ${e.getComponent().getName()}")
         if (theTable != null) {
             closeAction(e.getComponent(), theTable)
+        } else {
+            log.error("theTable is null in FrameHelper.windowClosing")
         }
-        // save the column order
+        saveColumns(e.getComponent().getName(), theTable)
         if (e.getComponent().getName().equals("main")) {
             log.debug("Window closing - saving values")
             saver.writeValues()
@@ -56,8 +57,73 @@ class FrameHelper extends WindowAdapter implements ComponentListener {
         super.windowClosing()
     }
 
-    void saveColumns(JTable theTable) {
+    void saveColumns(String windowName, JTable theTable) {
+        TableColumnModel columnModel = theTable.getColumnModel()
+        for (i in 0..<columnModel.getColumnCount()) {
+            TableColumn thisColumn = columnModel.getColumn(i)
+            saver.putInt(windowName, COL_ORDER_NAME + i.toString(), thisColumn.getModelIndex())
+            saver.putInt(windowName, COL_WIDTH_NAME + i.toString(), thisColumn.getWidth())
+        }
+    }
 
+    public static restoreColumns(String name, JTable theTable) {
+        JTableHeader header = theTable.getTableHeader()
+        theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF)
+        TableColumnModel headerModel = header.getColumnModel()
+        TableColumnModel tcModel = theTable.getColumnModel()
+        Integer[] desiredColumn = new Integer[tcModel.getColumnCount()]
+        boolean widthValid = true
+        int[] viewOrder = new int[tcModel.getColumnCount()]
+        int[] modelOrder = new int[tcModel.getColumnCount()]
+        boolean orderValid = true
+        for (i in 0..<tcModel.getColumnCount()) {
+            TableColumn thisColumn = tcModel.getColumn(i)
+            Integer newValue = saver.getInt(name, COL_ORDER_NAME + i.toString())
+            if (newValue != null) {
+                desiredColumn[i] = newValue
+            } else {
+                orderValid = false
+            }
+            newValue = saver.getInt(name, COL_WIDTH_NAME + i.toString())
+            if (newValue != null) {
+                thisColumn.setPreferredWidth(newValue)
+            } else {
+                widthValid = false
+            }
+        }
+        if (orderValid) {
+            log.trace("desiredArray is ${desiredColumn}")
+            ArrayList<Integer> resultArray = new ArrayList(tcModel.getColumnCount())
+            ArrayList<Integer> tempArray = new ArrayList(tcModel.getColumnCount())
+            ArrayList<Integer> currentArray = new ArrayList(tcModel.getColumnCount())
+            for (i in 0..<tcModel.getColumnCount()) {
+                currentArray.add(Integer.valueOf( i))
+            }
+            for (i in 0..<desiredColumn.size() - 1) {
+                if (desiredColumn[i].equals(currentArray.get(i))) {
+                    resultArray.add(currentArray.get(i))
+                } else {
+                    for (j in i+1..<currentArray.size()) {
+                        if (desiredColumn[i].equals(currentArray.get(j))) {
+                            tcModel.moveColumn(j, i)
+                            resultArray.add(currentArray.get(j))
+                            log.debug("column ${j} moved to column ${i}")
+                            currentArray.remove(j)
+                            tempArray.clear()
+                            tempArray.addAll(resultArray)
+                            for (k in i..<currentArray.size()) {
+                                tempArray.add(currentArray.get(k))
+                            }
+                            log.trace("tempArray is now ${tempArray}")
+                            currentArray.clear()
+                            currentArray.addAll(tempArray)
+                        }
+                    }
+                }
+                log.trace("after moves currentArray is ${currentArray}")
+            }
+        }
+        theTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
     }
 
     /**
