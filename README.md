@@ -1,2 +1,2 @@
 # rrDecoder
-SQL database storage or JMRI rosters
+SQL database storage for JMRI rosters
