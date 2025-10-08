@@ -1,0 +1,33 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spw.rr.database.ImportMapper">
+    <select id="getDBtime" resultType="java.sql.Timestamp">
+        select current_timestamp()
+        from dual;
+    </select>
+    <insert id="insertRosterEntry" parameterType="RosterEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO roster
+        (entered,
+         fullpath,
+         fileDate,
+         systemName)
+        VALUES (#{entryTime},
+                #{fullPath},
+                #{fileDate},
+                #{systemName})
+    </insert>
+    <update id="updateRosterEntry" parameterType="RosterEntry">
+        UPDATE
+            roster
+        SET fullpath=#{fullPath},
+            systemName = #{systemName},
+            fileDate = #{fileDate},
+            dateUpdated = #{dateUpdated}
+        WHERE
+            id = #{id}
+    </update>
+    <delete id="deleteDecoderEntry" parameterType="DecoderEntry">
+        DELETE
+        FROM Decoder
+        WHERE id = #{id};
+    </delete>
+</mapper>

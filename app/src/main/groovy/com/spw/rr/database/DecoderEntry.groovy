@@ -28,6 +28,7 @@ class DecoderEntry {
     Integer rosterId
     String hasDetail
     String hasSpeedProfile
+    int cvVersion
 
     List<DecoderDef> defValues
     List<FunctionLabel> labelValues

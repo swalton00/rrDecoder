@@ -6,7 +6,6 @@ interface Mapper {
     RosterEntry getRosterEntry(String systemName, String fullPath)
     RosterEntry getRosterEntryById(int rosterid)
     List<DecoderType> listDecoderTypes()
-    void insertRosterEntry(RosterEntry entry)
     List<DecoderEntry> listDecodersByRosterID(Integer id)
     List<DecoderEntry> listDecodersFor(List<Integer> rosterIds)
     DecoderEntry getDecoderEntry(int id)
@@ -15,9 +14,8 @@ interface Mapper {
     void insertFunctionLabel(FunctionLabel)
     void insertKeyValuePairs(KeyValuePairs)
     void insertSpeedSprofile(SpeedProfile)
-    int deleteDecoderEntry(DecoderEntry)
+
     void updateDecoderEntry(DecoderEntry entry)
-    void updateRosterEntry(RosterEntry entry)
     RosterEntry findRosterEntry(String systemName, String fullPath)
     void insertDecoderTypeEntry(DecoderType)
     void insertSpeedProfile(SpeedProfile)

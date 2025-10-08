@@ -20,11 +20,13 @@ import java.util.concurrent.Semaphore
 @Singleton
 class ImportService {
     DatabaseServices database = DatabaseServices.getInstance()
+    ImportDb importDb = ImportDb.getInstance()
     private static final Logger log = LoggerFactory.getLogger(ImportService.class)
     private static Semaphore importLock = new Semaphore(1)
     private static Semaphore detailLock = new Semaphore(1)
     Component parent
     List<DecoderType> decoderList = null
+    Timestamp dbTime = null
 
     boolean doesRosterExist(File rosterFile) {
         log.debug("looking for an existing roster on this system for ${rosterFile}")
@@ -70,6 +72,7 @@ class ImportService {
         if (!importLock.tryAcquire()) {
             throw new RuntimeException("attempting to import a file while an import is in progress")
         }
+        dbTime = importDb.getCurrentDbTime()
         Timestamp rosterUpdate = new Timestamp(rosterFile.lastModified())
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
@@ -89,12 +92,13 @@ class ImportService {
                 thisEntry.fullPath = rosterFile.path
                 thisEntry.systemName = getSystemName()
                 thisEntry.fileDate = rosterUpdate
-                thisEntry = database.addRoster(thisEntry)
+                thisEntry.entryTime = dbTime
+                thisEntry = importDb.addRoster(thisEntry)
                 log.debug("this entry is now ${thisEntry}")
             } else {
                 rosterFound = true
                 thisEntry.fileDate = rosterUpdate
-                thisEntry.dateUpdated = new Timestamp(new Date().getTime())
+                thisEntry.dateUpdated = dbTime
                 existingList = updateRosterEntries(thisEntry)
             }
             SwingUtilities.invokeLater {
@@ -180,13 +184,14 @@ class ImportService {
                 existingList.each {entry ->
                     DecoderEntry currentEntry = existingList.get(entry.key)
                     log.debug("this entry is ${currentEntry}")
-                    database.deleteDecoderEntry(currentEntry)
+                    importDb.deleteDecoderEntry(currentEntry)
                 }
             }
             if (rosterFound) {
-                database.updateRosterEntry(thisEntry)
+                thisEntry.dateUpdated = dbTime
+                importDb.updateRosterEntry(thisEntry)
             }
-            database.commitWork()
+         //   database.commitWork()
         } catch (Exception e) {
             log.error("Caught an exception working with the import", e)
             database.rollbackAll()

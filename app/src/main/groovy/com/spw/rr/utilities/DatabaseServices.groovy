@@ -12,6 +12,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.Timestamp
 
 @Singleton
 class DatabaseServices {
@@ -24,12 +25,14 @@ class DatabaseServices {
     static final String SET_SCHEMA = "SET SCHEMA "
     static final String DB_VERSION = "SELECT major, minor, table_count FROM DB_VERSION where id = 1"
     private static final String RESOURCE_NAME = "createTables.sql"
+    private static final String UPDATE_NAME_FRONT = "updateVersion_"
     private static final String MYBATIS_RESOURCE = "mybatis.xml"
     private static final Integer DB_MAJOR = 1
     private static final Integer DB_MINOR = 2
 
     SqlSessionFactory sqlSessionFactory
     SqlSession session
+
 
     boolean validate(Settings settings) {
         log.debug("validating for  $settings}")
@@ -54,7 +57,7 @@ class DatabaseServices {
                 tempURL = front + back
                 log.trace("URL schema removed is ${tempURL}")
             }
-        } else if (setting.schema == null) {
+        } else if (settings.schema == null) {
             log.error("no schema passed")
         } else {
             schema = settings.schema
@@ -87,6 +90,7 @@ class DatabaseServices {
                     throw new RuntimeException("Execute query to table count didn't return a result set")
                 }
                 matchCount = rs2.getInt(1)
+        //  add checks for rest of tables here
                 PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + settings.schema)
                 stmt2.execute()
                 if (matchCount == 1) {
@@ -102,6 +106,18 @@ class DatabaseServices {
                     if (majorVersion != DB_MAJOR | minorVersion != DB_MINOR)
                     {
                         log.error("mismatch on minor and major versions - Major = ${majorVersion} Minor = ${minorVersion}")
+                        if (majorVersion != DB_MAJOR) {
+                            log.error("Mismatch on database major version - should be ${DB_MAJOR} but is ${minorVersion}")
+                            throw new RuntimeException("Mismatch on database major version - ${majorVersion} but should be ${DB_MAJOR}")
+                        } else {
+                            // run changes to update from minor version to current version
+                            // changes will be on resource saved as  "update.vNN.sql"
+                            // apply changes and reread minor version until minor version matches DB_MINOR
+                            String resourceName = UPDATE_NAME_FRONT + majorVersion.toString() + "_"  + minorVersion.toString() + ".sql"
+                            log.info("Applying changes to update from ${minorVersion} from resource named ${resourceName}")
+                            new ApplyResources().apply(resourceName, (Connection) conn)
+                        }
+
                     }
                 } else if (matchCount == 0) {
                     log.debug("DB version not found - creating tables")
@@ -190,16 +206,6 @@ class DatabaseServices {
     void beginTransaction() {
         log.debug("starting a new Transaction")
         session = sqlSessionFactory.openSession(false)
-    }
-
-    RosterEntry addRoster(RosterEntry entry) {
-        log.debug("adding a new RosterEntry ${entry}")
-        if (session == null) {
-            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
-        }
-        Mapper map = session.getMapper(Mapper.class)
-        map.insertRosterEntry(entry)
-        return entry
     }
 
     RosterEntry getRosterEntry(String systemName, String fullPath) {
@@ -348,15 +354,6 @@ class DatabaseServices {
         mapper.insertSpeedProfile(sp)
         log.debug("inserted value was ${sp}")
         return sp
-    }
-
-    void updateRosterEntry(RosterEntry entry) {
-        log.debug("updating the roster ${entry}")
-        if (session == null) {
-            throw new RuntimeException("attempting to update a Roster entry outside a transaction")
-        }
-        Mapper map = session.getMapper(Mapper.class)
-        map.updateRosterEntry(entry)
     }
 
     DecoderDef insertDecoderDef(DecoderDef decoderDef) {
