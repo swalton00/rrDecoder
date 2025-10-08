@@ -85,7 +85,6 @@ class ImportService {
         HashMap<String, DecoderEntry> existingList = null
         Log4JStopWatch importTime = new Log4JStopWatch("import", "Starting the import")
         try {
-            database.beginTransaction()
             if (thisEntry == null) {
                 log.debug("roster not found -- adding new")
                 thisEntry = new RosterEntry()
@@ -114,21 +113,30 @@ class ImportService {
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
                 DecoderEntry newEntry = new DecoderEntry()
                 boolean decoderExists = false
+                setLocoValues(newEntry, entryList[i], thisEntry)
+                database.beginTransaction()
                 if (rosterFound) {
                     DecoderEntry previous = existingList.get(entryList[i].'@id'.text())
                     if (previous != null) {
-                        newEntry = previous
-                        decoderExists = true
-                        existingList.remove(newEntry.decoderId)
+                        if (newEntry.decoderTypeId != previous.decoderTypeId)  {
+                            existingList.remove(newEntry.decoderId)
+                            log.info("Decoder type was changed for entry ${previous.decoderId} with DCC address ${previous.dccAddress}")
+                            // since type was changed, we need to delete the old (to delete all dependents) and the reinsert
+                            importDb.deleteDecoderEntry(previous)
+                            decoderExists = false
+                        } else {
+                            newEntry = previous
+                            decoderExists = true
+                            existingList.remove(previous.decoderId)
+                        }
+
                     }
                 }
                 if (!rosterFound | (rosterFound & !decoderExists)) {
                     log.debug("no database entry found -- inserting")
-                    setLocoValues(newEntry, entryList[i], thisEntry)
                     database.addDecoderEntry(newEntry)
                 } else {
                     log.debug("existing entry being updated id = ${newEntry.id}")
-                    setLocoValues(newEntry, entryList[i], thisEntry)
                     database.updateDecoderEntry(newEntry)
                 }
                 individualStopWatch.stop()
@@ -178,20 +186,22 @@ class ImportService {
                     }
                     speedStopWatch.stop()
                 }
+                database.commitWork()
             }
             if (rosterFound && existingList.size() > 0) {
                 log.debug("still have some old existing decoder entries -- removing them -- ${existingList.size()}")
                 existingList.each {entry ->
                     DecoderEntry currentEntry = existingList.get(entry.key)
+                    database.beginTransaction()
                     log.debug("this entry is ${currentEntry}")
                     importDb.deleteDecoderEntry(currentEntry)
+                    database.commitWork()
                 }
             }
             if (rosterFound) {
                 thisEntry.dateUpdated = dbTime
                 importDb.updateRosterEntry(thisEntry)
             }
-         //   database.commitWork()
         } catch (Exception e) {
             log.error("Caught an exception working with the import", e)
             database.rollbackAll()
@@ -201,7 +211,6 @@ class ImportService {
                 monitor.setProgress(arraySize)
                 monitor.close()
             }
-            database.close()  // free up the session
             importTime.stop()
         }
         log.debug("there are ${arraySize} entries in this roster - releasing the lock")
@@ -212,7 +221,9 @@ class ImportService {
 
     HashMap<String, DecoderEntry> updateRosterEntries(RosterEntry thisEntry) {
         log.debug("updating an existing roster")
-        List<DecoderEntry> existingList = database.decodersForRoster(thisEntry.id)
+        ArrayList<Integer> rosterList = new ArrayList()
+        rosterList.add(thisEntry.id)
+        List<DecoderEntry> existingList = database.decodersForRosterList(rosterList)
         HashMap<String, DecoderEntry> oldLocos = new HashMap<>()
         existingList.each {
             oldLocos.put(it.decoderId, it)
@@ -238,7 +249,7 @@ class ImportService {
         entry.dccAddress = thisEntry.'@dccAddress'
         entry.manufacturerId = thisEntry.'@manufacturerID'
         entry.productId = thisEntry.'@productID'
-        entry.importDate = new Timestamp(new Date().getTime() )
+        entry.importDate = dbTime
         log.debug("date from XML was ${thisEntry.'dateUpdated'.text()}")
         entry.dateUpdated = doDateModified(thisEntry.'dateUpdated'.text())
         log.debug("dateupdated set to ${entry.dateUpdated}")

@@ -90,7 +90,7 @@ class DatabaseServices {
                     throw new RuntimeException("Execute query to table count didn't return a result set")
                 }
                 matchCount = rs2.getInt(1)
-        //  add checks for rest of tables here
+                //  add checks for rest of tables here
                 PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + settings.schema)
                 stmt2.execute()
                 if (matchCount == 1) {
@@ -103,8 +103,7 @@ class DatabaseServices {
                     }
                     int majorVersion = rs3.getInt(1)
                     int minorVersion = rs3.getInt(2)
-                    if (majorVersion != DB_MAJOR | minorVersion != DB_MINOR)
-                    {
+                    if (majorVersion != DB_MAJOR | minorVersion != DB_MINOR) {
                         log.error("mismatch on minor and major versions - Major = ${majorVersion} Minor = ${minorVersion}")
                         if (majorVersion != DB_MAJOR) {
                             log.error("Mismatch on database major version - should be ${DB_MAJOR} but is ${minorVersion}")
@@ -113,7 +112,7 @@ class DatabaseServices {
                             // run changes to update from minor version to current version
                             // changes will be on resource saved as  "update.vNN.sql"
                             // apply changes and reread minor version until minor version matches DB_MINOR
-                            String resourceName = UPDATE_NAME_FRONT + majorVersion.toString() + "_"  + minorVersion.toString() + ".sql"
+                            String resourceName = UPDATE_NAME_FRONT + majorVersion.toString() + "_" + minorVersion.toString() + ".sql"
                             log.info("Applying changes to update from ${minorVersion} from resource named ${resourceName}")
                             new ApplyResources().apply(resourceName, (Connection) conn)
                         }
@@ -187,24 +186,23 @@ class DatabaseServices {
 
     DecoderType insertDecoderTypeEntry(DecoderType type) {
         log.debug("inserting a new decoder type - ${type}")
-        boolean sessionOpened
         SqlSession mySession
-        if (session != null) {
-            log.debug("using an existing session for insert Decoder type entry")
-            mySession = session
-        } else {
+        try {
             mySession = sqlSessionFactory.openSession(true)
-            sessionOpened = true
+            Mapper map = mySession.getMapper(Mapper.class)
+            map.insertDecoderTypeEntry(type)
+        } finally {
+            mySession.close()
         }
-        Mapper map = mySession.getMapper(Mapper.class)
-        map.insertDecoderTypeEntry(type)
-        if (sessionOpened) session.close()
         log.debug("result was ${type}")
         return type
     }
 
     void beginTransaction() {
         log.debug("starting a new Transaction")
+        if (session != null) {
+            log.error("Opening a new transaction when already in a transaction")
+        }
         session = sqlSessionFactory.openSession(false)
     }
 
@@ -213,16 +211,11 @@ class DatabaseServices {
         SqlSession session
         RosterEntry result
         try {
-
-
             session = sqlSessionFactory.openSession(true)
             Mapper map = session.getMapper(Mapper.class)
             result = map.findRosterEntry(systemName, fullPath)
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
         } finally {
             session.close()
-
         }
         log.debug("result found was ${result}")
         return result
@@ -237,8 +230,6 @@ class DatabaseServices {
             Mapper mapper = session.getMapper(Mapper.class)
             entry = mapper.getRosterEntryById(rosterId)
             log.debug("result found was ${entry}")
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
         } finally {
             session.close()
         }
@@ -259,17 +250,6 @@ class DatabaseServices {
         log.debug("DecoderDef rows deleted = ${rowsDeleted}")
     }
 
-    List<DecoderEntry> decodersForRoster(int rosterID) {
-        log.debug("listing decoders for rosterID ${rosterID}")
-        if (session == null) {
-            throw new RuntimeException("attempting to run decoderss for roster outside of a transaction")
-        }
-        Mapper map = session.getMapper(Mapper.class)
-        List<DecoderEntry> result = map.listDecodersByRosterID(rosterID)
-        log.debug("result was ${result}")
-        return result
-    }
-
     List<DecoderEntry> decodersForRosterList(List<Integer> rosters) {
         log.debug("Getting a list of decoders for ${rosters.size()}")
         SqlSession session
@@ -278,9 +258,7 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper map = session.getMapper(Mapper.class)
             results = map.listDecodersFor(rosters)
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
-        } finally {
+        }  finally {
             session.close()
         }
     }
@@ -293,8 +271,6 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper mapper = session.getMapper(Mapper.class)
             decoder = mapper.getDecoderEntry(id)
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
         } finally {
             session.close()
         }
@@ -320,7 +296,6 @@ class DatabaseServices {
         }
         Mapper map = session.getMapper(Mapper.class)
         map.updateDecoderEntry(decoderEntry)
-
     }
 
     FunctionLabel insertFunctionLabel(FunctionLabel newValue) {
@@ -405,6 +380,8 @@ class DatabaseServices {
             throw new RuntimeException("Attempting to commit work when not in a transaction")
         }
         session.commit()
+        session.close()
+        session = null
     }
 
     void rollbackAll() {
@@ -412,6 +389,8 @@ class DatabaseServices {
             throw new RuntimeException("Attempting to rollback work when not in a transaction")
         }
         session.rollback()
+        session.close()
+        session = null
     }
 
 }
