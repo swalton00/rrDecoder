@@ -36,7 +36,7 @@
             manufacturerId,
             productId,
             dateUpdated,
-            entered as entryTime,
+            DATEIMPORTED as entryTime,
             decoderTypeId,
             detailTime,
             rosterId,
