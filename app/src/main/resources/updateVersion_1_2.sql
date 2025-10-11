@@ -3,20 +3,22 @@ ALTER TABLE cvValues ALTER COLUMN cvNumber SET NOT NULL ;
 
 ALTER TABLE cvValues ADD CONSTRAINT cvVal_uniq UNIQUE (decoderId, CvNumber);
 
-;
+ALTER TABLE decoder ADD CONSTRAINT decId_uniq UNIQUE (decoderId);
 
 CREATE TABLE cv_versions
 (
     decoderId INT          NOT NULL,
-    cvNumber  VARCHAR(255) NOT NULL,
     cvVersion INT          NOT NULL,
     changeTIme TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-    CONSTRAINT cv_ver_uni UNIQUE (decoderId, cvNumber, cvVersion),
-    CONSTRAINT cv_ver_pri_key PRIMARY KEY (decoderId, cvNumber, cvVersion),
-    CONSTRAINT cv_ver_for_cvNumber FOREIGN KEY (decoderId, cvNumber) REFERENCES cvValues (decoderId, cvNumber) ON DELETE CASCADE
+    CONSTRAINT cv_ver_uni UNIQUE (decoderId, cvVersion),
+    CONSTRAINT cv_ver_pri_key PRIMARY KEY (decoderId, cvVersion),
+    CONSTRAINT cv_ver_for_cvNumber FOREIGN KEY (decoderId) REFERENCES decoder (decoderId) ON DELETE CASCADE
 );
 
-ALTER TABLE DECODER ADD COLUMN changeVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN cvVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN labelVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN functionVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN keyVersion INT NOT NULL DEFAULT 0;
 
 CREATE TABLE savedCVvals
 (
@@ -39,16 +41,15 @@ ALTER TABLE roster ALTER COLUMN dateupdated
 
 ALTER TABLE roster ALTER COLUMN dateupdated
     DROP NOT NULL;
+    
+ALTER TABLE Decoder 
+    ADD COLUMN Shunt VARCHAR(16);
 
 ALTER TABLE
     FunctionLabels ADD column Label_Version INTEGER;
 
 ALTER TABLE
     functionlabels ADD column locked BOOLEAN;
-ALTER TABLE
-    functionlabels ADD column visible BOOLEAN;
-ALTER TABLE
-    functionlabels ADD column shunt BOOLEAN;
 
 ALTER TABLE
     functionlabels ADD CONSTRAINT lab_unique UNIQUE (decoderid, functionnumber);
@@ -57,12 +58,11 @@ CREATE TABLE
     label_versions
 (
     decoderid      INTEGER NOT NULL,
-    functionnumber CHARACTER VARYING(16),
-    version        INTEGER,
+    version_number INTEGER,
     version_time   TIMESTAMP NOT NULL,
-    CONSTRAINT label_ver_primary PRIMARY KEY (decoderid, functionnumber, version),
-    CONSTRAINT label_ver_foreign FOREIGN KEY (decoderid, functionnumber) REFERENCES
-        functionlabels (decoderid, functionnumber) ON
+    CONSTRAINT label_ver_primary PRIMARY KEY (decoderid, version_number),
+    CONSTRAINT label_ver_foreign FOREIGN KEY (decoderid) REFERENCES
+        decoder (decoderid) ON
         DELETE
         CASCADE
 );
@@ -74,9 +74,7 @@ CREATE TABLE
     functionnumber CHARACTER VARYING(16) NOT NULL,
     version_number INTEGER NOT NULL,
     saved_label    CHARACTER VARYING(255),
-    visible        BOOLEAN,
     locked         BOOLEAN,
-    shunt          BOOLEAN,
     CONSTRAINT svd_labs_primary PRIMARY KEY (decoderid, functionnumber, version_number),
     CONSTRAINT svd_labs_foreign FOREIGN KEY (decoderid, functionnumber) REFERENCES
         functionlabels (decoderid, functionnumber) ON
@@ -107,13 +105,12 @@ CREATE TABLE
     key_versions
 (
     decoderid    INTEGER NOT NULL,
-    pair_key     CHARACTER VARYING(255),
     version      INTEGER NOT NULL,
     version_time TIMESTAMP NOT NULL,
-    CONSTRAINT key_ver_unique UNIQUE (decoderid, pair_key, version),
-    CONSTRAINT key_ver_primary PRIMARY KEY (decoderid, pair_key, version),
-    CONSTRAINT key_ver_foreign FOREIGN KEY (decoderid, pair_key) REFERENCES functionlabels
-        (decoderid, pair_key) ON
+    CONSTRAINT key_ver_unique UNIQUE (decoderid, version),
+    CONSTRAINT key_ver_primary PRIMARY KEY (decoderid, version),
+    CONSTRAINT key_ver_foreign FOREIGN KEY (decoderid) REFERENCES decoder
+        (decoderid) ON
         DELETE
         CASCADE
 );

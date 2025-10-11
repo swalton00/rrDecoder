@@ -30,4 +30,19 @@
         FROM Decoder
         WHERE id = #{id};
     </delete>
+    <select id="getFunctionLabels" parameterType="int" resultType="java.util.ArrayList">
+        SELECT
+            id,
+            FUNCTIONNUMBER,
+            FUNCTIONLABEL,
+            LABEL_VERSION,
+            LOCKED,
+            SHUNT
+            FROM FUNCTIONLABELS
+        WHERE DECODERID = #{decoderId}
+        ORDER BY FUNCTIONNUMBER
+    </select>
+    <select id="getLabelVersionFor" resultType="LabelVersion" parameterType="Integer">
+        
+    </select>
 </mapper>

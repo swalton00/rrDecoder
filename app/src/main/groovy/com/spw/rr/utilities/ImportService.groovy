@@ -66,6 +66,39 @@ class ImportService {
         decoderListTime.stop()
     }
 
+    Hashtable<String, SaverObject> saverSetup(ArrayList<SaverObject> existing) {
+        Hashtable<String, SaverObject> hash = new Hashtable<>()
+        if (existing == null) {
+            return hash     // empty list - no saved entries
+        }
+        existing.each {
+            hash.put(it.getKey(), it)
+        }
+        return hash
+    }
+
+    boolean saverCheck(Hashtable<String, SaverObject> hash, SaverObject item) {
+
+    }
+
+    void importFunctionLabels(def entryList, int decoderId) {
+        int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
+        ArrayList<FunctionLabel> existing = importDb.getFunctionLabelsFor(decoderId)
+        Hashtable<String, SaverObject> hash = saverSetup(existing)
+
+        for (labelEntry in 0..<functionLabelSize) {
+            log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
+            FunctionLabel funcLab = new FunctionLabel()
+            funcLab.decoderId = newEntry.id
+            funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
+            funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
+            funcLab.locked = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
+            log.debug("new function label is ${funcLab}")
+            //database.insertFunctionLabel(funcLab)
+        }
+
+    }
+
 
     RosterEntry importRoster(Component parent, File rosterFile) {
         log.debug("importing from ${rosterFile.path} - getting the lock")
@@ -145,16 +178,7 @@ class ImportService {
                 def functionEntries = functions.'functionlabel'
                 if (functionEntries != null) {
                     Log4JStopWatch functionsStopWatch = new Log4JStopWatch("functions", "function entries")
-                    int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
-                    for (labelEntry in 0..<functionLabelSize) {
-                        log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
-                        FunctionLabel funcLab = new FunctionLabel()
-                        funcLab.decoderId = newEntry.id
-                        funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
-                        funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
-                        log.debug("new function label is ${funcLab}")
-                        database.insertFunctionLabel(funcLab)
-                    }
+                    importFunctionLabels(entryList, newEntry.id)
                     functionsStopWatch.stop()
                 }
                 int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
