@@ -14,9 +14,23 @@ class FunctionLabel extends SaverObject {
     String functionNum
     String  functionLabel
     boolean locked
-    boolean visible
-    boolean shunt
     Integer rosterId
+
+    @Override
+    boolean equals(Object other) {
+        log.info("invoked Function Lable instance")
+        if (!(other instanceof FunctionLabel)) {
+            return false
+        }
+         if ((locked &! other.locked) |
+                 (!locked & other.locked)) {
+             retunrn false
+         }
+        if (!decoderId.equals(other.decoderId)) return false
+        if (!functionNum.equals(other.functionNum)) return false
+        if (!(functionLabel.equals(other.functionLabel))) return false
+        return true
+    }
 
     @Override
     String getKey() {
@@ -59,17 +73,6 @@ class FunctionLabel extends SaverObject {
             return 1
         }
         return 0
-    }
-
-
-    boolean equals(Object otherItem) {
-        if (!otherItem instanceof FunctionLabel) {
-            return false
-        }
-        if (!functionNum.equals(otherItem.functionNum)) {
-            return false
-        }
-        return functionLabel.equals(otherItem.functionLabel)
     }
 
 }

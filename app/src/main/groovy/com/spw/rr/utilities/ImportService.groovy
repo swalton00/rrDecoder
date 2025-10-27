@@ -77,26 +77,93 @@ class ImportService {
         return hash
     }
 
-    boolean saverCheck(Hashtable<String, SaverObject> hash, SaverObject item) {
-
+    /**
+     * Check to see if the object has changed, if so, populate the new SaverObject
+     * @param hash  the hashtable created by the saverSetup
+     * @param item  the new item - has it changed?
+     * @param newVersion    the new version record, in case it has
+     * @param newSaver      a new saver item to populate if it changed
+     * @return
+     */
+    SaverBase saverCheck(Hashtable<String,
+            SaverObject> hash,
+            SaverObject item,
+            AbstractVersion newVersion,
+            SaverBase newSaver) {
+        SaverObject oldItem = hash.get(item.getKey())
+        newSaver.version = newVersion.version
+        newSaver.decoderId = item.decoderId
+        if (item.equals(oldItem)) {
+            return null
+        }
+        return newSaver
     }
 
-    void importFunctionLabels(def entryList, int decoderId) {
-        int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
+    void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
+        log.debug("Processing the labels for id ${decoderId} and entry ${decoderEntry}")
+        int functionLabelSize = entryList.'functionlabels'.functionlabel.size()
+        boolean createdVersion = false
+        LabelVersion newLabelVersion = new LabelVersion()
+        newLabelVersion.decoderId = decoderId
         ArrayList<FunctionLabel> existing = importDb.getFunctionLabelsFor(decoderId)
+        boolean addNewFunctionLabels = false
         Hashtable<String, SaverObject> hash = saverSetup(existing)
-
-        for (labelEntry in 0..<functionLabelSize) {
-            log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
-            FunctionLabel funcLab = new FunctionLabel()
-            funcLab.decoderId = newEntry.id
-            funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
-            funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
-            funcLab.locked = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
-            log.debug("new function label is ${funcLab}")
-            //database.insertFunctionLabel(funcLab)
+        LabelVersion newVersion
+        LabelVersion labelVersion
+        if (existing.size() == 0) {
+            log.debug("no existing Function Labels for decoderId of ${decoderId}")
+            addNewFunctionLabels = true
+        } else {
+            log.debug("have a set of existing FunctionLabels, setting up to record changeds")
+            labelVersion = importDb.getLabelVersionMaxFor(decoderId)
+            newVersion = new LabelVersion()
+            newVersion.decoderId = decoderId
+            if (labelVersion == null) {
+                newVersion.version = 0
+            } else {
+                newVersion.version = labelVersion.version + 1
+            }
+            newVersion.version_time = dbTime
         }
+        log.info("functionLabelSize is ${functionLabelSize}")
+        for (labelEntry in 0..<functionLabelSize) {
+            log.info("LabelEntry (index) is ${labelEntry}")
+            log.debug("this function label entry has ${entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList.'functionlabels'.functionlabel[labelEntry].text()}")
+            FunctionLabel funcLab = new FunctionLabel()
+            funcLab.decoderId = decoderEntry.id
+            funcLab.functionNum = Integer.valueOf(entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text())
+            funcLab.functionLabel = entryList.'functionlabels'.functionlabel[labelEntry].text()
 
+            String lockable = entryList.'functionlabels'.functionlabel[labelEntry].'@lockable'.text()
+            if ("true".equals(lockable)) {
+                funcLab.locked = true
+            } else {
+                funcLab.locked = false
+            }
+            log.debug("new function label is ${funcLab}")
+            if (addNewFunctionLabels) {
+                database.insertFunctionLabel(funcLab)
+            } else {
+                SavedLabel newSavedLabel
+                newSavedLabel = saverCheck(hash, funcLab, newVersion, newSavedLabel)
+                if (newSavedLabel != null) {
+                    if (!createdVersion) {
+                        createdVersion = true
+                        decoderEntry.labelVersion = newVersion.version
+                        importDb.writeLabelVersion(newVersion)
+                        createdVersion = true
+                    }
+                    newSavedLabel.locked = funcLab.locked
+                    FunctionLabel oldLabel = (FunctionLabel)hash.get(funcLab.getKey())
+                    newSavedLabel.functionNumber = funcLab.functionNum
+                    if (!(oldLabel == null)) {
+                        newSavedLabel.locked = oldLabel.locked
+                        newSavedLabel.saved_label = oldLabel.functionLabel
+                    }
+                    importDb.writeSavedLabel(newSavedLabel)
+                }
+            }
+        }
     }
 
 
@@ -178,7 +245,7 @@ class ImportService {
                 def functionEntries = functions.'functionlabel'
                 if (functionEntries != null) {
                     Log4JStopWatch functionsStopWatch = new Log4JStopWatch("functions", "function entries")
-                    importFunctionLabels(entryList, newEntry.id)
+                    importFunctionLabels(entryList[i], newEntry.id, newEntry)
                     functionsStopWatch.stop()
                 }
                 int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
@@ -274,6 +341,7 @@ class ImportService {
         entry.manufacturerId = thisEntry.'@manufacturerID'
         entry.productId = thisEntry.'@productID'
         entry.importDate = dbTime
+        entry.shunt = thisEntry.'@IsShuntingOn'
         log.debug("date from XML was ${thisEntry.'dateUpdated'.text()}")
         entry.dateUpdated = doDateModified(thisEntry.'dateUpdated'.text())
         log.debug("dateupdated set to ${entry.dateUpdated}")

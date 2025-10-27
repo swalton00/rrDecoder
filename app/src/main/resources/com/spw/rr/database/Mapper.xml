@@ -40,7 +40,7 @@
             decoderTypeId,
             detailTime,
             rosterId,
-            changeVersion as cvVersion
+            cvVersion
         FROM
             decoder
         WHERE

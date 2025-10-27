@@ -8,5 +8,8 @@ interface ImportMapper {
     void updateRosterEntry(RosterEntry entry)
     int deleteDecoderEntry(DecoderEntry)
     ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
-    LabelVersion getLabelVersionFor(Integer decoderId)
+    LabelVersion getLabelVersionMaxFor(Integer decoderId)
+    void insertLabelVersion(LabelVersion entry)
+    void insertSavedLabel(SavedLabel)
+    
 }
