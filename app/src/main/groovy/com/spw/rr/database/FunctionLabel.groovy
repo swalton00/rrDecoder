@@ -15,16 +15,17 @@ class FunctionLabel extends SaverObject {
     String  functionLabel
     boolean locked
     Integer rosterId
+    Integer labelVersion
 
     @Override
     boolean equals(Object other) {
-        log.info("invoked Function Lable instance")
+        log.info("invoked Function Label instance")
         if (!(other instanceof FunctionLabel)) {
             return false
         }
          if ((locked &! other.locked) |
                  (!locked & other.locked)) {
-             retunrn false
+             return false
          }
         if (!decoderId.equals(other.decoderId)) return false
         if (!functionNum.equals(other.functionNum)) return false

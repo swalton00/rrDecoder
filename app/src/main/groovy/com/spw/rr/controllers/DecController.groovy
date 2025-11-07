@@ -71,7 +71,7 @@ class DecController {
             try {
                 tempRoadNumber = Integer.valueOf(entry.roadNumber)
             } catch (Exception e) {
-                log.warn("Roadnumber is not a number for ${entry}")
+                log.trace("Roadnumber is not a number for ${entry}")
                 tempRoadNumber = null
             }
             nextLine.add(tempRoadNumber)

@@ -30,17 +30,24 @@
         FROM Decoder
         WHERE id = #{id};
     </delete>
-    <select id="getFunctionLabels" parameterType="int" resultType="java.util.ArrayList">
+    <select id="getFunctionLabels" parameterType="int" resultMap="functionLabelMap">
         SELECT
             id,
             FUNCTIONNUMBER,
             FUNCTIONLABEL,
-            LABEL_VERSION,
-            LOCKED
+            Coalesce(LABEL_VERSION, 0),
+            Coalesce(LOCKED, 'false') as Locked
             FROM FUNCTIONLABELS
         WHERE DECODERID = #{decoderId}
         ORDER BY FUNCTIONNUMBER
     </select>
+    <resultMap id="functionLabelMap" type="FunctionLabel">
+        <id property="id" column="id"/>
+        <result property="functionNum" column="FunctionNumber"/>
+        <result property="functionLabel" column="FunctionLabel"/>
+        <result property="labelVersion" column="Label_Version"/>
+        <result property="locked" column="Locked"/>
+    </resultMap>
     <select id="getLabelVersionMaxFor" resultType="LabelVersion" parameterType="Integer">
         SELECT
             decoderId,

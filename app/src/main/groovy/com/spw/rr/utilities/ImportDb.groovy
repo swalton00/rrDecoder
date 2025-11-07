@@ -81,6 +81,7 @@ class ImportDb {
         LabelVersion retVal = (LabelVersion)executeSql({ImportMapper map, int id ->
             return map.getLabelVersionMaxFor(id)
         }, decoderId)
+        log.debug("the max found was ${retVal}")
         return retVal
     }
 

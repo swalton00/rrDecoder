@@ -96,6 +96,7 @@ class ImportService {
         if (item.equals(oldItem)) {
             return null
         }
+        log.debug("differences - returning ${newSaver}")
         return newSaver
     }
 
@@ -118,12 +119,12 @@ class ImportService {
             labelVersion = importDb.getLabelVersionMaxFor(decoderId)
             newVersion = new LabelVersion()
             newVersion.decoderId = decoderId
+            newVersion.version_time = dbTime
             if (labelVersion == null) {
                 newVersion.version = 0
             } else {
                 newVersion.version = labelVersion.version + 1
             }
-            newVersion.version_time = dbTime
         }
         log.info("functionLabelSize is ${functionLabelSize}")
         for (labelEntry in 0..<functionLabelSize) {
@@ -144,7 +145,7 @@ class ImportService {
             if (addNewFunctionLabels) {
                 database.insertFunctionLabel(funcLab)
             } else {
-                SavedLabel newSavedLabel
+                SavedLabel newSavedLabel = new SavedLabel()
                 newSavedLabel = saverCheck(hash, funcLab, newVersion, newSavedLabel)
                 if (newSavedLabel != null) {
                     if (!createdVersion) {

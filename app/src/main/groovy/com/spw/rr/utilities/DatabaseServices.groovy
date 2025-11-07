@@ -28,7 +28,7 @@ class DatabaseServices {
     private static final String UPDATE_NAME_FRONT = "updateVersion_"
     private static final String MYBATIS_RESOURCE = "mybatis.xml"
     private static final Integer DB_MAJOR = 1
-    private static final Integer DB_MINOR = 2
+    private static final Integer DB_MINOR = 3
 
     SqlSessionFactory sqlSessionFactory
     SqlSession session
@@ -44,10 +44,15 @@ class DatabaseServices {
         finally check for tables
          */
         String tempURL = settings.url
+        boolean urlHasSchema = false
         if (tempURL.contains(";SCHEMA=")) {
+            urlHasSchema = true
             int schemaStart = tempURL.indexOf(";SCHEMA=")
             int schemaEnd = tempURL.indexOf(";", schemaStart + 1)
             schema = tempURL.substring(schemaStart + ";SCHEMA=".size())
+            if (schema.endsWith(";")) {
+                schema = schema.substring(0, schema.size() - 1)
+            }
             if (schemaEnd == -1) {
                 tempURL = tempURL.substring(0, schemaStart - 1)
                 log.trace("URL without the schema is ${tempURL}")
@@ -56,6 +61,7 @@ class DatabaseServices {
                 String back = tempURL.substring(schemaEnd)
                 tempURL = front + back
                 log.trace("URL schema removed is ${tempURL}")
+                settings.schema = tempURL
             }
         } else if (settings.schema == null) {
             log.error("no schema passed")
@@ -66,7 +72,11 @@ class DatabaseServices {
         log.debug("Testing database connection")
         Connection conn = null
         try {
-            conn = DriverManager.getConnection(tempURL, settings.userid, settings.password)
+            if (urlHasSchema) {
+                conn = DriverManager.getConnection(tempURL, settings.userid, settings.password)
+            } else {
+                conn = DriverManager.getConnection(settings.url, settings.userid, settings.password)
+            }
             if (conn != null) {
                 log.debug("connection succeeded")
                 PreparedStatement stmt = conn.prepareStatement(SCHEMA_TEST)
@@ -122,6 +132,12 @@ class DatabaseServices {
                     log.debug("DB version not found - creating tables")
                     new ApplyResources().apply(RESOURCE_NAME, (Connection) conn)
 
+                }
+                if (!urlHasSchema) {
+                    if (!settings.url.endsWith(";")) {
+                        settings.url = settings.url + ";"
+                    }
+                    settings.url = settings.url + "SCHEMA=" + settings.schema + ";"
                 }
                 returnValue = true
                 settings.settingsValid = true
