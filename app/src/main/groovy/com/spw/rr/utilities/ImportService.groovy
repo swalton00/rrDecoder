@@ -447,7 +447,7 @@ class ImportService {
                 log.error "File ${decoderFileName} was not found"
             }
             if (fileFound) {
-                monitor.setIntermediateProgress(3, "Parse XML File", "Setep 3 of 5")
+                monitor.setIntermediateProgress(3, "Parse XML File", "Step 3 of 5")
                 log.debug("found roster xml for id ${decoderEntry.id}")
                 groovy.util.XmlSlurper slurper = new groovy.util.XmlSlurper()
                 slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
