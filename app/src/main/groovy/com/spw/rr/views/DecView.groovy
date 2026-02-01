@@ -15,6 +15,8 @@ import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.sql.Timestamp
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class DecView {
 
@@ -24,6 +26,7 @@ class DecView {
     static final String D_NAME = "decoders"
     static final String D_CVLIST = "cvList"
     PropertySaver saver = PropertySaver.getInstance()
+    static final Pattern REGEX_NUMBER = Pattern.compile("^[\\d]*\$")
 
     RrTableModel tableModel
     ArrayList<JMenuItem> itemList = new ArrayList<>()
@@ -33,6 +36,39 @@ class DecView {
         this.controller = controller
         this.model = model
         model.view = this
+    }
+
+    def roadNumberComparator = { String left, String right ->
+        Matcher leftMatcher = REGEX_NUMBER.matcher(left)
+        Matcher rightMatcher = REGEX_NUMBER.matcher(right)
+        boolean leftGood = leftMatcher.matches()
+        boolean rightGood = rightMatcher.matches()
+        if (leftGood & rightGood) {
+            Integer leftInt = Integer.valueOf(left)
+            Integer rightInt = Integer.valueOf(right)
+            if (leftInt < rightInt) {
+                return -1
+            }
+            if (leftInt > rightInt) {
+                return 1
+            }
+            if (leftInt == rightInt) {
+                return 0
+            }
+        }
+        if (leftGood & (!rightGood)) {
+            return -1
+        }
+        if ((!leftGood) & rightGood) {
+            return 1
+        }
+        if (left < right) {
+            return -1
+        }
+        if (left > right) {
+            return 1
+        }
+        return 0
     }
 
     void init() {
@@ -137,7 +173,7 @@ class DecView {
         classList.add(4, String.class)  //has detail
         classList.add(5, String.class)  //file name
         classList.add(6, String.class)  //road name
-        classList.add(7, Integer.class)  //road number
+        classList.add(7, String.class)  //road number
         classList.add(8, Integer.class)  //manufacturer
         classList.add(9, String.class)  //decoder Family
         classList.add(10, String.class)  //decoder model
@@ -147,7 +183,9 @@ class DecView {
         classList.add(14, Timestamp.class)  //detail time
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
-        model.theTable.setRowSorter(new TableRowSorter(tableModel))
+        TableRowSorter sorter = new TableRowSorter(tableModel)
+        sorter.setComparator(7, roadNumberComparator as Comparator)
+        model.theTable.setRowSorter(sorter)
         model.cvListField.addFocusListener(model)
         String cvList = saver.getField(D_NAME, "cvList")
         if (cvList != null) {
