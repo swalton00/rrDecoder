@@ -12,6 +12,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.Timestamp
 
 @Singleton
 class DatabaseServices {
@@ -24,12 +25,14 @@ class DatabaseServices {
     static final String SET_SCHEMA = "SET SCHEMA "
     static final String DB_VERSION = "SELECT major, minor, table_count FROM DB_VERSION where id = 1"
     private static final String RESOURCE_NAME = "createTables.sql"
+    private static final String UPDATE_NAME_FRONT = "updateVersion_"
     private static final String MYBATIS_RESOURCE = "mybatis.xml"
     private static final Integer DB_MAJOR = 1
-    private static final Integer DB_MINOR = 2
+    private static final Integer DB_MINOR = 3
 
     SqlSessionFactory sqlSessionFactory
     SqlSession session
+
 
     boolean validate(Settings settings) {
         log.debug("validating for  $settings}")
@@ -41,10 +44,15 @@ class DatabaseServices {
         finally check for tables
          */
         String tempURL = settings.url
+        boolean urlHasSchema = false
         if (tempURL.contains(";SCHEMA=")) {
+            urlHasSchema = true
             int schemaStart = tempURL.indexOf(";SCHEMA=")
             int schemaEnd = tempURL.indexOf(";", schemaStart + 1)
             schema = tempURL.substring(schemaStart + ";SCHEMA=".size())
+            if (schema.endsWith(";")) {
+                schema = schema.substring(0, schema.size() - 1)
+            }
             if (schemaEnd == -1) {
                 tempURL = tempURL.substring(0, schemaStart - 1)
                 log.trace("URL without the schema is ${tempURL}")
@@ -53,8 +61,9 @@ class DatabaseServices {
                 String back = tempURL.substring(schemaEnd)
                 tempURL = front + back
                 log.trace("URL schema removed is ${tempURL}")
+                settings.schema = tempURL
             }
-        } else if (setting.schema == null) {
+        } else if (settings.schema == null) {
             log.error("no schema passed")
         } else {
             schema = settings.schema
@@ -63,7 +72,11 @@ class DatabaseServices {
         log.debug("Testing database connection")
         Connection conn = null
         try {
-            conn = DriverManager.getConnection(tempURL, settings.userid, settings.password)
+            if (urlHasSchema) {
+                conn = DriverManager.getConnection(tempURL, settings.userid, settings.password)
+            } else {
+                conn = DriverManager.getConnection(settings.url, settings.userid, settings.password)
+            }
             if (conn != null) {
                 log.debug("connection succeeded")
                 PreparedStatement stmt = conn.prepareStatement(SCHEMA_TEST)
@@ -87,6 +100,7 @@ class DatabaseServices {
                     throw new RuntimeException("Execute query to table count didn't return a result set")
                 }
                 matchCount = rs2.getInt(1)
+                //  add checks for rest of tables here
                 PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + settings.schema)
                 stmt2.execute()
                 if (matchCount == 1) {
@@ -99,14 +113,31 @@ class DatabaseServices {
                     }
                     int majorVersion = rs3.getInt(1)
                     int minorVersion = rs3.getInt(2)
-                    if (majorVersion != DB_MAJOR | minorVersion != DB_MINOR)
-                    {
+                    if (majorVersion != DB_MAJOR | minorVersion != DB_MINOR) {
                         log.error("mismatch on minor and major versions - Major = ${majorVersion} Minor = ${minorVersion}")
+                        if (majorVersion != DB_MAJOR) {
+                            log.error("Mismatch on database major version - should be ${DB_MAJOR} but is ${minorVersion}")
+                            throw new RuntimeException("Mismatch on database major version - ${majorVersion} but should be ${DB_MAJOR}")
+                        } else {
+                            // run changes to update from minor version to current version
+                            // changes will be on resource saved as  "update.vNN.sql"
+                            // apply changes and reread minor version until minor version matches DB_MINOR
+                            String resourceName = UPDATE_NAME_FRONT + majorVersion.toString() + "_" + minorVersion.toString() + ".sql"
+                            log.info("Applying changes to update from ${minorVersion} from resource named ${resourceName}")
+                            new ApplyResources().apply(resourceName, (Connection) conn)
+                        }
+
                     }
                 } else if (matchCount == 0) {
                     log.debug("DB version not found - creating tables")
                     new ApplyResources().apply(RESOURCE_NAME, (Connection) conn)
 
+                }
+                if (!urlHasSchema) {
+                    if (!settings.url.endsWith(";")) {
+                        settings.url = settings.url + ";"
+                    }
+                    settings.url = settings.url + "SCHEMA=" + settings.schema + ";"
                 }
                 returnValue = true
                 settings.settingsValid = true
@@ -171,35 +202,24 @@ class DatabaseServices {
 
     DecoderType insertDecoderTypeEntry(DecoderType type) {
         log.debug("inserting a new decoder type - ${type}")
-        boolean sessionOpened
         SqlSession mySession
-        if (session != null) {
-            log.debug("using an existing session for insert Decoder type entry")
-            mySession = session
-        } else {
+        try {
             mySession = sqlSessionFactory.openSession(true)
-            sessionOpened = true
+            Mapper map = mySession.getMapper(Mapper.class)
+            map.insertDecoderTypeEntry(type)
+        } finally {
+            mySession.close()
         }
-        Mapper map = mySession.getMapper(Mapper.class)
-        map.insertDecoderTypeEntry(type)
-        if (sessionOpened) session.close()
         log.debug("result was ${type}")
         return type
     }
 
     void beginTransaction() {
         log.debug("starting a new Transaction")
-        session = sqlSessionFactory.openSession(false)
-    }
-
-    RosterEntry addRoster(RosterEntry entry) {
-        log.debug("adding a new RosterEntry ${entry}")
-        if (session == null) {
-            throw new RuntimeException("attempting to run transInsertFunctionLabels outside of a transaction")
+        if (session != null) {
+            log.error("Opening a new transaction when already in a transaction")
         }
-        Mapper map = session.getMapper(Mapper.class)
-        map.insertRosterEntry(entry)
-        return entry
+        session = sqlSessionFactory.openSession(false)
     }
 
     RosterEntry getRosterEntry(String systemName, String fullPath) {
@@ -207,16 +227,11 @@ class DatabaseServices {
         SqlSession session
         RosterEntry result
         try {
-
-
             session = sqlSessionFactory.openSession(true)
             Mapper map = session.getMapper(Mapper.class)
             result = map.findRosterEntry(systemName, fullPath)
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
         } finally {
             session.close()
-
         }
         log.debug("result found was ${result}")
         return result
@@ -231,8 +246,6 @@ class DatabaseServices {
             Mapper mapper = session.getMapper(Mapper.class)
             entry = mapper.getRosterEntryById(rosterId)
             log.debug("result found was ${entry}")
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
         } finally {
             session.close()
         }
@@ -253,17 +266,6 @@ class DatabaseServices {
         log.debug("DecoderDef rows deleted = ${rowsDeleted}")
     }
 
-    List<DecoderEntry> decodersForRoster(int rosterID) {
-        log.debug("listing decoders for rosterID ${rosterID}")
-        if (session == null) {
-            throw new RuntimeException("attempting to run decoderss for roster outside of a transaction")
-        }
-        Mapper map = session.getMapper(Mapper.class)
-        List<DecoderEntry> result = map.listDecodersByRosterID(rosterID)
-        log.debug("result was ${result}")
-        return result
-    }
-
     List<DecoderEntry> decodersForRosterList(List<Integer> rosters) {
         log.debug("Getting a list of decoders for ${rosters.size()}")
         SqlSession session
@@ -272,9 +274,7 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper map = session.getMapper(Mapper.class)
             results = map.listDecodersFor(rosters)
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
-        } finally {
+        }  finally {
             session.close()
         }
     }
@@ -287,8 +287,6 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper mapper = session.getMapper(Mapper.class)
             decoder = mapper.getDecoderEntry(id)
-        } catch (Exception e) {
-            log.error("Exception process the SQL", e)
         } finally {
             session.close()
         }
@@ -314,7 +312,6 @@ class DatabaseServices {
         }
         Mapper map = session.getMapper(Mapper.class)
         map.updateDecoderEntry(decoderEntry)
-
     }
 
     FunctionLabel insertFunctionLabel(FunctionLabel newValue) {
@@ -348,15 +345,6 @@ class DatabaseServices {
         mapper.insertSpeedProfile(sp)
         log.debug("inserted value was ${sp}")
         return sp
-    }
-
-    void updateRosterEntry(RosterEntry entry) {
-        log.debug("updating the roster ${entry}")
-        if (session == null) {
-            throw new RuntimeException("attempting to update a Roster entry outside a transaction")
-        }
-        Mapper map = session.getMapper(Mapper.class)
-        map.updateRosterEntry(entry)
     }
 
     DecoderDef insertDecoderDef(DecoderDef decoderDef) {
@@ -408,6 +396,8 @@ class DatabaseServices {
             throw new RuntimeException("Attempting to commit work when not in a transaction")
         }
         session.commit()
+        session.close()
+        session = null
     }
 
     void rollbackAll() {
@@ -415,6 +405,8 @@ class DatabaseServices {
             throw new RuntimeException("Attempting to rollback work when not in a transaction")
         }
         session.rollback()
+        session.close()
+        session = null
     }
 
 }

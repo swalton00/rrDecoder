@@ -1,14 +1,37 @@
 package com.spw.rr.database
 
 import groovy.transform.ToString
+import org.slf4j.LoggerFactory
 
 @ToString(includeNames = true, includePackage = false, includeFields = true)
-class FunctionLabel extends AbstractItem{
+class FunctionLabel extends SaverObject {
+
+    FunctionLabel() {
+        log = LoggerFactory.getLogger(FunctionLabel.class)
+    }
+
     Integer id
-    Integer decoderId
-    Integer functionNum
+    String functionNum
     String  functionLabel
+    boolean locked
     Integer rosterId
+    Integer labelVersion
+
+    @Override
+    boolean equals(Object other) {
+        log.info("invoked Function Label instance")
+        if (!(other instanceof FunctionLabel)) {
+            return false
+        }
+         if ((locked &! other.locked) |
+                 (!locked & other.locked)) {
+             return false
+         }
+        if (!decoderId.equals(other.decoderId)) return false
+        if (!functionNum.equals(other.functionNum)) return false
+        if (!(functionLabel.equals(other.functionLabel))) return false
+        return true
+    }
 
     @Override
     String getKey() {
@@ -19,4 +42,38 @@ class FunctionLabel extends AbstractItem{
     void addRows(List<String> thisLine) {
         thisLine.add(functionLabel)
     }
+
+    @Override
+    String getValue() {
+        return functionLabel
+    }
+
+
+    int compareTo(SaverObject otherItem) {
+        if (this.decoderId != otherItem.decoderId) {
+            if (this.decoderId < otherItem.decoderId) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        if (!(otherItem instanceof FunctionLabel)) {
+            log.error("Attempting to compare a FunctionLabel to another type")
+            throw RuntimeException("Attempting to compare a Function Label to something else")
+        }
+        if (!functionNum.equals(otherItem.functionNum)) {
+             if (functionNum < otherItem.functionNum) {
+                 return -1
+             } else {
+                 return 1
+             }
+         }
+        if (functionLabel < otherItem.functionLabel) {
+            return -1
+        } else {
+            return 1
+        }
+        return 0
+    }
+
 }

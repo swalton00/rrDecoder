@@ -31,7 +31,7 @@ class Settings {
             log.debug("settings not present on initial load")
             settingsComplete = null
         } else {
-            log.debug("settings found complete on inital load")
+            log.debug("settings found complete on initial load")
             settingsComplete = true
         }
     }

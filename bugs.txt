@@ -1,0 +1,14 @@
+1. If the local drive is read-only, the program starts but any write operation fails. Opening
+    the database also fails. The program continues to run. The exception at that point
+    should cause the program to terminate with an error message - perhaps with an OKay dialog?
+
+2. Road "Number" needs to allow alpha characters (database change).
+
+3. Potentially related to 1) above - under certain circumstances (which ones?) the
+    display is off screen or too large (or perhaps, too small).
+
+4. Need to better allow for executing with a double click, rather than from a command line.
+
+5. DOC -- folder location of .bat file for execution.
+
+6. DOC -- doc to setup for network access to H2?

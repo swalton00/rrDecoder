@@ -20,11 +20,13 @@ import java.util.concurrent.Semaphore
 @Singleton
 class ImportService {
     DatabaseServices database = DatabaseServices.getInstance()
+    ImportDb importDb = ImportDb.getInstance()
     private static final Logger log = LoggerFactory.getLogger(ImportService.class)
     private static Semaphore importLock = new Semaphore(1)
     private static Semaphore detailLock = new Semaphore(1)
     Component parent
     List<DecoderType> decoderList = null
+    Timestamp dbTime = null
 
     boolean doesRosterExist(File rosterFile) {
         log.debug("looking for an existing roster on this system for ${rosterFile}")
@@ -64,12 +66,114 @@ class ImportService {
         decoderListTime.stop()
     }
 
+    Hashtable<String, SaverObject> saverSetup(ArrayList<SaverObject> existing) {
+        Hashtable<String, SaverObject> hash = new Hashtable<>()
+        if (existing == null) {
+            return hash     // empty list - no saved entries
+        }
+        existing.each {
+            hash.put(it.getKey(), it)
+        }
+        return hash
+    }
+
+    /**
+     * Check to see if the object has changed, if so, populate the new SaverObject
+     * @param hash  the hashtable created by the saverSetup
+     * @param item  the new item - has it changed?
+     * @param newVersion    the new version record, in case it has
+     * @param newSaver      a new saver item to populate if it changed
+     * @return
+     */
+    SaverBase saverCheck(Hashtable<String,
+            SaverObject> hash,
+            SaverObject item,
+            AbstractVersion newVersion,
+            SaverBase newSaver) {
+        SaverObject oldItem = hash.get(item.getKey())
+        newSaver.version = newVersion.version
+        newSaver.decoderId = item.decoderId
+        if (item.equals(oldItem)) {
+            return null
+        }
+        log.debug("differences - returning ${newSaver}")
+        return newSaver
+    }
+
+    void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
+        log.debug("Processing the labels for id ${decoderId} and entry ${decoderEntry}")
+        int functionLabelSize = entryList.'functionlabels'.functionlabel.size()
+        boolean createdVersion = false
+        LabelVersion newLabelVersion = new LabelVersion()
+        newLabelVersion.decoderId = decoderId
+        ArrayList<FunctionLabel> existing = importDb.getFunctionLabelsFor(decoderId)
+        boolean addNewFunctionLabels = false
+        Hashtable<String, SaverObject> hash = saverSetup(existing)
+        LabelVersion newVersion
+        LabelVersion labelVersion
+        if (existing.size() == 0) {
+            log.debug("no existing Function Labels for decoderId of ${decoderId}")
+            addNewFunctionLabels = true
+        } else {
+            log.debug("have a set of existing FunctionLabels, setting up to record changeds")
+            labelVersion = importDb.getLabelVersionMaxFor(decoderId)
+            newVersion = new LabelVersion()
+            newVersion.decoderId = decoderId
+            newVersion.version_time = dbTime
+            if (labelVersion == null) {
+                newVersion.version = 0
+            } else {
+                newVersion.version = labelVersion.version + 1
+            }
+        }
+        log.info("functionLabelSize is ${functionLabelSize}")
+        for (labelEntry in 0..<functionLabelSize) {
+            log.info("LabelEntry (index) is ${labelEntry}")
+            log.debug("this function label entry has ${entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList.'functionlabels'.functionlabel[labelEntry].text()}")
+            FunctionLabel funcLab = new FunctionLabel()
+            funcLab.decoderId = decoderEntry.id
+            funcLab.functionNum = Integer.valueOf(entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text())
+            funcLab.functionLabel = entryList.'functionlabels'.functionlabel[labelEntry].text()
+
+            String lockable = entryList.'functionlabels'.functionlabel[labelEntry].'@lockable'.text()
+            if ("true".equals(lockable)) {
+                funcLab.locked = true
+            } else {
+                funcLab.locked = false
+            }
+            log.debug("new function label is ${funcLab}")
+            if (addNewFunctionLabels) {
+                database.insertFunctionLabel(funcLab)
+            } else {
+                SavedLabel newSavedLabel = new SavedLabel()
+                newSavedLabel = saverCheck(hash, funcLab, newVersion, newSavedLabel)
+                if (newSavedLabel != null) {
+                    if (!createdVersion) {
+                        createdVersion = true
+                        decoderEntry.labelVersion = newVersion.version
+                        importDb.writeLabelVersion(newVersion)
+                        createdVersion = true
+                    }
+                    newSavedLabel.locked = funcLab.locked
+                    FunctionLabel oldLabel = (FunctionLabel)hash.get(funcLab.getKey())
+                    newSavedLabel.functionNumber = funcLab.functionNum
+                    if (!(oldLabel == null)) {
+                        newSavedLabel.locked = oldLabel.locked
+                        newSavedLabel.saved_label = oldLabel.functionLabel
+                    }
+                    importDb.writeSavedLabel(newSavedLabel)
+                }
+            }
+        }
+    }
+
 
     RosterEntry importRoster(Component parent, File rosterFile) {
         log.debug("importing from ${rosterFile.path} - getting the lock")
         if (!importLock.tryAcquire()) {
             throw new RuntimeException("attempting to import a file while an import is in progress")
         }
+        dbTime = importDb.getCurrentDbTime()
         Timestamp rosterUpdate = new Timestamp(rosterFile.lastModified())
         String rosterText = rosterFile.text
         def rosterValues = new XmlSlurper().parseText(rosterText)
@@ -82,19 +186,19 @@ class ImportService {
         HashMap<String, DecoderEntry> existingList = null
         Log4JStopWatch importTime = new Log4JStopWatch("import", "Starting the import")
         try {
-            database.beginTransaction()
             if (thisEntry == null) {
                 log.debug("roster not found -- adding new")
                 thisEntry = new RosterEntry()
                 thisEntry.fullPath = rosterFile.path
                 thisEntry.systemName = getSystemName()
                 thisEntry.fileDate = rosterUpdate
-                thisEntry = database.addRoster(thisEntry)
+                thisEntry.entryTime = dbTime
+                thisEntry = importDb.addRoster(thisEntry)
                 log.debug("this entry is now ${thisEntry}")
             } else {
                 rosterFound = true
                 thisEntry.fileDate = rosterUpdate
-                thisEntry.dateUpdated = new Timestamp(new Date().getTime())
+                thisEntry.dateUpdated = dbTime
                 existingList = updateRosterEntries(thisEntry)
             }
             SwingUtilities.invokeLater {
@@ -110,21 +214,30 @@ class ImportService {
                 Log4JStopWatch individualStopWatch = new Log4JStopWatch("indiv", "each roster entry${entryList[i].'@id'.text()}")
                 DecoderEntry newEntry = new DecoderEntry()
                 boolean decoderExists = false
+                setLocoValues(newEntry, entryList[i], thisEntry)
+                database.beginTransaction()
                 if (rosterFound) {
                     DecoderEntry previous = existingList.get(entryList[i].'@id'.text())
                     if (previous != null) {
-                        newEntry = previous
-                        decoderExists = true
-                        existingList.remove(newEntry.decoderId)
+                        if (newEntry.decoderTypeId != previous.decoderTypeId)  {
+                            existingList.remove(newEntry.decoderId)
+                            log.info("Decoder type was changed for entry ${previous.decoderId} with DCC address ${previous.dccAddress}")
+                            // since type was changed, we need to delete the old (to delete all dependents) and the reinsert
+                            importDb.deleteDecoderEntry(previous)
+                            decoderExists = false
+                        } else {
+                            newEntry = previous
+                            decoderExists = true
+                            existingList.remove(previous.decoderId)
+                        }
+
                     }
                 }
                 if (!rosterFound | (rosterFound & !decoderExists)) {
                     log.debug("no database entry found -- inserting")
-                    setLocoValues(newEntry, entryList[i], thisEntry)
                     database.addDecoderEntry(newEntry)
                 } else {
                     log.debug("existing entry being updated id = ${newEntry.id}")
-                    setLocoValues(newEntry, entryList[i], thisEntry)
                     database.updateDecoderEntry(newEntry)
                 }
                 individualStopWatch.stop()
@@ -133,16 +246,7 @@ class ImportService {
                 def functionEntries = functions.'functionlabel'
                 if (functionEntries != null) {
                     Log4JStopWatch functionsStopWatch = new Log4JStopWatch("functions", "function entries")
-                    int functionLabelSize = entryList[i].'functionlabels'.functionlabel.size()
-                    for (labelEntry in 0..<functionLabelSize) {
-                        log.debug("this function label entry has ${entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList[i].'functionlabels'.functionlabel[labelEntry].text()}")
-                        FunctionLabel funcLab = new FunctionLabel()
-                        funcLab.decoderId = newEntry.id
-                        funcLab.functionNum = Integer.valueOf(entryList[i].'functionlabels'.functionlabel[labelEntry].'@num'.text())
-                        funcLab.functionLabel = entryList[i].'functionlabels'.functionlabel[labelEntry].text()
-                        log.debug("new function label is ${funcLab}")
-                        database.insertFunctionLabel(funcLab)
-                    }
+                    importFunctionLabels(entryList[i], newEntry.id, newEntry)
                     functionsStopWatch.stop()
                 }
                 int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
@@ -174,19 +278,22 @@ class ImportService {
                     }
                     speedStopWatch.stop()
                 }
+                database.commitWork()
             }
             if (rosterFound && existingList.size() > 0) {
                 log.debug("still have some old existing decoder entries -- removing them -- ${existingList.size()}")
                 existingList.each {entry ->
                     DecoderEntry currentEntry = existingList.get(entry.key)
+                    database.beginTransaction()
                     log.debug("this entry is ${currentEntry}")
-                    database.deleteDecoderEntry(currentEntry)
+                    importDb.deleteDecoderEntry(currentEntry)
+                    database.commitWork()
                 }
             }
             if (rosterFound) {
-                database.updateRosterEntry(thisEntry)
+                thisEntry.dateUpdated = dbTime
+                importDb.updateRosterEntry(thisEntry)
             }
-            database.commitWork()
         } catch (Exception e) {
             log.error("Caught an exception working with the import", e)
             database.rollbackAll()
@@ -196,7 +303,6 @@ class ImportService {
                 monitor.setProgress(arraySize)
                 monitor.close()
             }
-            database.close()  // free up the session
             importTime.stop()
         }
         log.debug("there are ${arraySize} entries in this roster - releasing the lock")
@@ -207,7 +313,9 @@ class ImportService {
 
     HashMap<String, DecoderEntry> updateRosterEntries(RosterEntry thisEntry) {
         log.debug("updating an existing roster")
-        List<DecoderEntry> existingList = database.decodersForRoster(thisEntry.id)
+        ArrayList<Integer> rosterList = new ArrayList()
+        rosterList.add(thisEntry.id)
+        List<DecoderEntry> existingList = database.decodersForRosterList(rosterList)
         HashMap<String, DecoderEntry> oldLocos = new HashMap<>()
         existingList.each {
             oldLocos.put(it.decoderId, it)
@@ -233,7 +341,8 @@ class ImportService {
         entry.dccAddress = thisEntry.'@dccAddress'
         entry.manufacturerId = thisEntry.'@manufacturerID'
         entry.productId = thisEntry.'@productID'
-        entry.importDate = new Timestamp(new Date().getTime() )
+        entry.importDate = dbTime
+        entry.shunt = thisEntry.'@IsShuntingOn'
         log.debug("date from XML was ${thisEntry.'dateUpdated'.text()}")
         entry.dateUpdated = doDateModified(thisEntry.'dateUpdated'.text())
         log.debug("dateupdated set to ${entry.dateUpdated}")

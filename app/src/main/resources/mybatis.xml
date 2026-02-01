@@ -28,5 +28,6 @@
     <mappers>
         <mapper resource="com/spw/rr/database/Mapper.xml"/>
         <mapper resource="com/spw/rr/viewdb/ViewDb.xml"/>
+        <mapper resource="com/spw/rr/database/ImportMapper.xml"/>
     </mappers>
 </configuration>

@@ -77,6 +77,7 @@ class MainController {
         nextLine.add(newEntry.decCount)
         nextLine.add(newEntry.fullPath)
         nextLine.add(newEntry.fileDate)
+        nextLine.add(newEntry.entryTime)
         nextLine.add(newEntry.dateUpdated)
         return nextLine
     }
@@ -108,6 +109,7 @@ class MainController {
                 for (i in 0..<model.tableList.size()) {
                     if (model.tableList.get((int) i).get(0).equals(newEntry.id)) {
                         model.tableList.set((int) i, lineEntry)
+                        view.tableModel.fireTableDataChanged()
                     }
                 }
             }

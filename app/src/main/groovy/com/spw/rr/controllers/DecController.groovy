@@ -67,14 +67,7 @@ class DecController {
             nextLine.add(entry.hasDetail)
             nextLine.add(entry.fileName)
             nextLine.add(entry.roadName)
-            Integer tempRoadNumber
-            try {
-                tempRoadNumber = Integer.valueOf(entry.roadNumber)
-            } catch (Exception e) {
-                log.warn("Roadnumber is not a number for ${entry}")
-                tempRoadNumber = null
-            }
-            nextLine.add(tempRoadNumber)
+            nextLine.add(entry.roadNumber)
             nextLine.add(entry.manufacturer)
             nextLine.add(entry.decoderFamily)
             nextLine.add(entry.decoderModel)

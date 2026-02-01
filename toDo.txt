@@ -1,0 +1,6 @@
+Bugs:
+    When saving a new database, schema is not tested
+    When saving the preferences, a new schema is not saved
+    On startup, if database exists, doesn't correctly check for tables
+        Checks if DB_Version exists, doesn't check for rest of tables
+    Doesn't work if URL doesn't include SCHEMA=xx

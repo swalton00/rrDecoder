@@ -50,6 +50,7 @@ class RrTableModel extends AbstractTableModel{
     @Override
     Class getColumnClass(int columnNumber) {
         if (columnNumber < tableClasses.size()) {
+            log.debug("returning tableClass for column ${columnNumber} - ${tableClasses.get(columnNumber)}")
             return (Class)tableClasses.get(columnNumber)
         } else {
             return String.class

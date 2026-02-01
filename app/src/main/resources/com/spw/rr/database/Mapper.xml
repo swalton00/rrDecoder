@@ -36,9 +36,11 @@
             manufacturerId,
             productId,
             dateUpdated,
+            DATEIMPORTED as entryTime,
             decoderTypeId,
             detailTime,
-            rosterId
+            rosterId,
+            cvVersion
         FROM
             decoder
         WHERE
@@ -85,17 +87,7 @@
             rosterID = #{arg0}
         ORDER BY id
     </select>
-    <insert id="insertRosterEntry" parameterType="RosterEntry" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        INSERT INTO roster
-        (entered,
-         fullpath,
-         fileDate,
-         systemName)
-        VALUES (CURRENT_TIMESTAMP,
-                        #{fullPath},
-                        #{fileDate},
-                        #{systemName})
-    </insert>
+
     <select id="listDecoderTypes" resultType="DecoderType">
         SELECT id,
                decoderFamily,
@@ -251,21 +243,6 @@
                 #{reverseValue}
             )
     </insert>
-    <delete id="deleteDecoderEntry" parameterType="DecoderEntry">
-        DELETE
-        FROM Decoder
-        WHERE id = #{id};
-    </delete>
-    <update id="updateRosterEntry" parameterType="RosterEntry">
-        UPDATE
-            roster
-        SET fullpath=#{fullPath},
-            systemName = #{systemName},
-            fileDate = #{fileDate},
-            dateUpdated = CURRENT_TIMESTAMP
-        WHERE
-            id = #{id}
-    </update>
     <select id="listDecodersFor" resultType="DecoderEntry">
         SELECT
             p.id,
