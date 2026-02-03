@@ -45,7 +45,7 @@ class ImportService {
         return database.getRosterEntry(systemName, fullPath)
     }
 
-    private static String getSystemName() {
+    public static String getSystemName() {
         log.debug("getting System name")
         return System.getenv("COMPUTERNAME")
     }

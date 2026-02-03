@@ -12,7 +12,6 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.Timestamp
 
 @Singleton
 class DatabaseServices {
@@ -35,52 +34,26 @@ class DatabaseServices {
 
 
     boolean validate(Settings settings) {
-        log.debug("validating for  $settings}")
-        String schema
+        validate(settings.userid, settings.password, settings.schema, settings.url)
+    }
+
+    boolean validate(String userid, String password, String schema, String url) {
+        log.debug("validating for  url: ${url}, Schema: ${schema}, userid: ${userid}")
         boolean returnValue = false
-        /*
-        if url contains schema, remove schema first to validate (schema might not be present in database
-        then, connect, check for schemaa (if not present,
-        finally check for tables
-         */
-        String tempURL = settings.url
-        boolean urlHasSchema = false
+        String tempURL = url
         if (tempURL.contains(";SCHEMA=")) {
-            urlHasSchema = true
-            int schemaStart = tempURL.indexOf(";SCHEMA=")
-            int schemaEnd = tempURL.indexOf(";", schemaStart + 1)
-            schema = tempURL.substring(schemaStart + ";SCHEMA=".size())
-            if (schema.endsWith(";")) {
-                schema = schema.substring(0, schema.size() - 1)
-            }
-            if (schemaEnd == -1) {
-                tempURL = tempURL.substring(0, schemaStart - 1)
-                log.trace("URL without the schema is ${tempURL}")
-            } else {
-                String front = tempURL.substring(0, schemaStart)
-                String back = tempURL.substring(schemaEnd)
-                tempURL = front + back
-                log.trace("URL schema removed is ${tempURL}")
-                settings.schema = tempURL
-            }
-        } else if (settings.schema == null) {
-            log.error("no schema passed")
-        } else {
-            schema = settings.schema
+            log.error("URL should not contain SCHEMA")
+            return false
         }
         log.debug("using a schema of ${schema} in the validator")
         log.debug("Testing database connection")
         Connection conn = null
         try {
-            if (urlHasSchema) {
-                conn = DriverManager.getConnection(tempURL, settings.userid, settings.password)
-            } else {
-                conn = DriverManager.getConnection(settings.url, settings.userid, settings.password)
-            }
-            if (conn != null) {
+           conn = DriverManager.getConnection(url, userid, password)
+           if (conn != null) {
                 log.debug("connection succeeded")
                 PreparedStatement stmt = conn.prepareStatement(SCHEMA_TEST)
-                stmt.setString(1, settings.schema.toUpperCase())
+                stmt.setString(1, schema.toUpperCase())
                 ResultSet rs = stmt.executeQuery()
                 if (!rs.next()) {
                     log.error("result set didn't return any values")
@@ -89,11 +62,11 @@ class DatabaseServices {
                 int matchCount = rs.getInt(1)
                 if (matchCount == 0) {
                     log.debug("schema not present -- creating")
-                    PreparedStatement createSchema = conn.prepareStatement(CREATE_SCHEMA + settings.schema)
+                    PreparedStatement createSchema = conn.prepareStatement(CREATE_SCHEMA + schema)
                     createSchema.execute()
                 }
                 PreparedStatement stmt3 = conn.prepareStatement(TABLE_TEST)
-                stmt3.setString(1, settings.schema.toUpperCase())
+                stmt3.setString(1, schema.toUpperCase())
                 ResultSet rs2 = stmt3.executeQuery()
                 if (!rs2.next()) {
                     log.error("search for tables didn't return a result set as it should")
@@ -101,7 +74,7 @@ class DatabaseServices {
                 }
                 matchCount = rs2.getInt(1)
                 //  add checks for rest of tables here
-                PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + settings.schema)
+                PreparedStatement stmt2 = conn.prepareStatement(SET_SCHEMA + schema)
                 stmt2.execute()
                 if (matchCount == 1) {
                     log.debug("tables found - checking db version")
@@ -133,15 +106,8 @@ class DatabaseServices {
                     new ApplyResources().apply(RESOURCE_NAME, (Connection) conn)
 
                 }
-                if (!urlHasSchema) {
-                    if (!settings.url.endsWith(";")) {
-                        settings.url = settings.url + ";"
-                    }
-                    settings.url = settings.url + "SCHEMA=" + settings.schema + ";"
-                }
                 returnValue = true
-                settings.settingsValid = true
-            }
+                }
         } catch (Exception e) {
             log.error("exception working with the database", e)
             throw new RuntimeException("exception working with the database")
@@ -158,7 +124,9 @@ class DatabaseServices {
     void dbStart(Settings settings) {
         log.debug("starting the datasouce with settings ${settings}")
         Properties dbProps = new Properties()
-        dbProps.put("url", settings.url)
+        String newURL =  settings.url + ";SCHEMA=" + settings.schema
+        log.debug("Mybatis will be using URL of ${newURL}")
+        dbProps.put("url", newURL)
         dbProps.put("username", settings.userid)
         dbProps.put("password", settings.password)
         dbProps.put("driver", "org.h2.Driver")

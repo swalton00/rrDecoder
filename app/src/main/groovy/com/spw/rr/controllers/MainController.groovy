@@ -58,6 +58,11 @@ class MainController {
             log.debug("don't have a valid settings yet - going directly to prefs")
             createProps()
         }
+
+        completeInit()
+    }
+
+    void completeInit() {
         if (settings.databaseOpen) {
             log.debug("loading the data for the main view")
             List<RosterEntry> entries = databaseServices.listRosters()
@@ -68,6 +73,7 @@ class MainController {
             }
             view.tableModel.fireTableDataChanged()
         }
+
     }
 
     private ArrayList<String> buildEntry(RosterEntry newEntry) {

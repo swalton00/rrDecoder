@@ -10,6 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.JFileChooser
+import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 import java.awt.Window
 import java.awt.event.ActionEvent
@@ -22,7 +23,12 @@ class PropsController {
     PropsView view
     Window parentWidow
     Settings settings
-    Settings newSettings
+
+    String newUserid
+    String newPassword
+    String newURL
+    String newSchema
+    //Settings tempSettings
 
 
     private static final Logger log = LoggerFactory.getLogger(PropsController.class)
@@ -38,9 +44,9 @@ class PropsController {
     def chooseAction  = { ActionEvent event ->
         log.debug("Choosing the location for the database")
         JFileChooser chooser = new JFileChooser()
-        chooser.setDialogTitle("Select OpsPro Home Directory")
+        chooser.setDialogTitle("Select Database Location")
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
-        int returnValue = chooser.showDialog(null, "Select OpsPro Home")
+        int returnValue = chooser.showDialog(null, "Set DB Location")
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File chosen = chooser.getSelectedFile()
             log.debug("selected file was ${chosen.toString()}")
@@ -56,31 +62,55 @@ class PropsController {
         view.thisWindow.setVisible(false)
     }
 
+    boolean checkSettingsChange(String oldSetting, String newSetting) {
+        return !(oldSetting == newSetting)
+    }
+
     def backgroundSave = { ->
-        log.debug("validating the settings in ${newSettings}")
-        boolean goodSettings = database.validate(newSettings)
+        log.debug("validating the settings in ${tempSettings}")
+        boolean goodSettings = database.validate(tempSettings)
+        settings.settingsValid = goodSettings
         if (goodSettings) {
+            settings.settingsValid = true
             log.debug("settings determined to be good - saving them")
-            settings = newSettings
+            boolean settingsChanged = false
+            settings |= checkSettingsChange(settings.schema, newSchema)
+            settings |= checkSettingsChange(settings.userid, newUserid)
+            settings |= checkSettingsChange(settings.password, newPassword)
+            settings |= checkSettingsChange(settings.url, newURL)
+            settings.schema = newSchema
+            settings.userid = newUserid
+            settings.password = newPassword
+            settings.url = newURL
             settings.saveSettings()
             saver.writeValues()
             database.dbStart(settings)
             SwingUtilities.invokeLater {
                 view.thisWindow.setVisible(false)
             }
+            if (!settings.databaseOpen) {
+                log.debug("database is not open, completing settings")
+            } else {
+                if (settingsChanged) {
+                    log.debug("settings have changed - will terminate to restart")
+                    SwingUtilities.invokeAndWait {
+                        JOptionPane.showMessageDialog(null,
+                                "Settings have changed - click to terminate and restart",
+                        JOptionPane.WARNING_MESSAGE)
+                        System.exit(4)
+                    }
+                }
+            }
         }
     }
 
     def saveAction = { ActionEvent event ->
         log.debug("save action")
-        newSettings = new Settings()
-        newSettings.settingsComplete = false
-        newSettings.settingsValid = false
-        newSettings.userid = model.fieldUserid.getText()
-        newSettings.password = new String(model.fieldPassword.getPassword())
-        newSettings.url = model.fieldURL.getText()
+        newUserid = model.fieldUserid.getText()
+        newPassword = new String(model.fieldPassword.getPassword())
+        newURL = model.fieldURL.getText()
         if (!model.fieldSchema.getText().isEmpty()) {
-            newSettings.schema = model.fieldSchema.getText()
+            newSchema = model.fieldSchema.getText()
         }
         worker.execute(backgroundSave)
     }

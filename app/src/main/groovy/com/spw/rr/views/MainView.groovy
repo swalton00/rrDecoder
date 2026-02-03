@@ -120,15 +120,15 @@ class MainView {
         Integer mainWidth = saver.getInt("main", FrameHelper.WIDTH_NAME)
         Integer mainHeight = saver.getInt("main", FrameHelper.HEIGHT_NAME)
         if (mainWidth == null) {
-            mainWidth = 1000
+            mainWidth = 1200
         }
         if (mainHeight == null) {
-            mainHeight = 1500
+            mainHeight = 300
         }
         model.baseFrame.setPreferredSize(new Dimension(mainWidth, mainHeight))
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         model.baseFrame.getContentPane().add(scrollPane, "grow")
-        FrameHelper.setFrameValues(model.baseFrame, "main", 1500, 1200)
+        FrameHelper.setFrameValues(model.baseFrame, "main", 1200, 300)
         model.theTable.setIntercellSpacing(new Dimension(6, 4))
         ArrayList<Class> classList = new ArrayList<>()
         classList.add(0, Integer.class)

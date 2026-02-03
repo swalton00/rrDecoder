@@ -8,6 +8,7 @@ repositories {
 }
 
 asciidoctor {
+
     sourceDir  file('src/asciidoc')
     sources {
         include 'RRdecoder.adoc'
