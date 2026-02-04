@@ -46,6 +46,7 @@ class MainView {
     }
 
     void init() {
+        model.dataIsRosterList = true
         model.baseFrame = new JFrame("Model Railroad Decoder Database App")
         model.baseFrame.setName(WINDOW_NAME)
         model.baseFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -65,6 +66,9 @@ class MainView {
         model.importDetailItem = new JMenuItem("Import Details")
         model.importDetailItem.addActionListener(controller.importDetailAction)
         model.importDetailItem.setEnabled(false)
+        model.detailImportOkay.addPropertyChangeListener {
+            model.importDetailItem.setEnabled(model.importGood)
+        }
         fileMenu.add(model.importDetailItem)
         JMenuItem closeMenuItem = new JMenuItem("Close")
         closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK))
@@ -110,10 +114,8 @@ class MainView {
         model.tableIsSelected.addPropertyChangeListener {
             if (it.newValue) {
                 model.viewItem.setEnabled(true)
-                model.importDetailItem.setEnabled(true)
             } else if (!it.newValue) {
                 model.viewItem.setEnabled(false)
-                model.importDetailItem.setEnabled(false)
             }
         }
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)

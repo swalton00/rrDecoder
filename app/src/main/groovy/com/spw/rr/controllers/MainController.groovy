@@ -41,6 +41,7 @@ class MainController {
     void init() {
         saver.init()
         model = new MainModel(this)
+        model.systemName = ImportService.getSystemName()
         model.init()
         view = new MainView(this, model)
         settings.loadSettings()

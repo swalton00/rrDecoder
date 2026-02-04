@@ -17,8 +17,13 @@ class RrBaseModel {
     // the id's of the rows selected (ID's are always the first element in the row
     ArrayList<Integer> selectedRows = new ArrayList<>()
     TableModel tableModel
+    boolean dataIsRosterList = false
+    boolean dataIsDecoderList = false
+    String systemName = ""
+    boolean importGood = false
 
 
     ObservableBean  tableIsSelected = new ObservableBean(value: false)
+    ObservableBean  detailImportOkay = new ObservableBean(value: false)
 
 }
