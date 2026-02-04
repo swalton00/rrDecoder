@@ -1,13 +1,38 @@
+
+buildscript {
+    configurations.classpath {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
+                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
+                details.because 'Dependency has moved'
+            }
+        }
+    }
+}
+
 plugins {
-    id 'org.asciidoctor.jvm.convert' version '4.0.2'
-    id 'org.asciidoctor.jvm.pdf' version '4.0.2'
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'org.asciidoctor.jvm.pdf' version '3.3.2'
+    id 'org.asciidoctor.jvm.gems' version '3.3.2'
 }
 
 repositories {
     mavenCentral()
 }
 
+
 asciidoctor {
+
+
+    inProcess = JAVA_EXEC
+    forkOptions {
+        jvmArgs = ["--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED",
+                   "--add-opens", "java.base/java.io=ALL-UNNAMED"]
+    }
+
+    outputOptions {
+        backends = ['html5', 'pdf']
+    }
 
     sourceDir  file('src/asciidoc')
     sources {
