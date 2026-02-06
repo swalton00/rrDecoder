@@ -21,6 +21,7 @@ class Settings {
     String userid
     String password
     String schema
+    String systemName
 
     public void loadSettings() {
         url = saver.getBaseString(NAME_URL)
@@ -34,6 +35,7 @@ class Settings {
             log.debug("settings found complete on initial load")
             settingsComplete = true
         }
+        systemName = ImportService.getSystemName()
     }
 
     public void saveSettings() {

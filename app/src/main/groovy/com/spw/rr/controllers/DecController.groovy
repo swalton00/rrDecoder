@@ -31,9 +31,10 @@ class DecController {
     ViewDbService dbService = ViewDbService.getInstance()
     List<Integer> idList
 
-    DecController(Component parent, ArrayList<Integer> rosterIds) {
+    DecController(Component parent, ArrayList<Integer> rosterIds, boolean importOkay) {
         model = new DecModel()
         model.init()
+        model.selectedViewImportGood = importOkay
         view = new DecView(parent, this, model)
         idList = rosterIds
     }

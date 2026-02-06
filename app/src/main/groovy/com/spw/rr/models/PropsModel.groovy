@@ -57,8 +57,6 @@ class PropsModel implements FocusListener {
                             fieldLocation.getText() +
                             "/" +
                             fieldDbName.getText() +
-                            ";SCHEMA=" +
-                            fieldSchema.getText() +
                             ";AUTO_SERVER=TRUE;"
             )
             rbFile.setSelected(true)

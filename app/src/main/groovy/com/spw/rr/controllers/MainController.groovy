@@ -41,6 +41,7 @@ class MainController {
     void init() {
         saver.init()
         model = new MainModel(this)
+        model.systemName = ImportService.getSystemName()
         model.init()
         view = new MainView(this, model)
         settings.loadSettings()
@@ -58,6 +59,11 @@ class MainController {
             log.debug("don't have a valid settings yet - going directly to prefs")
             createProps()
         }
+
+        completeInit()
+    }
+
+    void completeInit() {
         if (settings.databaseOpen) {
             log.debug("loading the data for the main view")
             List<RosterEntry> entries = databaseServices.listRosters()
@@ -68,6 +74,7 @@ class MainController {
             }
             view.tableModel.fireTableDataChanged()
         }
+
     }
 
     private ArrayList<String> buildEntry(RosterEntry newEntry) {
@@ -159,7 +166,7 @@ class MainController {
     ArrayList<Integer> rosterIds = new ArrayList<>()
 
     void backgroundView() {
-        DecController decController = new DecController(model.baseFrame, rosterIds)
+        DecController decController = new DecController(model.baseFrame, rosterIds, model.importGood)
         decController.init()
     }
 
@@ -182,9 +189,13 @@ class MainController {
     def viewAllAction = { ActionEvent event ->
         log.debug("view all requested")
         rosterIds.clear()
+        model.importGood = true
         model.tableList.each {
             Integer thisId = Integer.valueOf(it.get(0))
             rosterIds.add(thisId)
+            if (!model.systemName.equals(it.get(1))) {
+                model.importGood = false
+            }
         }
         log.trace("Roster ids are ${rosterIds}")
         worker.execute(backgroundView())

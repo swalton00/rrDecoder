@@ -46,6 +46,7 @@ class MainView {
     }
 
     void init() {
+        model.dataIsRosterList = true
         model.baseFrame = new JFrame("Model Railroad Decoder Database App")
         model.baseFrame.setName(WINDOW_NAME)
         model.baseFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -65,6 +66,9 @@ class MainView {
         model.importDetailItem = new JMenuItem("Import Details")
         model.importDetailItem.addActionListener(controller.importDetailAction)
         model.importDetailItem.setEnabled(false)
+        model.detailImportOkay.addPropertyChangeListener {
+            model.importDetailItem.setEnabled(model.importGood)
+        }
         fileMenu.add(model.importDetailItem)
         JMenuItem closeMenuItem = new JMenuItem("Close")
         closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK))
@@ -110,25 +114,23 @@ class MainView {
         model.tableIsSelected.addPropertyChangeListener {
             if (it.newValue) {
                 model.viewItem.setEnabled(true)
-                model.importDetailItem.setEnabled(true)
             } else if (!it.newValue) {
                 model.viewItem.setEnabled(false)
-                model.importDetailItem.setEnabled(false)
             }
         }
         model.theTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
         Integer mainWidth = saver.getInt("main", FrameHelper.WIDTH_NAME)
         Integer mainHeight = saver.getInt("main", FrameHelper.HEIGHT_NAME)
         if (mainWidth == null) {
-            mainWidth = 1000
+            mainWidth = 1200
         }
         if (mainHeight == null) {
-            mainHeight = 1500
+            mainHeight = 300
         }
         model.baseFrame.setPreferredSize(new Dimension(mainWidth, mainHeight))
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         model.baseFrame.getContentPane().add(scrollPane, "grow")
-        FrameHelper.setFrameValues(model.baseFrame, "main", 1500, 1200)
+        FrameHelper.setFrameValues(model.baseFrame, "main", 1200, 300)
         model.theTable.setIntercellSpacing(new Dimension(6, 4))
         ArrayList<Class> classList = new ArrayList<>()
         classList.add(0, Integer.class)

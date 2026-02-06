@@ -1,0 +1,18 @@
+Release 1.0.5
+
+1. Fixed the initial size issue.
+
+2. Fixed several bugs in initial setup.
+
+    BREAKING Change -- The "SCHEMA=" in no longer allowed in the URL to the database.
+        If it is set in the saved database URL, on startup the application will display the
+        preferences dialog. You must manually remove the ":SCHEMA=" from the URL and click SAVE.
+
+3. Several changes were made to better handle a network database. Specifically, "Import Detail"
+    is only enabled for the main (roster list) if all rosters were on imported on the current system.
+    For the decoder list, Import Detail is only enabled if all decoders are from roster(s) imported
+    on the local system.
+
+4. The name of the distribution zip or tar file is "decoderDB" (without the version number).
+    This will simplify upgrading in the future. For this release, remove the "app-1.0.2" directory
+    and unzip or untar the current zip into the now empty folder.

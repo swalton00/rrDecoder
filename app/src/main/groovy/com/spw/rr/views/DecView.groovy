@@ -137,7 +137,7 @@ class DecView {
         JMenuItem[] addList = [model.viewSpeedProfileItem, model.viewSpeedGraphItem,
                                model.viewDecDetailItem, model.viewFunctionItem,
                                model.viewKeyPairsItem, model.viewStandCvItem,
-                               model.viewAllCvItem, model.importDetailItem]
+                               model.viewAllCvItem]
         addList.each {
             itemList.add(it)
         }
@@ -152,6 +152,8 @@ class DecView {
             itemList.each { item ->
                 item.setEnabled((boolean) it.newValue)
             }
+            model.goodSelection = it.newValue
+            model.importDetailItem.setEnabled(model.selectedViewImportGood & (it.newValue as Boolean))
             if (it.newValue & model.testCvList()) {
                 model.viewSelCvItem.setEnabled(true)
             }

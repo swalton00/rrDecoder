@@ -29,6 +29,16 @@ dependencies {
     implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.5'
 }
 
+distZip {
+    archiveBaseName = 'decoderDB'
+    archiveVersion = ''
+}
+
+distTar {
+    archiveBaseName = 'decoderDB'
+    archiveVersion = ''
+}
+
 application {
 
     mainClass = 'com.spw.rr.RRdecoder'
