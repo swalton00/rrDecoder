@@ -4,7 +4,6 @@ import com.spw.rr.database.DecoderEntry
 import com.spw.rr.utilities.ObservableBean
 import com.spw.rr.views.DecView
 import groovy.transform.ToString
-import org.apache.tools.ant.taskdefs.modules.Jmod
 
 import javax.swing.JMenuItem
 import javax.swing.JTextField
@@ -35,6 +34,9 @@ class DecModel extends RrBaseModel implements  FocusListener {
                             "Details Read"])
         preferredWidths.addAll([10, 10, 10, 5, 5, 30, 20, 10, 10, 15, 20])
     }
+
+    boolean selectedViewImportGood = false
+    boolean goodSelection = false
 
     ArrayList<DecoderEntry> fullList = new ArrayList<>()
     Component thisDialog
@@ -72,7 +74,7 @@ class DecModel extends RrBaseModel implements  FocusListener {
     @Override
     void focusLost(FocusEvent e) {
         if (e.getComponent().getName().equals("cvlist")) {
-            if (importDetailItem != null & importDetailItem.isEnabled()) {
+            if (goodSelection) {
                 viewSelCvItem.setEnabled(false)
                 boolean goodValue = testCvList()
                 if (goodValue) {

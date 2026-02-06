@@ -166,7 +166,7 @@ class MainController {
     ArrayList<Integer> rosterIds = new ArrayList<>()
 
     void backgroundView() {
-        DecController decController = new DecController(model.baseFrame, rosterIds)
+        DecController decController = new DecController(model.baseFrame, rosterIds, model.importGood)
         decController.init()
     }
 
@@ -189,9 +189,13 @@ class MainController {
     def viewAllAction = { ActionEvent event ->
         log.debug("view all requested")
         rosterIds.clear()
+        model.importGood = true
         model.tableList.each {
             Integer thisId = Integer.valueOf(it.get(0))
             rosterIds.add(thisId)
+            if (!model.systemName.equals(it.get(1))) {
+                model.importGood = false
+            }
         }
         log.trace("Roster ids are ${rosterIds}")
         worker.execute(backgroundView())

@@ -28,8 +28,6 @@ class ListenerForTables implements ListSelectionListener {
             int max = lsm.getMaxSelectionIndex()
             if (model.dataIsRosterList) {
                 model.importGood = true
-            } else {
-                model.importGood = false
             }
             for (i in min..max) {
                 if (lsm.isSelectedIndex(i)) {
