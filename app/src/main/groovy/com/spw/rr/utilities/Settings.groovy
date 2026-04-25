@@ -23,7 +23,7 @@ class Settings {
     String schema
     String systemName
 
-    public void loadSettings() {
+    void loadSettings() {
         url = saver.getBaseString(NAME_URL)
         userid = saver.getBaseString(NAME_USERID)
         password = saver.getBaseString(NAME_PASSWORD)
@@ -38,7 +38,7 @@ class Settings {
         systemName = ImportService.getSystemName()
     }
 
-    public void saveSettings() {
+    void saveSettings() {
         log.debug("saving the settings values")
         saver.putBaseString(NAME_URL, url)
         saver.putBaseString(NAME_USERID, userid)

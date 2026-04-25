@@ -24,12 +24,16 @@ class PropsController {
     Window parentWidow
     Settings settings
 
-    String newUserid
-    String newPassword
-    String newURL
-    String newSchema
-    //Settings tempSettings
+    Settings tempSettings
+    MainController parentController = null
 
+    PropsController() {
+
+    }
+
+    PropsController(MainController parentController) {
+        this.parentController = parentController
+    }
 
     private static final Logger log = LoggerFactory.getLogger(PropsController.class)
 
@@ -69,19 +73,20 @@ class PropsController {
     def backgroundSave = { ->
         log.debug("validating the settings in ${tempSettings}")
         boolean goodSettings = database.validate(tempSettings)
+        settings = parentController.settings
         settings.settingsValid = goodSettings
         if (goodSettings) {
             settings.settingsValid = true
             log.debug("settings determined to be good - saving them")
             boolean settingsChanged = false
-            settings |= checkSettingsChange(settings.schema, newSchema)
-            settings |= checkSettingsChange(settings.userid, newUserid)
-            settings |= checkSettingsChange(settings.password, newPassword)
-            settings |= checkSettingsChange(settings.url, newURL)
-            settings.schema = newSchema
-            settings.userid = newUserid
-            settings.password = newPassword
-            settings.url = newURL
+            settingsChanged |= checkSettingsChange(settings.schema, tempSettings.schema)
+            settingsChanged |= checkSettingsChange(settings.userid, tempSettings.userid)
+            settingsChanged |= checkSettingsChange(settings.password, tempSettings.password)
+            settingsChanged |= checkSettingsChange(settings.url, tempSettings.url)
+            settings.schema = tempSettings.schema
+            settings.userid = tempSettings.userid
+            settings.password = tempSettings.password
+            settings.url = tempSettings.url
             settings.saveSettings()
             saver.writeValues()
             database.dbStart(settings)
@@ -106,11 +111,12 @@ class PropsController {
 
     def saveAction = { ActionEvent event ->
         log.debug("save action")
-        newUserid = model.fieldUserid.getText()
-        newPassword = new String(model.fieldPassword.getPassword())
-        newURL = model.fieldURL.getText()
+        tempSettings = new Settings()
+        tempSettings.userid = model.fieldUserid.getText()
+        tempSettings.password = new String(model.fieldPassword.getPassword())
+        tempSettings.url = model.fieldURL.getText()
         if (!model.fieldSchema.getText().isEmpty()) {
-            newSchema = model.fieldSchema.getText()
+            tempSettings.schema = model.fieldSchema.getText()
         }
         worker.execute(backgroundSave)
     }

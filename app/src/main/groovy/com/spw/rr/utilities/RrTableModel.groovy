@@ -60,7 +60,7 @@ class RrTableModel extends AbstractTableModel{
     public static ArrayList<Integer> getSelectedRows(JTable theTable) {
         ArrayList<Integer> returnValue = new ArrayList()
         if (theTable.getSelectedRowCount() == 0) {
-            log.debug("no selected rows - returning an empty Array")
+             log.debug("no selected rows - returning an empty Array")
             return returnValue
         }
         int[] selected = theTable.getSelectedRows()

@@ -124,7 +124,13 @@ class DatabaseServices {
     void dbStart(Settings settings) {
         log.debug("starting the datasouce with settings ${settings}")
         Properties dbProps = new Properties()
-        String newURL =  settings.url + ";SCHEMA=" + settings.schema
+        String newURL
+        if (!settings.url.endsWith(";")) {
+            newURL = settings.url + ";"
+        } else {
+            newURL = settings.url
+        }
+        newURL =  newURL + "SCHEMA=" + settings.schema
         log.debug("Mybatis will be using URL of ${newURL}")
         dbProps.put("url", newURL)
         dbProps.put("username", settings.userid)

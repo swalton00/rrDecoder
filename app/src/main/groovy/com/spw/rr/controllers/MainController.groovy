@@ -138,7 +138,7 @@ class MainController {
     }
 
     def createProps = { ->
-        pc = new PropsController()
+        pc = new PropsController(this)
         pc.init(model.baseFrame, settings)
     }
 
