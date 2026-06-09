@@ -15,7 +15,7 @@ class RrTableModel extends AbstractTableModel{
     void setClasses(ArrayList<Class> newClasses) {
         tableClasses.clear()
         for (i in 0..<newClasses.size()) {
-            tableClasses.add(newClasses(i))
+            tableClasses.add(newClasses.get(i))
         }
     }
 
@@ -53,6 +53,7 @@ class RrTableModel extends AbstractTableModel{
             log.debug("returning tableClass for column ${columnNumber} - ${tableClasses.get(columnNumber)}")
             return (Class)tableClasses.get(columnNumber)
         } else {
+            log.debug("returning String as column is ${columnNumber} and tableClasses has size ${tableClasses.size()}")
             return String.class
         }
    }

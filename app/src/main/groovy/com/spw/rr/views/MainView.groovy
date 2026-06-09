@@ -89,6 +89,7 @@ class MainView {
         viewMenu.add(viewAllItem)
         model.viewItem = new JMenuItem("View Selected Decoders")
         model.viewItem.setEnabled(false)
+        model.viewItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.ALT_MASK))
         model.viewItem.addActionListener(controller.viewAction)
         viewMenu.add(model.viewItem)
 
@@ -139,8 +140,10 @@ class MainView {
         classList.add(3, String.class)
         classList.add(4, Timestamp.class)
         classList.add(5, Timestamp.class)
+        classList.add(6, Timestamp.class)
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
+        log.debug("setting tableClasses to ${classList}")
         model.theTable.setRowSorter(new TableRowSorter(tableModel))
         FrameHelper.restoreColumns(WINDOW_NAME, model.theTable)
         model.baseFrame.pack()

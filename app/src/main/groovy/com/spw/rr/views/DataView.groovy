@@ -7,6 +7,7 @@ import com.spw.rr.utilities.MultiLineTableHeaderRenderer
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RightTableCellRenderer
 import com.spw.rr.utilities.RrTableModel
+import groovy.util.logging.Slf4j
 import net.miginfocom.swing.MigLayout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -19,11 +20,11 @@ import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 
+@Slf4j
 class DataView {
 
     private static final int D_WIDTH = 1200
     private static final int D_HEIGHT = 900
-    private static final Logger log = LoggerFactory.getLogger(DataView.class)
     PropertySaver saver = PropertySaver.getInstance()
     DataController controller
     DataModel model
@@ -74,6 +75,7 @@ class DataView {
         model.dialog.setJMenuBar(menuBar)
         tableModel = new RrTableModel(model)
         tableModel = new RrTableModel(model)
+        tableModel.setClasses(model.tableClasses)
         model.theTable = new JTable(tableModel)
         model.theTable.setCellSelectionEnabled(false)
         model.theTable.setColumnSelectionAllowed(false)

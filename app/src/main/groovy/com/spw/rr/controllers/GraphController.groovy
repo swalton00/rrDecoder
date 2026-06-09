@@ -3,7 +3,6 @@ package com.spw.rr.controllers
 import com.spw.rr.database.DecoderEntry
 import com.spw.rr.database.SpeedProfile
 import com.spw.rr.models.GraphModel
-import com.spw.rr.viewdb.ViewDb
 import com.spw.rr.viewdb.ViewDbService
 import com.spw.rr.views.GraphView
 import org.jfree.chart.ChartFactory
@@ -40,7 +39,7 @@ class GraphController {
     void buildGraph() {
         List<DecoderEntry> decs = database.getList(ViewDbService.ListType.SPEED_LIST, decoders, null)
         if (decs.size() == 0) {
-            log.info("returned list of decoders is empty (no speed progiles?)")
+            log.info("returned list of decoders is empty (no speed profiles?)")
             return
         }
         log.debug("returned list has ${decs.size()} entries")
@@ -56,13 +55,13 @@ class GraphController {
                 locoList.add(it.roadName + it.roadNumber + " Reverse")
                 thisLoco = it.roadName + it.roadNumber
                 it.speedValues.each { SpeedProfile spd ->
-                    dataset.addValue(spd.forwardValue, thisLoco + " Forward", spd.speedStep)
-                    dataset.addValue(spd.reverseValue, thisLoco + " Reverse", spd.speedStep)
+                    dataset.addValue(spd.forwardValue, thisLoco + " Forward", new BigDecimal(spd.speedStep)/1000)
+                    dataset.addValue(spd.reverseValue, thisLoco + " Reverse", new BigDecimal(spd.speedStep)/1000)
                 }
             }
         }
         model.dataset = dataset
-        model.chart = ChartFactory.createLineChart("Speed Profile Value", "Speed Step", locoList.get(0), model.dataset)
+        model.chart = ChartFactory.createLineChart("Speed Profile Value", "Throttle Percentage", "Speed", model.dataset)
         model.chartPanel = new ChartPanel(model.chart)
         model.init()
         SwingUtilities.invokeLater {

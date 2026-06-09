@@ -32,10 +32,10 @@ class DataController {
 
     public enum ViewType {
         SELECTED_CVS,       // Decoders down, CVs across
-        ALL_CVS,            // Decoders aaross, CVs down
+        ALL_CVS,            // Decoders across, CVs down
         STANDARD_CVS,       // CVs across, 3 lines, decoders down
-        FUNCTION_LABELS,    // decoderrs down, label across
-        SPEED_PROFILE,      //  decoders across, profiles down
+        FUNCTION_LABELS,    // decoders down, label across
+        SPEED_PROFILE,      // decoders across, profiles down
         KEY_PAIRS,          // decoders down, pairs across
         DECODER_DETAIL      // decoders across, defs down
 
@@ -73,7 +73,7 @@ class DataController {
                 printTitle = "Standard CV Contents"
                 break
             case ViewType.FUNCTION_LABELS: buildFunctionLabels()
-                printTitle = "Function Lables"
+                printTitle = "Function Labels"
                 break
             case ViewType.DECODER_DETAIL: buildDecPetail()
                 printTitle = "Decoder Details"
@@ -101,6 +101,7 @@ class DataController {
         entries.each {
             String title = fixRoadName(it)
             model.columnNames.add(title)
+            model.tableClasses.add(String.class)
         }
         restDecoderDown(entries, listType)
     }
@@ -135,7 +136,17 @@ class DataController {
         ArrayList<ArrayList<String>> allLines = new ArrayList<>()
         theKeys.each { String keyVal ->
             ArrayList<String> thisLine = new ArrayList<>()
-            thisLine.add(keyVal)
+            if (viewType == ViewType.SPEED_PROFILE) {
+                Integer speedStep = Integer.valueOf(keyVal)
+                BigDecimal correctedStep = new BigDecimal(speedStep)
+                correctedStep = correctedStep /1000
+                Integer step = 126 * correctedStep
+                thisLine.add(String.format("%.3f", correctedStep))
+                thisLine.add(step.toString())
+            } else {
+                thisLine.add(keyVal)
+            }
+
             entries.each { DecoderEntry dec ->
                 AbstractItem item = dec.keyHash.get(keyVal)
                 if (item != null) {
@@ -161,6 +172,7 @@ class DataController {
         List<DecoderEntry> decoders = database.getList(ViewDbService.ListType.ALL_CV, decoderIds, null)
         log.debug("decoder list is ${decoders.size()}")
         model.columnNames.add("CV Number")
+        model.tableClasses.add(Integer.class)
         doColumnHeaders(decoders, ViewType.ALL_CVS)
     }
 
@@ -175,9 +187,12 @@ class DataController {
             log.trace("after trim - ${newVal} - ${newVal.size()}")
         }
         model.columnNames.add("Decoder ID")
+        model.tableClasses.add(Integer.class)
         model.columnNames.add("DCC Address")
+        model.tableClasses.add(Integer.class)
         newCvList.each {
             model.columnNames.add(it)
+            model.tableClasses.add(Integer.class)
             log.trace("size of ${it} - ${it.size()}")
         }
         List<DecoderEntry> cvelements = database.getList(ViewDbService.ListType.CV_LIST, decoderIds, newCvList)
@@ -222,6 +237,7 @@ class DataController {
         view = new DataView(parent, this, model, "Standard CV View", "stdview")
         STD_TITLE.each {
             model.columnNames.add(it)
+            model.tableClasses.add(Integer.class)
         }
         log.debug("creating a list of Standard CVs for the decoders: ${decoderIds}")
         List<DecoderEntry> cvelements = database.getList(ViewDbService.ListType.FIXED_CVS, decoderIds, null)
@@ -233,6 +249,7 @@ class DataController {
         log.debug("creating a list of function labels for decoders")
         List<DecoderEntry> decs = database.getList(ViewDbService.ListType.LABEL_LIST, decoderIds, null)
         model.columnNames.add("Function Number")
+        model.tableClasses.add(Integer.class)
         doColumnHeaders(decs, ViewType.FUNCTION_LABELS)
     }
 
@@ -240,11 +257,16 @@ class DataController {
         view = new DataView(parent, this, model, "Speed Profiles", "speedview")
         log.debug("creatinga list of speed profile values for decoders")
         List<DecoderEntry> decs = database.getList(ViewDbService.ListType.SPEED_LIST, decoderIds, null)
-        model.columnNames.add("Speed Entry")
+        model.columnNames.add("Throttle\nPercentage")
+        model.tableClasses.add(BigDecimal.class)
+        model.columnNames.add("Speed\nStep")
+        model.tableClasses.add(Integer.class)
         decs.each {
             String hdr = fixRoadName(it)
             model.columnNames.add(hdr + "\n" + "Forward")
+            model.tableClasses.add(Double.class)
             model.columnNames.add(hdr + "\n" + "Reverse")
+            model.tableClasses.add(Double.class)
         }
         restDecoderDown(decs, ViewType.SPEED_PROFILE)
     }
@@ -254,6 +276,7 @@ class DataController {
         log.debug("creating a list of key value pairs for decoders")
         List<DecoderEntry> decs = database.getList(ViewDbService.ListType.KEY_VAL_LIST, decoderIds, null)
         model.columnNames.add("Key")
+        model.tableClasses.add(String.class)
         doColumnHeaders(decs, ViewType.KEY_PAIRS)
     }
 
@@ -262,6 +285,7 @@ class DataController {
         log.debug("creating a list of decoder definitions for decoders")
         List<DecoderEntry> decs = database.getList(ViewDbService.ListType.DEF_LIST, decoderIds, null)
         model.columnNames.add("Decoder Def")
+        model.tableClasses.add(String.class)
         doColumnHeaders(decs, ViewType.DECODER_DETAIL)
     }
 
