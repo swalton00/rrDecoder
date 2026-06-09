@@ -43,6 +43,7 @@ class DecModel extends RrBaseModel implements  FocusListener {
     ObservableBean enableCVdetail = new ObservableBean()
     DecView view
     JMenuItem importDetailItem
+    JMenuItem filePrintItem
 
     JMenuItem viewSpeedProfileItem
     JMenuItem viewSpeedGraphItem

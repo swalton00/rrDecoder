@@ -18,7 +18,7 @@ class SpeedProfile extends AbstractItem {
 
     @Override
     void addRows(List<String> thisLine) {
-        thisLine.add(forwardValue.toString())
-        thisLine.add(reverseValue.toString())
+        thisLine.add(String.format("%.3f", forwardValue))
+        thisLine.add(String.format("%.3f", reverseValue))
     }
 }

@@ -1,4 +1,8 @@
 = RR Decoder Database Application
+J. Scott Walton
+v1.1, May 2026
+:appversion: 1.0.6
+:toc:
 
 == Introduction
 The RR Decoder Database application is a tool that reads the roster.xml files created by DecoderPro, breaks them
@@ -39,23 +43,17 @@ Once all the values have been entered, the "Save New Settings" button will be en
 that button, all the settings will be validated and, if all are good, the values will be saved and you
 will see the main window.
 
-=== The Main window
+== Using Decoder Database
 
-The main window shows a list of all rosters that have been imported (the
-ones the program knows about).
-The list will be empty until you import a roster.
-If there are roster entries present, you may select one or more.
-The
+=== Window Actions
 
-==== Window Actions
-
-The actions within the window are common to all windows.
+The actions within the windows are common to all windows.
 
 Selection of one or more entries is commonly done with the mouse.
-To select one roster, simply move the mouse pointer to it and click.
-To expand the selection to multiple entries, hold down the shift key
-while you click on another entry. That will add that entry
-and all entries between it and the original entry. If you hold down
+To select  selectthe Control key while you click it will add (or subtract) that single entry.
+Control-clicking an entry will reverse the selection state of that entry.
+ion to multiple entries, hold down the shift key
+while you clielection to multiple entries, hold down the shift key
 the Control key while you click it will add (or subtract) that single entry.
 Control-clicking an entry will reverse the selection state of that entry.
 
@@ -71,6 +69,12 @@ Position the mouse pointer in the header line on the line between two columns
 and drag left or right to resize that columns.
 When you move or resize a column, that action will be saved and the column sizes
 and positions will be restored when you restart the program.
+
+=== The Main window
+The main window shows a list of all rosters that have been imported (the
+ones the program knows about).
+The list will be empty until you import a roster.
+If there are roster entries present, you may select one or more.
 
 ==== The Main Window Contents
 
@@ -151,7 +155,7 @@ to the left or the right. Both of these changes will be saved and restored the
 next time you show this window  (the view filters will not be restored).
 
 ==== The columns
-The Id is a an arbitrary number assigned by the database to represent this decoder. It has
+The ID is a an arbitrary number assigned by the database to represent this decoder. It has
 no particular meaning, but if you want to restore the original order, simply sort by this column.
 
 RosterId is database assigned identifier of the roster from which this entry came.
@@ -184,7 +188,93 @@ Road Name (and Road Number) are the values entered in these fields when the XML 
 created (or last modified).
 
 
+Manufacturer is the value that was entered when the decoder was first entered into 
+DecoderPro. It is normally used to hold the manufacturer of the the locomotive 
+(not the decoder).
+
+Decoder Family and Decoder Model are values entered into DecoderPro to identify the
+specific decoder installed in the locomotive. These two values determine what CV 
+numbers are shown (and are programmable with DecoderPro). Together they determine
+the screens shown by DecoderPro.
+
+The Owner column in DecoderPro my be filled by a default value, or changed when
+the decoder is first entered. It can be easily changed by DecoderPro.
+
+Date Updated is the date and time when the decoder XML file was last saved.
+
+Imported is the time and date that this roster was last imported into the database.
+
+The Details Read column shows when the full xml file was last read by this tool.
 
 
+==== Menu Items
+
+===== File Items
+
+* Import Detail - This item will only be enabled if one or more decoder entries are selected. When chosen, the full XML file(s) for the selected decoders will be read. The Details Read column will be updated.  Alt-I is a short-cut key for this item.
+
+* Print - This item will bring up a standard print dialog and print 
+the list of decoders as you are currently viewing it. Alt-P is a short-cut key.
+
+* Close - Closes the view of the decoders. Alt-C is a short-cut key.
+
+===== View Items
+
+These menu items are all only enabled when one or more decoders are selected. 
+In addition, the View Selected CV Contents item requires that you enter the CV
+numbers you wish to view.
+
+* View Speed Profiles - this item will show a textual view of the speed profiles
+of all the selected decoders. If none of the selected decoders have speed 
+profiles, you will see an empty window. When you run the speed profile in
+PanelPro, you can choose the starting speed step, the increment and the ending speed 
+step for each locoomotive when you profile them, you will likely see a wide
+variation in rows of the display. The window will show the throttle percentage (as
+a decimal fraction), the speed step (from 1 to 126) and the recorded forward and
+reverse speeds for each of the selected engines.
+
+* Graph Speed Profile will show the contents of Speed Profiles as a graph of their
+values. If a selected decoder entry does not have an associated speed profile,
+it will still be listed in the legend, but there will be no line for it. 
+The graph will show the same information as shown in "View Speed Profiles", but 
+in the form of a graph.
+
+* View Function Labels will show the assigned labeled for each of the selected engines.
+Only function numbers that have an assigned label will be shown. 
+You can change these assignments in DecoderPro by selecting an engine and 
+choosing "Labels & Media".
+
+* View Key Value Pairs will show a list of all the keys assinged to the selected 
+engines and the value of each. The keys reflect information that DecoderPro 
+stores about each engine. Examples of this information include the Roster Group
+for the engine (if you are using that capability), and, if you are using 
+the Dispatcher to automatically run trains, information about the train
+and when it was last used. 
+You can add additional keys by going to the "Labels & Media" menu item in
+DecoderPro and selecting the "Roster Media" tab. 
+Adding or updating items in the "Roster custom attributes" window will change 
+or add to the values shown here. They can also be shown in DecoderPro as columns.
+
+* View Standard CV Contents shows a selected subset of CV values, arranged with CV values across the top for each of the selected locomotives. The NMRA assigned 
+usage is shown with the CV number. This is a good view to be able to compare
+the basic CV values for 
+long list of engines.
+
+* View Selected CV Contents shows values in a selected CV's in the same format as
+the "View Standard CV Contents" but for CV numbers that you have selected. This
+menu item will be disabled until you enter a valid list of CV numbers in the field
+labeled "CVs: "
+
+* View All CV Contents will show all CV numbers for the selected engines. Since the
+list of CV numbers may be quite long, the CV numbers are shown vertically, with
+the engine numbers shown across. For best results, don't select too many locomotives
+for this view. The list is pre-sorted by CV numbers, with each set of indexes sorted 
+by index, then ascending within that index.
+
+* CVs: is the field where you enter the specific CV numbers you want to view.
+For non-indexed CVs simply enter the CV number (from 0 to 255). Indexed CVs are
+specified as  group of two or three numbers seperated by a period. There are often two 
+indexes. Seperate each set of CV numbers by a comma and a single (optional) space. 
+Examples: 1, 2, 11,99, 0.252.257, 0.252.277, 1.0.257, 16.0.259, 16.0.448, 26.13.317
 
 

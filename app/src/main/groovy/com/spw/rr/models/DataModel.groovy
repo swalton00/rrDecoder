@@ -14,6 +14,8 @@ class DataModel extends RrBaseModel {
     DataController controller
     DataView view
     JDialog dialog
+
+    ArrayList<Class> tableClasses = new ArrayList<>()
     private static final Logger log = LoggerFactory.getLogger(DataModel.class)
     DataModel(DataController controller) {
         this.controller = controller

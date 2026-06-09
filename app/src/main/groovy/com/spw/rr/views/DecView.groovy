@@ -7,6 +7,7 @@ import com.spw.rr.utilities.ListenerForTables
 import com.spw.rr.utilities.PropertySaver
 import com.spw.rr.utilities.RrTableModel
 import com.spw.rr.utilities.TimestampRenderer
+import groovy.util.logging.Slf4j
 import net.miginfocom.swing.MigLayout
 
 import javax.swing.*
@@ -18,6 +19,7 @@ import java.sql.Timestamp
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Slf4j
 class DecView {
 
     Component parent
@@ -86,10 +88,10 @@ class DecView {
         model.importDetailItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.ALT_MASK))
         model.importDetailItem.addActionListener(controller.importDetailAction)
         fileMenu.add(model.importDetailItem)
-        JMenuItem filePrintItem = new JMenuItem("Print")
-        filePrintItem.addActionListener(controller.filePrintAction)
-        filePrintItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK))
-        fileMenu.add(filePrintItem)
+        model.filePrintItem = new JMenuItem("Print")
+        model.filePrintItem.addActionListener(controller.filePrintAction)
+        model.filePrintItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK))
+        fileMenu.add(model.filePrintItem)
         JMenuItem fileCloseItem = new JMenuItem("Close")
         fileCloseItem.addActionListener(controller.fileCloseAction)
         fileCloseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK))
@@ -107,7 +109,7 @@ class DecView {
         model.viewDecDetailItem = new JMenuItem("View Decoder Details")
         model.viewDecDetailItem.setEnabled(false)
         model.viewDecDetailItem.addActionListener(controller.viewDecDetailAction)
-        viewMenu.add(model.viewDecDetailItem)
+       // viewMenu.add(model.viewDecDetailItem)
         model.viewFunctionItem = new JMenuItem("View Function Labels")
         model.viewFunctionItem.setEnabled(false)
         viewMenu.add(model.viewFunctionItem)
@@ -162,7 +164,7 @@ class DecView {
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         tempDialog.add(scrollPane, BorderLayout.CENTER)
         JPanel cvPanel = new JPanel(new MigLayout("fill"))
-        JLabel cvLabel = new JLabel("CVs: ID, ")
+        JLabel cvLabel = new JLabel("CVs: ")
         cvPanel.add(cvLabel, "h 30px:30px:30px, right")
         model.cvListField = new JTextField("")
         model.cvListField.setColumns(40)
@@ -185,6 +187,7 @@ class DecView {
         classList.add(14, Timestamp.class)  //detail time
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
+        log.debug("setting tableClasses to ${classList}")
         TableRowSorter sorter = new TableRowSorter(tableModel)
         sorter.setComparator(7, roadNumberComparator as Comparator)
         model.theTable.setRowSorter(sorter)
