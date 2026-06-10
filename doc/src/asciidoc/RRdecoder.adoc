@@ -7,41 +7,68 @@ v1.1, May 2026
 == Introduction
 The RR Decoder Database application is a tool that reads the roster.xml files created by DecoderPro, breaks them
 apart and stores them in a relational database (the database software is H2, a pure Java tool included with
-this tool). The tool provides several ways to view the data including severals ways to view CV values (and
-compare those values between locomotives), a view of the labels applied to Functions Keys and Speed profiles
-(if you are using those).
+this tool). The tool provides several ways to view the data.
+These include several ways to view CV values (and
+compare those values between locomotives).
+You can also view the labels applied to Functions Keys.
+If you are using Speed Profiles you can also view these
+as either graphs or view the raw data.
 
 == Installation
 
 The Software is distributed in a zip file including all the needed required software (except Java itself). You
-need a Java version 11 or later to run it (the same as JMRI). Unzip the the software into an empty directory.
-It will create several directories (including one called "app"). Inside the app folder, you will find a
-file called "app.bat" and another simply called "app". The ".bat" file is for Windows and the other for Mac and
-Unix (untested). Double click on the app.bat file and it will run the application.
+need Java version 11 or later to run it (the same as JMRI). Unzip the the software into an empty directory.
+It will create several directories (including one called "decoderDB").
+Inside that folder, you will find a folder called "bin". That folder
+contains files
+called "app.bat" and "app". The "app.bat" file is for Windows
+and the "app" file is for Mac and Unix.
+In Windows you may double click on the app.bat
+file and it will run the application.
+You can also run it from a command
+line by navigating to directory, typeing "app.bat" and pressing Enter.
+
+With Windows you can use a shortcut to make it
+easier to access the application.
+Create a shortcut by right-clicking on an empty space on your desktop.
+In the resulting menu, choose New and select "Shortcut".
+A properties menu will open and you can type the full path
+to the "app.bat" file (including the name), or use "Browse" to
+locate the file and click on it it.
 
 === First Usage
 The first time you run the application you will need to provide some values to be used for the database.
 These values will be saved, so you will only need to provide them once. You can change them later, if you want
-(though that will force you to reimport your date).
+(though that will force you to reimport your data).
 
 The database requires a userid and password. Since the database will be created after you have entered all
 the values, the userid id and password are your choice (the first usage sets them). The values are saved
 in an insecure manner so don't repeat these from another application. Security is not an issue with this
 application because it's only accessible from the local machine and the database doesn't hold any
 financially significant data.
+Select a userid and password. You will need to know these
+values only if you want to use the database from a
+different application, or if you delete the rrDecoder.properties file
+and restart the application and want to reuse the same database.
 
 The database can be specified either with the full URL, containing all the parts, or be specifying each
 part individually. If you enter the parts, the full URL will be automatically populated and stored.
 The three parts required are: database location, name and the schema for the decoder data.
 The easiest method to select the location is to use the "Choose Location" button and select an empty
 directory.
-The database name is flexible, but must be at least three characters long, begin with a letter and
+The database name is flexible, but must be at least three characters
+long, beginning with a letter and
 contain only letters, numbers and possibly underscores.
-The final choice is for the schema to use for the tables in the database (I used "decoder" for mine).
+The final choice is for the schema to use for the tables
+in the database (I used "decoder" for mine).
+You can use any word (beginning with a letter, and containing only
+letters and numbers).
 
 Once all the values have been entered, the "Save New Settings" button will be enabled. When you click on
 that button, all the settings will be validated and, if all are good, the values will be saved and you
-will see the main window.
+will see the main window. If there are any errors, you should
+see an error message at the bottow of the window and the
+Save button will again be disabled until you change a value.
 
 == Using Decoder Database
 
@@ -49,26 +76,43 @@ will see the main window.
 
 The actions within the windows are common to all windows.
 
+The standard window actions to move or resize windows use
+the normal mouse movements.
+The application will save the size and position of windows and
+restore them when you reopen that window later.
+It will also store position and size of columns when you when
+those windows.
+Certain windows do not store column size and
+position because the columns depend of your selections.
+
 Selection of one or more entries is commonly done with the mouse.
-To select  selectthe Control key while you click it will add (or subtract) that single entry.
+Clicking on one row will result in only that row being selected
+(regardless of whether or not other rows are already selected).
+If you hold the Control key while you click, it will add (or subtract) that single entry.
 Control-clicking an entry will reverse the selection state of that entry.
-ion to multiple entries, hold down the shift key
-while you clielection to multiple entries, hold down the shift key
+To expand the selection to multiple entries, hold down the shift key
+while you click on another entry.That will add that entry
+and all entries between it and the original entry.
+If you hold down
 the Control key while you click it will add (or subtract) that single entry.
 Control-clicking an entry will reverse the selection state of that entry.
 
-Several menu actions will depend on whether or not a row is selected.
-Those actions will be disabled until one or more rows are selected. The state of
-the action will be visible when you pull down a menu (disabled actions are grayed out).
+Several menu actions will depend on whether a row is selected.
+Those actions will be disabled until one or more rows are selected.
+If an action is disabled, the menu item will be light grey.
+Enabled actions are darker.
 
-Clicking on a header entry will sort the entries by that column. Clicking
-again on that entry will sort the rows in the reverse order by that column.
-Position the mouse pointer on a column header and drag that header to a new
-position to reposition that column.
-Position the mouse pointer in the header line on the line between two columns
-and drag left or right to resize that columns.
-When you move or resize a column, that action will be saved and the column sizes
-and positions will be restored when you restart the program.
+Clicking on a header entry will sort the entries by that column.
+Clicking again on that header will sort the rows in the reverse order.
+Some windows and some columns do not allow sorting.
+Change column by positioning the mouse pointer on a column header
+and dragging that column to a new position.
+Position the mouse pointer in the header line
+on the line between two columns
+and drag left or right to resize those columns.
+In most windows, when you move or resize a column, that size and position
+will be saved and the values will be restored when you
+that window is next reopened.
 
 === The Main window
 The main window shows a list of all rosters that have been imported (the
@@ -81,6 +125,8 @@ If there are roster entries present, you may select one or more.
 Each row in the main window is roster that has been imported. The "Id" column is
 the number which has been assigned by the database to this roster. It has no
 importance other than to identify the roster to the database.
+This number will also show in other windows and will allow you
+to see which roster holds the specific decoder.
 
 The "System" column contains the name of the PC which created this row. If your
 database is not located on a network, the value will always be the same.
@@ -158,26 +204,29 @@ next time you show this window  (the view filters will not be restored).
 The ID is a an arbitrary number assigned by the database to represent this decoder. It has
 no particular meaning, but if you want to restore the original order, simply sort by this column.
 
-RosterId is database assigned identifier of the roster from which this entry came.
+RosterId is a database assigned identifier of the roster from which this entry came.
 If you selected multiple rosters to view (or chose to view ALL rosters), use this value to
 distinguish where this decoder entry came from.
 
 Address is the DCC address assigned to this decoder. It could be a long address or a short
 address (DecoderPro does not indicate which in the roster, but it can be significant to
-your command station/throttle combination if you want to select it).
+your command station/throttle combination
+if you want to select this locomotive).
 
 The "Speeds?" column shows whether or not this entry also has a speed profile associated with it.
 The Speed Profile is generated by PanelPro, by selected "Speed Profiling" from the Roster menu.
 You can select a locomotive and view the current profile from that window.
 Use that same window to generate a speed profile.
-The RrDecoder tool shows you if a decoder has had a speed profile generated.
+The Speed Profile is used by DecoderPro (or PanelPro) when
+running locomotives with automated tools such as Dispatcher.
 
 The "Details?" column shows if the details for the decoder have been read and added to the database.
-When you first import the roster.xml, the program only reads that one file.
-There is an additional file specific to this decoder
-(the name is contained in the next column), that has the details
-of the settings for the decoder. Reading that file can take a long time
-(from seconds to several minutes), depending on the size of the file.
+When you first import the roster.xml, the program only reads
+the roster.xml. Most of the detail is in
+the additional file specific to this decoder
+(the name is contained in the next column)Reading that file can take a long time
+(from seconds to several minutes), depending on the size of the file
+and the speed of your computer.
 Because of that potentially long delay, those files are not read until you specifically
 request that they be read. Select one or more decoders and choose File, Import Detail
 (or press Alt-I) to read the files belonging to the selected decoders.
@@ -188,7 +237,7 @@ Road Name (and Road Number) are the values entered in these fields when the XML 
 created (or last modified).
 
 
-Manufacturer is the value that was entered when the decoder was first entered into
+Manufacturer is the value entered when the decoder was first entered into
 DecoderPro. It is normally used to hold the manufacturer of the the locomotive
 (not the decoder).
 
@@ -228,9 +277,12 @@ numbers you wish to view.
 of all the selected decoders. If none of the selected decoders have speed
 profiles, you will see an empty window. When you run the speed profile in
 PanelPro, you can choose the starting speed step, the increment and the ending speed
-step for each locoomotive when you profile them, you will likely see a wide
-variation in rows of the display. The window will show the throttle percentage (as
-a decimal fraction), the speed step (from 1 to 126) and the recorded forward and
+step for each locomotive when you profile it.
+Thus it is likely you will likely see a wide
+variation in the data in the rows of the display.
+The window will show the throttle percentage (as
+a decimal fraction), the speed step (from 1 to 126)
+and the recorded forward and
 reverse speeds for each of the selected engines.
 
 * Graph Speed Profile will show the contents of Speed Profiles as a graph of their
@@ -244,10 +296,14 @@ Only function numbers that have an assigned label will be shown.
 You can change these assignments in DecoderPro by selecting an engine and
 choosing "Labels & Media".
 
-* View Key Value Pairs will show a list of all the keys assinged to the selected
-engines and the value of each. The keys reflect information that DecoderPro
-stores about each engine. Examples of this information include the Roster Group
-for the engine (if you are using that capability), and, if you are using
+* View Key Value Pairs will show a list of all the keys assigned
+to each selected
+engine and the value of that key.
+The keys reflect information that DecoderPro
+stores about each engine.
+Examples of this information include the Roster Group
+for the engine (if you are using that capability),
+and if you are using
 the Dispatcher to automatically run trains, information about the train
 and when it was last used.
 You can add additional keys by going to the "Labels & Media" menu item in
@@ -257,7 +313,7 @@ or add to the values shown here. They can also be shown in DecoderPro as columns
 
 * View Standard CV Contents shows a selected subset of CV values, arranged with CV values across the top for each of the selected locomotives. The NMRA assigned
 usage is shown with the CV number. This is a good view to be able to compare
-the basic CV values for
+the basic CV values for a
 long list of engines.
 
 * View Selected CV Contents shows values in a selected CV's in the same format as
@@ -272,9 +328,21 @@ for this view. The list is pre-sorted by CV numbers, with each set of indexes so
 by index, then ascending within that index.
 
 * CVs: is the field where you enter the specific CV numbers you want to view.
-For non-indexed CVs simply enter the CV number (from 0 to 255). Indexed CVs are
+For non-indexed CVs enter the CV number (from 0 to 255).
+Indexed CVs are
 specified as  group of two or three numbers seperated by a period. There are often two
 indexes. Seperate each set of CV numbers by a comma and a single (optional) space.
 Examples: 1, 2, 11,99, 0.252.257, 0.252.277, 1.0.257, 16.0.259, 16.0.448, 26.13.317
 
+===== Help
+
+At this point the Help menu does nothing.
+
+=== Data Windows
+
+All data windows have the same menu items: File and Help.
+File Print (Alt-P) prints the window shown.
+File Close (Alt-C) closes the window.
+
+include::Network.adoc[]
 

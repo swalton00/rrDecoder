@@ -4,10 +4,10 @@
 
 If you run H2 (The database software) and allow it to handle 
 requests from other systems beyond the machine on which it is
-running, you taking a risk. You should ensure that users 
+running, you are taking a risk. You should ensure that users
 from the outside world cannot connect to the the H2 server. 
 The most effective way to do that is to run it on a 
-network that is not connected to the outside world -- 
+network not connected to the outside world –
 a totally private network with no routers with external
 connections. Barring that, there are still some things 
 you can do to make sure that that it stays secure.
@@ -15,12 +15,14 @@ you can do to make sure that that it stays secure.
 * Insure that the port 9092 will not pass the edge router 
 (this is the port that H2 will open for connections).
 
-* Create the database(s) ahead of time and allow the network server to only connect to existing databases, and not create
+* Create the database(s) ahead of time and allow
+the network server to only connect to existing databases, and not create
 new ones via the network connection.
 
 * Restrict the network server to only connect to databases within a specific directory. 
 
-The first item is dependent on the configuration of your router and is not something that can be addressed here.
+The first item is dependent on the configuration of your router and
+is not something that can be addressed here.
 The other two items are determined by parameters you specify
 when you start the H2 as a server. More about this later.
 
@@ -28,7 +30,7 @@ when you start the H2 as a server. More about this later.
 ==== Background
 
 H2, the database software, is a pure Java application.
-The only item needed to run H2 is a Java jar nameded 
+The only item needed to run H2 is a Java jar named
 h2-<release>.jar. The rrDecoder distribution includes this
 file in the "lib" sub-directory of the distribution. The
 current release includes the h2-2.3.232.jar file, where
@@ -37,32 +39,33 @@ You could download the software from their website
 (https://www.h2database.com/html/main.html)
 where there is also a great deal of documentation, including
 a PDF with complete documentation on how to use SQL to
-query a database (You don't need to use SQL to 
-use the rrDecoder tool).
+query a database. You don't need to use SQL to
+use the rrDecoder tool.
 
 The H2 Java jar is an executable JAR file. The best
 way to run this is to open a command line window and
 navigate to the location where the H2 JAR is located.
-then, at the command line in that window, enter the 
+In the command line in that window, enter the
 command "java -jar h2-<release>.jar" A good shortcut, as long
 as you are at the command line in the directory where the 
 jar is located, is the to type "java -jar h2-" and then press
-the TAB key -- the command processor should finish the
-command with the complete name and you can then press the
+the TAB key – the command processor should finish the
+command with the complete name. Then you can press the
 ENTER key.
 
 When the H2 JAR file is executed, it open a browser window
-and act as a web server for your local machine. You 
+and runs as a web server for your local machine. You
 can then use that window to connect to any supported SQL 
 server and run queries. If you were simply to double-click
-on the jar, it would run it and bring up the Web page. 
+on the jar, it would run H2 as a web server and display the Web page.
 
 CAUTION: Do not run the server by simply double-clicking
-the JAR file. It will run correctly and answer queries 
+the JAR file.
+It will run correctly and answer queries
 as expected, but you will have no easy way of terminating
 the web server (even if you close the browser window, 
 the server will still be running in the background).
-If you have connected to a database, you may still be connected
+If you have connected to a database, you will still be connected
 to the database, even if you close the browser window.
 That would impact your ability to do other things with that 
 database and its associated files.
@@ -78,13 +81,17 @@ includes H2 and that application connects to H2
 with a URL (database locator) the includes the phrase
 "AUTO_SERVER=TRUE" in the URL, then that application
 *might* become the server. (The first application that connects
-this way becomes the server; suceeding applications
+this way becomes the server; succeeding applications
 are then clients. If the server terminates then
-another application will become the server). When the
-database is open, only that server can access it: the files are locked.
+another application will become the server).
+When the database is open,
+only that server can access it: the files are locked.
+If a another application wants connect to that database,
+it *MUST* include the "AUTO_SERVER_TRUE" in its URL
+or the connection will fail.
 
 To run H2 as a standalone server requires starting the JAR
-file with a Java command to specify the specify class to 
+file with a Java command to specify the specify the class to
 use as the entry point. The command to see a list of 
 availbale options would be:
 [source]
@@ -106,8 +113,8 @@ actually start the network database server:
 and shutdown scripts.
 . Copy the H2 jar into that directory
 . Create two script files to run H2:
-.. The start script: (start_h2.bat?) On Unix/Mac system
-these should be simply "start_h2" and then mark them
+.. The start script: (start_h2.bat) On Unix/Mac system
+these should be simply "start_h2" and be marked as
 executable with CHMOD.
 +
 [listing]
@@ -122,7 +129,9 @@ java -cp h2-2.3.232.jar org.h2.tools.Server
 The <directory> is the full path to the directory
 created above. The <shutdown password> will be used
 when you want to shut down the server.
-.. The shutdown script (stop_h2.bat?)
+.. The shutdown script (stop_h2.bat) will shutdown
+running H2 server. On Unix or Mac it should be simply
+stop_h2 and be marked as executable.
 +
 [listing]
 ---- 
@@ -131,12 +140,14 @@ java -cp h2-2.3.232.jar org.h2.tools.Server
     -tcpPassword <shutdown password>
 ----
 The <shutdown password> is the value used above. You 
-would use "tcp://localhost" if you the shutdown script on
+would use "tcp://localhost" if you run the shutdown script on
 the system where the server is running. Otherwise, 
 use the system name or IP address.
 . Create all databases that you will be connecting to.
-This will allow you prevent the newwork server from 
-creating databases (the "-ifExists" paramenter in the startup script). Do this by running a program with a connection 
+This will allow you prevent to the network server from
+creating databases (the "-ifExists" paramenter in the startup script).
+To create the database, you should use an application to
+connect to this server by
 using a URL in the form of:
 +
 [listing]
@@ -152,7 +163,7 @@ the values you will need later.
 You could use the rrDecoder software to create these,
 or you use any other software that understands Java
 type database connections. You can't use H2 as a webserver
-to do this becuase, by default, it will not create *NEW*
+to do this because, by default, it will not create *NEW*
 databases.
 
 ==== Connect to the server
@@ -164,20 +175,21 @@ should use a database URL of the form:
 ----
 jdbc:h2:tcp://<system>/<database
 ----
-The <system> is reference to the machine on which 
-the database server is running. For the same machine,
+The <system> is a reference to the machine on which
+the database server is running.
+If it running on the same machine as the database server,
 you can use "localhost". For other systems, use 
 either the IP address (this is usually of a form
-similar to "192.168.14.22", but numbers will be 
+similar to "192.168.14.22", but the numbers will be
 specific to the system on which the server is running.
 If you have a nameserver present on the network, you 
 can refer to the system by name. If you are not 
 running IPv4 on your network, you may need to use the
 IPv6 network address. To see the nework address 
-of the server on a Windows system, from a command line
+of the server on a Windows system, at a command line
 type "ipconfig" and press ENTER.
 That will show a list of network adapters and,
-for active adapter, show the various forms of network
+for the active adapter, show the various forms of network
 addresses for that system.
 
 ==== Starting and stopping the server
@@ -185,5 +197,23 @@ addresses for that system.
 Starting and stopping the server is quite simple.
 You could simply double click on the starting script.
 Or, open a command line, navigate to the directory
-where the script files are, and type starting script 
+where the script files are, and type the starting script
 name and press enter.
+
+To stop the server, run the shutdown script (double-click
+or at a command line). You must shutdown the server
+if you want to move the database or connect
+directly to it.
+
+=== Precautions when Using Networked Database
+
+If you use a network database to store you DecoderDB data,
+you should be careful to *ONLY* run the
+Import Details command from the system on which the
+roster.xml was first imported. If you attempt to
+do so, the import will likely fail.
+This remains true even if the roster is stored on
+a network resource such as DropBox or a NAS server.
+The file name stored in the database is the full path to
+the XML file most likely will be slightly different on a
+different system.
