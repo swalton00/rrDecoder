@@ -1,6 +1,6 @@
-=== Running the Database as a Network Server
+== Running the Database on a Network Server
 
-==== Precautions
+=== Precautions
 
 If you run H2 (The database software) and allow it to handle 
 requests from other systems beyond the machine on which it is
@@ -27,7 +27,7 @@ The other two items are determined by parameters you specify
 when you start the H2 as a server. More about this later.
 
 
-==== Background
+=== Background
 
 H2, the database software, is a pure Java application.
 The only item needed to run H2 is a Java jar named
@@ -89,6 +89,8 @@ only that server can access it: the files are locked.
 If a another application wants connect to that database,
 it *MUST* include the "AUTO_SERVER_TRUE" in its URL
 or the connection will fail.
+
+=== Setup
 
 To run H2 as a standalone server requires starting the JAR
 file with a Java command to specify the specify the class to

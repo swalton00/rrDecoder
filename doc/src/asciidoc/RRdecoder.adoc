@@ -344,5 +344,5 @@ All data windows have the same menu items: File and Help.
 File Print (Alt-P) prints the window shown.
 File Close (Alt-C) closes the window.
 
-include::Network.adoc[]
+include::src/asciidoc/Network.adoc[]
 
