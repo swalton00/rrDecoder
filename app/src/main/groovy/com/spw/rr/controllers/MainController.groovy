@@ -158,8 +158,12 @@ class MainController {
             log.debug("nothing selected - skipping import detail")
             return
         }
+        ArrayList importIds = new ArrayList()
+        rosterIds.each {
+            importIds.add(rosterIdList.get(it))
+        }
         worker.execute { ->
-            imports.importDetailRoster(model.baseFrame, rosterIds)
+            imports.importDetailRoster(model.baseFrame, importIds)
         }
     }
 

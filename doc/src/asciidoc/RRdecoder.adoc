@@ -165,7 +165,9 @@ cancel to cancel the import.
 
 ==== Importing Details
 When one or more rosters have been selected, the "Import Details" menu choice will be
-enabled. At this point, it would be best to defer importing details until you have
+enabled as long as all the selected rosters were imported by the current system.
+This would only not be the case if you were using a network database.
+At this point, it would be best to defer importing details until you have
 opened the roster and selected a small number of decoders. Importing the details
 can take a *VERY* long time, so it's best to do it in small increments a few decoders at a time
 
