@@ -209,7 +209,7 @@ directly to it.
 
 === Warning When Using a Networked Database
 
-If you use a network database to store you DecoderDB data,
+If you use a network database to store your DecoderDB data,
 you will be to run the Import Detail *ONLY* on the system
 on which the
 roster.xml was first imported.
