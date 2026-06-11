@@ -33,6 +33,7 @@ class PropsModel implements FocusListener {
     JTextField fieldSchema = new JTextField("")
     JTextField fieldLocation = new JTextField("")
     JTextField fieldDbName = new JTextField("")
+    JTextField fieldMessages = new JTextField("", 80)
     JRadioButton rbFile = new JRadioButton("Location")
     JRadioButton rbUrl = new JRadioButton("URL")
     JButton buttonCancel = new JButton("Cancel")

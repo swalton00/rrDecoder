@@ -73,6 +73,11 @@ class PropsController {
     def backgroundSave = { ->
         log.debug("validating the settings in ${tempSettings}")
         boolean goodSettings = database.validate(tempSettings)
+        if (!goodSettings) {
+            SwingUtilities.invokeLater {
+                model.fieldMessages.setText(database.getErrorMessage())
+            }
+        }
         settings = parentController.settings
         settings.settingsValid = goodSettings
         if (goodSettings) {
@@ -99,8 +104,9 @@ class PropsController {
                 if (settingsChanged) {
                     log.debug("settings have changed - will terminate to restart")
                     SwingUtilities.invokeAndWait {
-                        JOptionPane.showMessageDialog(null,
+                        JOptionPane.showMessageDialog(parentWidow,
                                 "Settings have changed - click to terminate and restart",
+                                "Message",
                         JOptionPane.WARNING_MESSAGE)
                         System.exit(4)
                     }

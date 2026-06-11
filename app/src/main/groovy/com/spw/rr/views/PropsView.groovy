@@ -112,6 +112,8 @@ class PropsView {
             model.buttonSave.setEnabled(false)
         }
         thisWindow.getContentPane().add(model.buttonSave, "wrap")
+        thisWindow.add(new JLabel("Message:"))
+        thisWindow.add(model.fieldMessages)
         model.buttonSave.addActionListener(controller.saveAction)
         FrameHelper.setFrameValues(thisWindow, "prefs", 500, 400)
         model.fieldURL.addFocusListener(model)

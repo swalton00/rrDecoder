@@ -179,7 +179,7 @@ jdbc:h2:tcp://<system>/<database
 ----
 The <system> is a reference to the machine on which
 the database server is running.
-If it running on the same machine as the database server,
+If it is running on the same machine as the database server,
 you can use "localhost". For other systems, use 
 either the IP address (this is usually of a form
 similar to "192.168.14.22", but the numbers will be
@@ -207,15 +207,17 @@ or at a command line). You must shutdown the server
 if you want to move the database or connect
 directly to it.
 
-=== Precautions when Using Networked Database
+=== Warning When Using a Networked Database
 
 If you use a network database to store you DecoderDB data,
-you should be careful to *ONLY* run the
-Import Details command from the system on which the
-roster.xml was first imported. If you attempt to
-do so, the import will likely fail.
-This remains true even if the roster is stored on
+you will be to run the Import Detail *ONLY* on the system
+on which the
+roster.xml was first imported.
+The program will not enable Import Detail if
+the System name does not match the name of the
+system you are running on.
+This is true even if the roster is stored on
 a network resource such as DropBox or a NAS server.
 The file name stored in the database is the full path to
-the XML file most likely will be slightly different on a
-different system.
+the XML file most likely will be slightly different
+if you are on a different system.

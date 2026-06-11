@@ -126,7 +126,7 @@ class ImportService {
                 newVersion.version = labelVersion.version + 1
             }
         }
-        log.info("functionLabelSize is ${functionLabelSize}")
+        log.debug("functionLabelSize is ${functionLabelSize}")
         for (labelEntry in 0..<functionLabelSize) {
             log.info("LabelEntry (index) is ${labelEntry}")
             log.debug("this function label entry has ${entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList.'functionlabels'.functionlabel[labelEntry].text()}")

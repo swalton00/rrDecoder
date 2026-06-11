@@ -32,9 +32,22 @@ class DatabaseServices {
     SqlSessionFactory sqlSessionFactory
     SqlSession session
 
+    String errorMessage
+    boolean errorFound = false
+
 
     boolean validate(Settings settings) {
         validate(settings.userid, settings.password, settings.schema, settings.url)
+    }
+
+    String getErrorMessage() {
+        log.debug("getting the last error message")
+        if (!errorFound) {
+            log.info("last error was requested but no previous error - returning empty string")
+            return ""
+        }
+        errorFound = false
+        return errorMessage
     }
 
     boolean validate(String userid, String password, String schema, String url) {
@@ -43,6 +56,8 @@ class DatabaseServices {
         String tempURL = url
         if (tempURL.contains(";SCHEMA=")) {
             log.error("URL should not contain SCHEMA")
+            errorFound = true
+            errorMessage = "URL Should not contain Schema"
             return false
         }
         log.debug("using a schema of ${schema} in the validator")
@@ -110,7 +125,9 @@ class DatabaseServices {
                 }
         } catch (Exception e) {
             log.error("exception working with the database", e)
-            throw new RuntimeException("exception working with the database")
+            errorMessage = e.getMessage()
+            errorFound = true
+          //  throw new RuntimeException("exception working with the database")
         } finally {
             if (conn != null) {
                 log.debug("closing connection")
