@@ -98,8 +98,10 @@ class PropsController {
             SwingUtilities.invokeLater {
                 view.thisWindow.setVisible(false)
             }
-            if (!settings.databaseOpen) {
+            if (!settings.settingsComplete) {
                 log.debug("database is not open, completing settings")
+                database.dbStart(settings)
+                parentController.completeInit()
             } else {
                 if (settingsChanged) {
                     log.debug("settings have changed - will terminate to restart")
