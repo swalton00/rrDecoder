@@ -1,26 +1,28 @@
 
 ALTER TABLE cvValues ALTER COLUMN cvNumber SET NOT NULL ;
 
-ALTER TABLE cvValues ADD CONSTRAINT cvVal_uniq UNIQUE (decoderId, CvNumber);
+ALTER TABLE cvValues ADD CONSTRAINT IF NOT EXISTS cvVal_uniq UNIQUE (decoderId, CvNumber);
 
-ALTER TABLE decoder ADD CONSTRAINT decId_uniq UNIQUE (decoderId);
+ALTER TABLE decoder ADD CONSTRAINT IF NOT EXISTS decId_uniq UNIQUE (rosterid, decoderId);
 
-CREATE TABLE cv_versions
+
+
+CREATE TABLE IF NOT EXISTS cv_versions
 (
     decoderId INT          NOT NULL,
     cvVersion INT          NOT NULL,
-    changeTIme TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+    changeTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
     CONSTRAINT cv_ver_uni UNIQUE (decoderId, cvVersion),
     CONSTRAINT cv_ver_pri_key PRIMARY KEY (decoderId, cvVersion),
-    CONSTRAINT cv_ver_for_cvNumber FOREIGN KEY (decoderId) REFERENCES decoder (decoderId) ON DELETE CASCADE
+    CONSTRAINT cv_ver_for_cvNumber FOREIGN KEY (decoderId) REFERENCES decoder (Id) ON DELETE CASCADE
 );
 
-ALTER TABLE DECODER ADD COLUMN cvVersion INT NOT NULL DEFAULT 0;
-ALTER TABLE DECODER ADD COLUMN labelVersion INT NOT NULL DEFAULT 0;
-ALTER TABLE DECODER ADD COLUMN functionVersion INT NOT NULL DEFAULT 0;
-ALTER TABLE DECODER ADD COLUMN keyVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN IF NOT EXISTS cvVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN IF NOT EXISTS labelVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN IF NOT EXISTS functionVersion INT NOT NULL DEFAULT 0;
+ALTER TABLE DECODER ADD COLUMN IF NOT EXISTS keyVersion INT NOT NULL DEFAULT 0;
 
-CREATE TABLE savedCVvals
+CREATE TABLE IF NOT EXISTS savedCVvals
 (
     decoderId INT   NOT NULL ,
     cvNumber  VARCHAR(255) NOT NULL ,
@@ -43,18 +45,31 @@ ALTER TABLE roster ALTER COLUMN dateupdated
     DROP NOT NULL;
     
 ALTER TABLE Decoder 
-    ADD COLUMN Shunt VARCHAR(16);
+    ADD COLUMN IF NOT EXISTS Shunt VARCHAR(16);
 
 ALTER TABLE
-    FunctionLabels ADD column Label_Version INTEGER;
+    FunctionLabels ADD column IF NOT EXISTS Label_Version INTEGER;
 
 ALTER TABLE
-    functionlabels ADD column locked BOOLEAN;
+    functionlabels ADD column IF NOT EXISTS locked BOOLEAN;
+    
+    DELETE
+FROM
+    functionlabels a
+WHERE
+    a.id <
+    (   SELECT
+            MAX(id)
+        FROM
+            functionlabels b
+        WHERE
+            a.decoderid = b.decoderid
+        AND a.functionnumber = b.functionnumber);
 
 ALTER TABLE
-    functionlabels ADD CONSTRAINT lab_unique UNIQUE (decoderid, functionnumber);
+    functionlabels ADD CONSTRAINT IF NOT EXISTS lab_unique UNIQUE (decoderid, functionnumber);
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     label_versions
 (
     decoderid      INTEGER NOT NULL,
@@ -62,12 +77,12 @@ CREATE TABLE
     version_time   TIMESTAMP NOT NULL,
     CONSTRAINT label_ver_primary PRIMARY KEY (decoderid, version_number),
     CONSTRAINT label_ver_foreign FOREIGN KEY (decoderid) REFERENCES
-        decoder (decoderid) ON
+        decoder (id) ON
         DELETE
         CASCADE
 );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     saved_Labels
 (
     decoderid      INTEGER NOT NULL,
@@ -83,11 +98,24 @@ CREATE TABLE
 );
 
 ALTER TABLE
-    keyvalues ADD column key_version CHARACTER VARYING(25);
-ALTER TABLE
-    keyvalues ADD CONSTRAINT key_unique UNIQUE (decoderid, pair_key);
+    keyvalues ADD column IF NOT EXISTS key_version CHARACTER VARYING(25);
+DELETE
+FROM
+    keyvalues a
+WHERE
+    a.id <
+    (   SELECT
+            MAX(id)
+        FROM
+            keyvalues b
+        WHERE
+            a.decoderid = b.decoderid
+        AND a.pair_key = b.pair_key);
 
-CREATE TABLE
+ALTER TABLE
+    keyvalues ADD CONSTRAINT IF NOT EXISTS KEY_VALUE_DEC_PAIR_UNIQUE UNIQUE (decoderid, pair_key);
+
+CREATE TABLE IF NOT EXISTS
     saved_keys
 (
     decoderId      INTEGER NOT NULL,
@@ -101,7 +129,7 @@ CREATE TABLE
         CASCADE
 );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     key_versions
 (
     decoderid    INTEGER NOT NULL,
@@ -110,9 +138,9 @@ CREATE TABLE
     CONSTRAINT key_ver_unique UNIQUE (decoderid, version),
     CONSTRAINT key_ver_primary PRIMARY KEY (decoderid, version),
     CONSTRAINT key_ver_foreign FOREIGN KEY (decoderid) REFERENCES decoder
-        (decoderid) ON
+        (id) ON
         DELETE
         CASCADE
 );
 
-UPDATE DB_VERSION set  MINOR = 3 WHERE id = 1;
+UPDATE DB_VERSION set  MINOR = 3, TABLE_COUNT = 12 WHERE id = 1;
