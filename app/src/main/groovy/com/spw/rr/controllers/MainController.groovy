@@ -58,12 +58,14 @@ class MainController {
         if (!settings.settingsValid | !settings.settingsComplete) {
             log.debug("don't have a valid settings yet - going directly to prefs")
             createProps()
+        } else {
+            completeInit()
         }
-
-        completeInit()
     }
 
     void completeInit() {
+        log.debug("setting initializationComplete to true")
+        settings.initializationComplete = true
         if (settings.databaseOpen) {
             log.debug("loading the data for the main view")
             List<RosterEntry> entries = databaseServices.listRosters()

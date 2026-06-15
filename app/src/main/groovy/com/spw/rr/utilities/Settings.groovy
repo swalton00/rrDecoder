@@ -11,6 +11,7 @@ class Settings {
     boolean settingsComplete = false
     boolean settingsValid = false
     boolean databaseOpen = false
+    boolean initializationComplete = false
 
     private static final String NAME_URL = "URL"
     private static final String NAME_USERID = "Userid"
