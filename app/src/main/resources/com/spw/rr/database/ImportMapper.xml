@@ -90,4 +90,10 @@
                 #{locked}
                    )
     </insert>
+    <delete id="deleteOldLabels" parameterType="DecoderEntry">
+        DELETE FROM FUNCTIONLABELS WHERE decoderId = #{id}
+    </delete>
+    <delete id="deleteOldKeys" parameterType="DecoderEntry">
+        DELETE FROM KEYVALUES  WHERE decoderId = #{id}
+    </delete>
 </mapper>

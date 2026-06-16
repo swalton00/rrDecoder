@@ -79,17 +79,17 @@ class ImportService {
 
     /**
      * Check to see if the object has changed, if so, populate the new SaverObject
-     * @param hash  the hashtable created by the saverSetup
-     * @param item  the new item - has it changed?
-     * @param newVersion    the new version record, in case it has
-     * @param newSaver      a new saver item to populate if it changed
+     * @param hash the hashtable created by the saverSetup
+     * @param item the new item - has it changed?
+     * @param newVersion the new version record, in case it has
+     * @param newSaver a new saver item to populate if it changed
      * @return
      */
     SaverBase saverCheck(Hashtable<String,
             SaverObject> hash,
-            SaverObject item,
-            AbstractVersion newVersion,
-            SaverBase newSaver) {
+                         SaverObject item,
+                         AbstractVersion newVersion,
+                         SaverBase newSaver) {
         SaverObject oldItem = hash.get(item.getKey())
         newSaver.version = newVersion.version
         newSaver.decoderId = item.decoderId
@@ -103,12 +103,13 @@ class ImportService {
     void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
         log.debug("Processing the labels for id ${decoderId} and entry ${decoderEntry}")
         int functionLabelSize = entryList.'functionlabels'.functionlabel.size()
-        boolean createdVersion = false
-        LabelVersion newLabelVersion = new LabelVersion()
-        newLabelVersion.decoderId = decoderId
-        ArrayList<FunctionLabel> existing = importDb.getFunctionLabelsFor(decoderId)
-        boolean addNewFunctionLabels = false
-        Hashtable<String, SaverObject> hash = saverSetup(existing)
+        database.deleteOldLabels(decoderEntry)
+        /*boolean createdVersion = false
+        //LabelVersion newLabelVersion = new LabelVersion()
+        //newLabelVersion.decoderId = decoderId
+        //ArrayList<FunctionLabel> existing = importDb.get/FunctionLabelsFor(decoderId)
+        //boolean addNewFunctionLabels = false
+        //Hashtable<String, SaverObject> hash = saverSetup(existing)
         LabelVersion newVersion
         LabelVersion labelVersion
         if (existing.size() == 0) {
@@ -125,8 +126,9 @@ class ImportService {
             } else {
                 newVersion.version = labelVersion.version + 1
             }
-        }
+        }*/
         log.debug("functionLabelSize is ${functionLabelSize}")
+
         for (labelEntry in 0..<functionLabelSize) {
             log.info("LabelEntry (index) is ${labelEntry}")
             log.debug("this function label entry has ${entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList.'functionlabels'.functionlabel[labelEntry].text()}")
@@ -142,28 +144,27 @@ class ImportService {
                 funcLab.locked = false
             }
             log.debug("new function label is ${funcLab}")
-            if (addNewFunctionLabels) {
-                database.insertFunctionLabel(funcLab)
-            } else {
-                SavedLabel newSavedLabel = new SavedLabel()
-                newSavedLabel = saverCheck(hash, funcLab, newVersion, newSavedLabel)
-                if (newSavedLabel != null) {
-                    if (!createdVersion) {
-                        createdVersion = true
-                        decoderEntry.labelVersion = newVersion.version
-                        importDb.writeLabelVersion(newVersion)
-                        createdVersion = true
-                    }
-                    newSavedLabel.locked = funcLab.locked
-                    FunctionLabel oldLabel = (FunctionLabel)hash.get(funcLab.getKey())
-                    newSavedLabel.functionNumber = funcLab.functionNum
-                    if (!(oldLabel == null)) {
-                        newSavedLabel.locked = oldLabel.locked
-                        newSavedLabel.saved_label = oldLabel.functionLabel
-                    }
-                    importDb.writeSavedLabel(newSavedLabel)
-                }
-            }
+/*            if (addNewFunctionLabels) {*/
+            database.insertFunctionLabel(funcLab)
+            /*       } else {
+                /* SavedLabel newSavedLabel = new SavedLabel()
+                    newSavedLabel = saverCheck(hash, funcLab, newVersion, newSavedLabel)
+                    if (newSavedLabel != null) {
+                        if (!createdVersion) {
+                            createdVersion = true
+                            decoderEntry.labelVersion = newVersion.version
+                            importDb.writeLabelVersion(newVersion)
+                            createdVersion = true
+                        }
+                        newSavedLabel.locked = funcLab.locked
+                        FunctionLabel oldLabel = (FunctionLabel)hash.get(funcLab.getKey())
+                        newSavedLabel.functionNumber = funcLab.functionNum
+                        if (!(oldLabel == null)) {
+                            newSavedLabel.locked = oldLabel.locked
+                            newSavedLabel.saved_label = oldLabel.functionLabel
+                        }
+                        importDb.writeSavedLabel(newSavedLabel)*/
+
         }
     }
 
@@ -219,7 +220,7 @@ class ImportService {
                 if (rosterFound) {
                     DecoderEntry previous = existingList.get(entryList[i].'@id'.text())
                     if (previous != null) {
-                        if (newEntry.decoderTypeId != previous.decoderTypeId)  {
+                        if (newEntry.decoderTypeId != previous.decoderTypeId) {
                             existingList.remove(newEntry.decoderId)
                             log.info("Decoder type was changed for entry ${previous.decoderId} with DCC address ${previous.dccAddress}")
                             // since type was changed, we need to delete the old (to delete all dependents) and the reinsert
@@ -251,6 +252,10 @@ class ImportService {
                 }
                 int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
                 log.debug("key value size is ${keyValuesSize}")
+                if (decoderExists) {
+                    log.debug("Deleting old keyValues entries")
+                    database.deleteOldKeyValues(newEntry)
+                }
                 if (keyValuesSize > 0) {
                     Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
                     for (j in 0..<keyValuesSize) {
@@ -282,7 +287,7 @@ class ImportService {
             }
             if (rosterFound && existingList.size() > 0) {
                 log.debug("still have some old existing decoder entries -- removing them -- ${existingList.size()}")
-                existingList.each {entry ->
+                existingList.each { entry ->
                     DecoderEntry currentEntry = existingList.get(entry.key)
                     database.beginTransaction()
                     log.debug("this entry is ${currentEntry}")
@@ -294,7 +299,8 @@ class ImportService {
                 thisEntry.dateUpdated = dbTime
                 importDb.updateRosterEntry(thisEntry)
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("Caught an exception working with the import", e)
             database.rollbackAll()
         } finally {
@@ -305,7 +311,7 @@ class ImportService {
             }
             importTime.stop()
         }
-        log.debug("there are ${arraySize} entries in this roster - releasing the lock")
+        log.debug(" there are  ${arraySize} entries in this roster - releasing the lock ")
         thisEntry.decCount = arraySize
         importLock.release()
         return thisEntry
@@ -382,23 +388,23 @@ class ImportService {
             Date date = dateFormat.parse(dateValue)
             return new Timestamp(date.getTime())
         } catch (ParseException ex) {
-            log.debug("data parse exception -- trying SimpleDateFormat")
+            log.debug("data parse exception -- trying SimpleDateFormat", ex)
             try {
 
                 return new Timestamp(DateFormat.getTimeInstance().parse(dateValue).getTime())
                 return retVal
             } catch (ParseException ex2) {
-                log.debug("that didn't work -- trying custom format")
+                log.debug("that didn't work -- trying custom format", ex2)
                 DateFormat customFmt = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a");
                 try {
                     return new Timestamp(customFmt.parse(dateValue).getTime())
                 } catch (ParseException ex3) {
 // then try with a specific format to handle e.g. "01-Oct-2016 9:13:36"
-                    customFmt = new SimpleDateFormat("dd-MMM-yyyy hh:mm:ss");
+                    customFmt = new SimpleDateFormat("dd-MMM-yyyy hh:mm:ss")
                     return new Timestamp(customFmt.parse(dateValue))
                 }
             } catch (IllegalArgumentException ex2) {
-                log.error("Illegal argument for DateUpdated -- setting to current date")
+                log.error("Illegal argument for DateUpdated -- setting to current date", ex2)
             }
         }
         return new Timestamp(new Date().getTime())
@@ -449,7 +455,7 @@ class ImportService {
             if (fileFound) {
                 monitor.setIntermediateProgress(3, "Parse XML File", "Step 3 of 5")
                 log.debug("found roster xml for id ${decoderEntry.id}")
-                groovy.util.XmlSlurper slurper = new groovy.util.XmlSlurper()
+                XmlSlurper slurper = new XmlSlurper()
                 slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
                 slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
                 def decoderXML = slurper.parseText(decoderText)

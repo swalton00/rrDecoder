@@ -316,6 +316,24 @@ class DatabaseServices {
         return newValue
     }
 
+    void deleteOldKeyValues(DecoderEntry decoderEntry) {
+        log.debug("delete all keyValues for this decoder")
+        if (session == null) {
+            throw new RuntimeException("attempting to run delete old Key Values outside of a transaction")
+        }
+        ImportMapper map = session.getMapper(ImportMapper.class)
+        map.deleteOldKeys(decoderEntry)
+    }
+
+    void deleteOldLabels(DecoderEntry decoderEntry) {
+        log.debug("delete all Labels for this decoder")
+        if (session == null) {
+            throw new RuntimeException("attempting to run delete old Labels  outside of a transaction")
+        }
+        ImportMapper map = session.getMapper(ImportMapper.class)
+        map.deleteOldLabels(decoderEntry)
+    }
+
     KeyValuePairs insertKeyValuePair(KeyValuePairs kvp) {
         log.debug("adding a new KeyValuePair: ${kvp}")
         if (session == null) {
@@ -353,7 +371,7 @@ class DatabaseServices {
     CvValues insertCVs(CvValues cVvalues) {
         log.debug("adding new CV value: ${cVvalues} for a transaction")
         if (session == null) {
-            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
+            throw new RuntimeException("attempting to insert a new CV outside a transaction")
         }
         Mapper mapper = session.getMapper(Mapper.class)
         mapper.insertCVs(cVvalues)
