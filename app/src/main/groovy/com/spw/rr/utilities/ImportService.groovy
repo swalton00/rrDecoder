@@ -47,7 +47,18 @@ class ImportService {
 
     public static String getSystemName() {
         log.debug("getting System name")
-        return System.getenv("COMPUTERNAME")
+        String systemName = System.getenv("COMPUTERNAME")
+        log.debug("System name found was ${systemName}")
+        if (systemName != null) {
+            return systemName
+        }
+        try {
+            systemName = java.net.InetAddress.getLocalHost().getHostName()
+        } catch (UnknownHostException e) {
+            log.error("Unknown hostname", e)
+            systemName = "*Unknown*"
+        }
+        return systemName
     }
 
 
@@ -130,7 +141,7 @@ class ImportService {
         log.debug("functionLabelSize is ${functionLabelSize}")
 
         for (labelEntry in 0..<functionLabelSize) {
-            log.info("LabelEntry (index) is ${labelEntry}")
+            log.debug("LabelEntry (index) is ${labelEntry}")
             log.debug("this function label entry has ${entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList.'functionlabels'.functionlabel[labelEntry].text()}")
             FunctionLabel funcLab = new FunctionLabel()
             funcLab.decoderId = decoderEntry.id
@@ -177,16 +188,19 @@ class ImportService {
         dbTime = importDb.getCurrentDbTime()
         Timestamp rosterUpdate = new Timestamp(rosterFile.lastModified())
         String rosterText = rosterFile.text
-        def rosterValues = new XmlSlurper().parseText(rosterText)
-        int arraySize = rosterValues.roster.locomotive.size()
-        def entryList = rosterValues.roster.locomotive
-        ProgressMonitor monitor = new ProgressMonitor(parent, "Importing Decoders", "Reading XML", 0, 1)
-        buildDecoderList()
-        RosterEntry thisEntry = getRosterEntry(rosterFile.path)
-        boolean rosterFound = false
-        HashMap<String, DecoderEntry> existingList = null
         Log4JStopWatch importTime = new Log4JStopWatch("import", "Starting the import")
+        ProgressMonitor monitor = new ProgressMonitor(parent, "Importing Decoders", "Reading XML", 0, 1)
+        int arraySize = 0
+        RosterEntry thisEntry = null
         try {
+            def rosterValues = new XmlSlurper().parseText(rosterText)
+            arraySize = rosterValues.roster.locomotive.size()
+            def entryList = rosterValues.roster.locomotive
+            buildDecoderList()
+            thisEntry = getRosterEntry(rosterFile.path)
+            boolean rosterFound = false
+            HashMap<String, DecoderEntry> existingList = null
+
             if (thisEntry == null) {
                 log.debug("roster not found -- adding new")
                 thisEntry = new RosterEntry()
@@ -304,6 +318,7 @@ class ImportService {
             log.error("Caught an exception working with the import", e)
             database.rollbackAll()
         } finally {
+            importLock.release()
             log.trace("closing the progress monitor")
             SwingUtilities.invokeLater {
                 monitor.setProgress(arraySize)
@@ -313,7 +328,6 @@ class ImportService {
         }
         log.debug(" there are  ${arraySize} entries in this roster - releasing the lock ")
         thisEntry.decCount = arraySize
-        importLock.release()
         return thisEntry
     }
 
@@ -458,10 +472,10 @@ class ImportService {
                 XmlSlurper slurper = new XmlSlurper()
                 slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
                 slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-                def decoderXML = slurper.parseText(decoderText)
                 try {
                     Log4JStopWatch individualStopWatch = new Log4JStopWatch("details1", "decoder id = ${decoderId}")
                     database.beginTransaction()
+                    def decoderXML = slurper.parseText(decoderText)
                     int varSize = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'.size()
                     // clean out any old CV values and DecoderDef rows first
 

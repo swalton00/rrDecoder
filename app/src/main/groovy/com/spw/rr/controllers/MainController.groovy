@@ -14,6 +14,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.JFileChooser
+import javax.swing.JOptionPane
 import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
 import javax.swing.table.DefaultTableCellRenderer
@@ -131,9 +132,21 @@ class MainController {
         log.debug("import requested")
         JFileChooser chooser = new JFileChooser()
         chooser.setDialogTitle("Select appropriate roster.xml")
+        chooser.setFileHidingEnabled(false)
         int retVal = chooser.showOpenDialog(null)
         if (retVal == JFileChooser.APPROVE_OPTION) {
             chosen = chooser.getSelectedFile()
+            if (!chosen.getName().equals("roster.xml")) {
+                JOptionPane.showOptionDialog(model.baseFrame,
+                        "You must select a 'roster.xml' file - click okay to finish",
+                        "Error - wrong file",
+                        JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.WARNING_MESSAGE,
+                        null,
+                null,
+                null)
+                return
+            }
             worker.execute(importBackgrounnd)
         }
 

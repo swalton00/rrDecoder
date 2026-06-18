@@ -1,9 +1,15 @@
 package com.spw.rr.utilities
 
+import groovy.util.logging.Log4j
+
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Log4j
 class CvNameComparator implements Comparator {
+    boolean leftErrorPending = true
+    boolean rightErrorPending = true
+
     private static int getValidCount(Matcher matcher) {
         if (matcher.group(3) != null) {
             return 3
@@ -66,13 +72,28 @@ class CvNameComparator implements Comparator {
         Matcher leftMatch = regExPatt.matcher(left)
 
         if (!leftMatch.matches()) {
-            throw new NotACvNameException("Left parameter must match a the CV name pattern")
+            if (leftErrorPending) {
+                log.info("Non-matching left CV value - ${left}")
+                leftErrorPending = false
+            }
+            if (left.toString() < right.toString()) {
+                return -1
+            } else {
+                return +1
+            }
         }
         Matcher rightMatch = regExPatt.matcher((String)right)
         if (!rightMatch.matches()) {
-            throw new NotACvNameException("Right parameter must match the CV name pattern")
+            if (rightErrorPending) {
+                log.info("Non-matching right CV value ${right}")
+                rightErrorPending = false
+            }
+            if (left.toString() < right.toString()) {
+                return -1
+            } else {
+                return +1
+            }
         }
-
         int leftCount = getValidCount(leftMatch)
         int rightCount = getValidCount(rightMatch)
         if (leftCount < rightCount) {
