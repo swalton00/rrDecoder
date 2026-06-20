@@ -319,8 +319,10 @@ the basic CV values for a
 long list of engines.
 
 * View Selected CV Contents shows values in a selected CV's in the same format as
-the "View Standard CV Contents" but for CV numbers that you have selected. This
-menu item will be disabled until you enter a valid list of CV numbers in the field
+the "View Standard CV Contents" but for CV numbers that you have selected.
+If a selected decoder does not implement a specific CV identifer, the value
+field will be empty for that identifier.
+This menu item will be disabled until you enter a valid list of CV numbers in the field
 labeled "CVs: "
 
 * View All CV Contents will show all CV numbers for the selected engines. Since the
@@ -331,9 +333,12 @@ by index, then ascending within that index.
 
 * CVs: is the field where you enter the specific CV numbers you want to view.
 For non-indexed CVs enter the CV number (from 0 to 255).
-Indexed CVs are
-specified as  group of two or three numbers seperated by a period. There are often two
-indexes. Seperate each set of CV numbers by a comma and a single (optional) space.
+Some decoders may include letters in the CV number value. You can copy
+a value from the View All CV Centers window to serve as a pattern for
+complicated CV identifiers.
+Indexed CVs are usually
+specified as a group of two or three values seperated by a period. There are often two
+indexes. Seperate each set of CV numbers by a comma and a perhaps spaces.
 Examples: 1, 2, 11,99, 0.252.257, 0.252.277, 1.0.257, 16.0.259, 16.0.448, 26.13.317
 
 ===== Help

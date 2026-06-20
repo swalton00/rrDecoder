@@ -67,9 +67,11 @@ class DecModel extends RrBaseModel implements  FocusListener {
     }
 
     boolean testCvList() {
-        Pattern regexPattern = Pattern.compile("[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}(?:\\,\\s{0,2}[\\d]{1,4}(?:\\.[\\d]{1,3}){0,2}){0,15}+\$")
-        Matcher match = regexPattern.matcher(cvListField.getText())
-        return match.matches()
+        if (!cvListField.getText().isBlank()) {
+            return true
+        } else {
+            return false
+        }
     }
 
     @Override

@@ -93,6 +93,8 @@ class DataView {
             model.theTable.getColumnModel().getColumn(i).setCellRenderer(rightRenderer)
             model.theTable.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer)
         }
+        model.theTable.setCellSelectionEnabled(true)
+        model.theTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
         JScrollPane scrollPane = new JScrollPane(model.theTable)
         model.dialog.getContentPane().add(scrollPane, "grow")
         FrameHelper.setFrameValues(model.dialog, viewName, D_WIDTH, D_HEIGHT)
