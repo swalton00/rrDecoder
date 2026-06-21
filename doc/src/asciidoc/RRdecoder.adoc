@@ -11,22 +11,22 @@ this tool). The tool provides several ways to view the data.
 These include several ways to view CV values (and
 compare those values between locomotives).
 You can also view the labels applied to Functions Keys.
-If you are using Speed Profiles you can also view these
+If you are using Speed Profiles, you can also view these
 as either graphs or view the raw data.
 
 == Installation
 
-The Software is distributed in a zip file including all the needed required software (except Java itself). You
-need Java version 11 or later to run it (the same as JMRI). Unzip the the software into an empty directory.
+The Software is distributed in a zip file including all the required software (except Java itself). You
+need Java version 11 or later to run it (the same as JMRI). Unzip the software into an empty directory.
 It will create several directories (including one called "decoderDB").
 Inside that folder, you will find a folder called "bin". That folder
 contains files
 called "app.bat" and "app". The "app.bat" file is for Windows
 and the "app" file is for Mac and Unix.
-In Windows you may double click on the app.bat
+In Windows, you may double-click on the app.bat
 file and it will run the application.
 You can also run it from a command
-line by navigating to directory, typeing "app.bat" and pressing Enter.
+line by navigating to the directory, typing "app.bat" and pressing Enter.
 
 With Windows you can use a shortcut to make it
 easier to access the application.
@@ -34,16 +34,17 @@ Create a shortcut by right-clicking on an empty space on your desktop.
 In the resulting menu, choose New and select "Shortcut".
 A properties menu will open and you can type the full path
 to the "app.bat" file (including the name), or use "Browse" to
-locate the file and click on it it.
+locate the file and click on it.
 
 === First Usage
-The first time you run the application you will need to provide some values to be used for the database.
-These values will be saved, so you will only need to provide them once. You can change them later, if you want
+The first time you run the application, you will need to provide some values to be used for the database.
+These values will be saved, so you will only need to provide them once.
+You can change them later if you want to
 (though that will force you to reimport your data).
 
 The database requires a userid and password. Since the database will be created after you have entered all
 the values, the userid id and password are your choice (the first usage sets them). The values are saved
-in an insecure manner so don't repeat these from another application. Security is not an issue with this
+in an insecure manner, so don't repeat these from another application. Security is not an issue with this
 application because it's only accessible from the local machine and the database doesn't hold any
 financially significant data.
 Select a userid and password. You will need to know these
@@ -56,9 +57,9 @@ part individually. If you enter the parts, the full URL will be automatically po
 The three parts required are: database location, name and the schema for the decoder data.
 The easiest method to select the location is to use the "Choose Location" button and select an empty
 directory.
-The database name is flexible, but must be at least three characters
+The database name is flexible but must be at least three characters
 long, beginning with a letter and
-contain only letters, numbers and possibly underscores.
+must contain only letters, numbers and possibly underscores.
 The final choice is for the schema to use for the tables
 in the database (I used "decoder" for mine).
 You can use any word (beginning with a letter, and containing only
@@ -67,7 +68,7 @@ letters and numbers).
 Once all the values have been entered, the "Save New Settings" button will be enabled. When you click on
 that button, all the settings will be validated and, if all are good, the values will be saved and you
 will see the main window. If there are any errors, you should
-see an error message at the bottow of the window and the
+see an error message at the bottom of the window, and the
 Save button will again be disabled until you change a value.
 
 == Using Decoder Database
@@ -80,18 +81,18 @@ The standard window actions to move or resize windows use
 the normal mouse movements.
 The application will save the size and position of windows and
 restore them when you reopen that window later.
-It will also store position and size of columns when you when
+It will also store the position and size of columns when you when
 those windows.
 Certain windows do not store column size and
-position because the columns depend of your selections.
+position because the columns depend on your selections.
 
 Selection of one or more entries is commonly done with the mouse.
 Clicking on one row will result in only that row being selected
-(regardless of whether or not other rows are already selected).
+(regardless of whether other rows are already selected).
 If you hold the Control key while you click, it will add (or subtract) that single entry.
 Control-clicking an entry will reverse the selection state of that entry.
 To expand the selection to multiple entries, hold down the shift key
-while you click on another entry.That will add that entry
+while you click on another entry. That will add that entry
 and all entries between it and the original entry.
 If you hold down
 the Control key while you click it will add (or subtract) that single entry.
@@ -99,7 +100,7 @@ Control-clicking an entry will reverse the selection state of that entry.
 
 Several menu actions will depend on whether a row is selected.
 Those actions will be disabled until one or more rows are selected.
-If an action is disabled, the menu item will be light grey.
+If an action is disabled, the menu item will be light gray.
 Enabled actions are darker.
 
 Clicking on a header entry will sort the entries by that column.
@@ -122,10 +123,10 @@ If there are roster entries present, you may select one or more.
 
 ==== The Main Window Contents
 
-Each row in the main window is roster that has been imported. The "Id" column is
-the number which has been assigned by the database to this roster. It has no
+Each row in the main window is the roster that has been imported. The "Id" column is
+the number that has been assigned by the database to this roster. It has no
 importance other than to identify the roster to the database.
-This number will also show in other windows and will allow you
+This number will also be shown in other windows and will allow you
 to see which roster holds the specific decoder.
 
 The "System" column contains the name of the PC which created this row. If your
@@ -142,7 +143,7 @@ The "# Decoders" column shows the number of decoders that are contained in that 
 It is not uncommon to see an entry showing zero. This is often the case if that
 profile is used for OperationsPro.
 
-The "Full Path" shows where roster.xml file is located. If you have multiple rosters in
+The "Full Path" shows where the roster.xml file is located. If you have multiple rosters in
 your database, this is probably the best way to identify the one you want.
 
 ==== Importing a Roster
@@ -150,16 +151,16 @@ Choose "File Import" (or Alt-I) to import a roster. That will bring up a
 dialog which will allow you to select a "roster.xml" That file (generated by
 DecoderPro) contains a listing of all the decoders that have been either
 programmed by DecoderPro or imported into DecoderPro.
-When the dialog opens, it show the contents of your "Documents" folder. You
-will need to navigate to the "roster.xml" which is normally found
+When the dialog opens, it shows the contents of your "Documents" folder. You
+will need to navigate to the "roster.xml," which is normally found
 within the folder defined by the profile (you may have chosen to locate
 it elsewhere, such as on a network drive, or in a DropBox folder).
 If the profile is in a default location, you should
-navigate to the "Users" folder and within that you should find a folder
+navigate to the "Users" folder, and within that you should find a folder
 representing you (the current user). Within that folder will be a "JMRI"
 folder and within that will be one or more JMRI Profile folders (again, you
 may have chosen to place them elsewhere). If there is a Roster in that location,
-the diaglog will show a "roster.xml". Select that file and click on "Open" to import that
+the dialog will show a "roster.xml". Select that file and click on "Open" to import that
 roster. If you don't want to import any roster at this time, simply click on
 cancel to cancel the import.
 
@@ -175,16 +176,16 @@ can take a *VERY* long time, so it's best to do it in small increments a few dec
 Choose "File" "Close" (or Alt-C) to end the program. In other windows, this action
 will only end the current window.
 
-==== Settings -- Edit
+==== Settings – Edit
 This menu choice will allow you to change your initial selection of Database name, location,
 userid and password. Those values will be remembered each time to start the program. You
 may safely ignore this menu unless you want to switch to a different database.
 
-==== View -- All
-The "View" "All Decoders" menu choice will be bring up a window containing every decoder
+==== View – All
+The "View" "All Decoders" menu choice will bring up a window containing every decoder
 from all rosters which have been imported.
 
-==== View -- Selected Decoders
+==== View – Selected Decoders
 The "View Selected Decoders" menu choice will only be enabled if you have selected one or more
 rosters. When you select this menu item, it will bring up a window with all decoders from
 every roster that has been selected.
@@ -195,18 +196,18 @@ At the moment, the Help menu items do nothing.
 
 === The Decoder Window
 The Decoder Window opens when either View All or View Selected is chosen in the main window.
-The window shows all decoders contained in the selected roster(s) -- unless you chose to filter
-out out some decoders based on their characteristics.
+The window shows all decoders contained in the selected roster(s) – unless you chose to filter
+out some decoders based on their characteristics.
 The columns can be rearranged by dragging column heads to new positions.
 The sizes of columns can be adjusted by dragging the bar in the column heads between columns
 to the left or the right. Both of these changes will be saved and restored the
-next time you show this window  (the view filters will not be restored).
+next time you show this window (the view filters will not be restored).
 
 ==== The columns
-The ID is a an arbitrary number assigned by the database to represent this decoder. It has
-no particular meaning, but if you want to restore the original order, simply sort by this column.
+The ID is an arbitrary number assigned by the database to represent this decoder. It has
+no particular meaning, but if you want to restore the original order, you can sort by this column.
 
-RosterId is a database assigned identifier of the roster from which this entry came.
+RosterId is an identifier assigned by the database for the roster from which this entry came.
 If you selected multiple rosters to view (or chose to view ALL rosters), use this value to
 distinguish where this decoder entry came from.
 
@@ -215,8 +216,8 @@ address (DecoderPro does not indicate which in the roster, but it can be signifi
 your command station/throttle combination
 if you want to select this locomotive).
 
-The "Speeds?" column shows whether or not this entry also has a speed profile associated with it.
-The Speed Profile is generated by PanelPro, by selected "Speed Profiling" from the Roster menu.
+The "Speeds?" column shows whether this entry also has a speed profile associated with it.
+The Speed Profile is generated in PanelPro by selecting "Speed Profiling" from the Roster menu.
 You can select a locomotive and view the current profile from that window.
 Use that same window to generate a speed profile.
 The Speed Profile is used by DecoderPro (or PanelPro) when
@@ -233,14 +234,14 @@ Because of that potentially long delay, those files are not read until you speci
 request that they be read. Select one or more decoders and choose File, Import Detail
 (or press Alt-I) to read the files belonging to the selected decoders.
 
-The XML File column contains the name of the file containing the details of the deccoder.
+The "XML File" column contains the name of the file containing the details of the decoder.
 
-Road Name (and Road Number) are the values entered in these fields when the XML file was
+"Road Name" (and "Road Number") contain values entered in these fields when the XML file was
 created (or last modified).
 
 
 Manufacturer is the value entered when the decoder was first entered into
-DecoderPro. It is normally used to hold the manufacturer of the the locomotive
+DecoderPro. It is normally used to hold the manufacturer of the locomotive
 (not the decoder).
 
 Decoder Family and Decoder Model are values entered into DecoderPro to identify the
@@ -248,23 +249,23 @@ specific decoder installed in the locomotive. These two values determine what CV
 numbers are shown (and are programmable with DecoderPro). Together they determine
 the screens shown by DecoderPro.
 
-The Owner column in DecoderPro my be filled by a default value, or changed when
+The Owner column in DecoderPro may be filled by a default value or changed when
 the decoder is first entered. It can be easily changed by DecoderPro.
 
 Date Updated is the date and time when the decoder XML file was last saved.
 
 Imported is the time and date that this roster was last imported into the database.
 
-The Details Read column shows when the full xml file was last read by this tool.
+The Details Read column shows when this tool last read the full XML file.
 
 
 ==== Menu Items
 
 ===== File Items
 
-* Import Detail - This item will only be enabled if one or more decoder entries are selected. When chosen, the full XML file(s) for the selected decoders will be read. The Details Read column will be updated.  Alt-I is a short-cut key for this item.
+* Import Detail – This item will only be enabled if one or more decoder entries are selected. When chosen, the full XML file(s) for the selected decoders will be read. The Details Read column will be updated.  Alt-I is a short-cut key for this item.
 
-* Print - This item will bring up a standard print dialog and print
+* Print – This item will bring up a standard print dialog and print
 the list of decoders as you are currently viewing it. Alt-P is a short-cut key.
 
 * Close - Closes the view of the decoders. Alt-C is a short-cut key.
@@ -275,12 +276,12 @@ These menu items are all only enabled when one or more decoders are selected.
 In addition, the View Selected CV Contents item requires that you enter the CV
 numbers you wish to view.
 
-* View Speed Profiles - this item will show a textual view of the speed profiles
-of all the selected decoders. If none of the selected decoders have speed
+* View Speed Profiles – this item will show a textual view of the speed profiles
+for all the selected decoders. If none of the selected decoders have speed
 profiles, you will see an empty window. When you run the speed profile in
 PanelPro, you can choose the starting speed step, the increment and the ending speed
 step for each locomotive when you profile it.
-Thus it is likely you will likely see a wide
+Thus, it is likely you will see a wide
 variation in the data in the rows of the display.
 The window will show the throttle percentage (as
 a decimal fraction), the speed step (from 1 to 126)
@@ -313,14 +314,15 @@ DecoderPro and selecting the "Roster Media" tab.
 Adding or updating items in the "Roster custom attributes" window will change
 or add to the values shown here. They can also be shown in DecoderPro as columns.
 
-* View Standard CV Contents shows a selected subset of CV values, arranged with CV values across the top for each of the selected locomotives. The NMRA assigned
+* View Standard CV Contents shows a selected subset of CV values, arranged with CV values across the top for each of the selected locomotives.
+The NMRA assigned
 usage is shown with the CV number. This is a good view to be able to compare
 the basic CV values for a
 long list of engines.
 
-* View Selected CV Contents shows values in a selected CV's in the same format as
+* View Selected CV Contents shows values in a selected CV in the same format as
 the "View Standard CV Contents" but for CV numbers that you have selected.
-If a selected decoder does not implement a specific CV identifer, the value
+If a selected decoder does not implement a specific CV identifier, the value
 field will be empty for that identifier.
 This menu item will be disabled until you enter a valid list of CV numbers in the field
 labeled "CVs: "
@@ -337,8 +339,8 @@ Some decoders may include letters in the CV number value. You can copy
 a value from the View All CV Centers window to serve as a pattern for
 complicated CV identifiers.
 Indexed CVs are usually
-specified as a group of two or three values seperated by a period. There are often two
-indexes. Seperate each set of CV numbers by a comma and a perhaps spaces.
+specified as a group of two or three values separated by a period. There are often two
+indexes. Separate each set of CV numbers by a comma and perhaps one or more spaces.
 Examples: 1, 2, 11,99, 0.252.257, 0.252.277, 1.0.257, 16.0.259, 16.0.448, 26.13.317
 
 ===== Help
