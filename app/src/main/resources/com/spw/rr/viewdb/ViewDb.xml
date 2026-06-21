@@ -48,10 +48,6 @@
             functionlabels fn
         on a.id = fn.decoderid
         </if>
-        <if test="arg0.name() == 'SELECT_DEF'">
-            decoderdef de
-            on a.id = de.decoderid
-        </if>
         <if test="arg0.name() == 'SELECT_SPD'">
             speedprofile spd
             on a.id = spd.decoderid
@@ -126,8 +122,7 @@
             WHERE
                 EXISTS ( SELECT * FROM cvvalues cv
                 WHERE cv.decoderid = t1.id)
-                OR EXISTS ( SELECT * FROM decoderdef de
-                    WHERE de.decoderid = t1.id)) AS t21
+                ) AS t21
         ON t21.id = p.id
         <where>
             <foreach collection="list" index="index" item="item"
@@ -209,12 +204,6 @@
                <result property="decoderId" column="kvdecoderId"/>
                <result property="pair_key" column="pair_key"/>
                <result property="pair_value" column="pair_value"/>
-           </collection>
-           <collection property="defValues" ofType="DecoderDef">
-               <id column="deid" property="id"/>
-               <result column="dedecoderId" property="decoderId"/>
-               <result property="varValue" column="varValue"/>
-               <result property="item" column="item"/>
            </collection>
     </resultMap>
 </mapper>

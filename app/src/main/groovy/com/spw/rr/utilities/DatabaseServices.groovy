@@ -246,15 +246,13 @@ class DatabaseServices {
 
 
     void prepareDetail(Integer decoderId) {
-        log.debug("preparing for Detail import by deleting CvValue and DecoderDef where decoderId = ${decoderId}")
+        log.debug("preparing for Detail import by deleting CvValue where decoderId = ${decoderId}")
         if (session == null) {
             throw new RuntimeException("attempting to run decoderss for roster outside of a transaction")
         }
         Mapper mapper = session.getMapper(Mapper.class)
         int rowsDeleted = mapper.deleteCVs(decoderId)
         log.debug("CVvalues rows deleted = ${rowsDeleted}")
-        rowsDeleted = mapper.deleteDecoderDef(decoderId)
-        log.debug("DecoderDef rows deleted = ${rowsDeleted}")
     }
 
     List<DecoderEntry> decodersForRosterList(List<Integer> rosters) {
@@ -355,18 +353,6 @@ class DatabaseServices {
         log.debug("inserted value was ${sp}")
         return sp
     }
-
-    DecoderDef insertDecoderDef(DecoderDef decoderDef) {
-        log.debug("adding new decoder defininiton: ${decoderDef} inside a transaction")
-        if (session == null) {
-            throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
-        }
-        Mapper mapper = session.getMapper(Mapper.class)
-        mapper.insertDecoderDef(decoderDef)
-        log.debug("result was ${decoderDef}")
-        return decoderDef
-    }
-
 
     CvValues insertCVs(CvValues cVvalues) {
         log.debug("adding new CV value: ${cVvalues} for a transaction")

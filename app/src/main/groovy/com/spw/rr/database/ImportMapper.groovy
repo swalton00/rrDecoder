@@ -10,8 +10,6 @@ interface ImportMapper {
     int deleteOldLabels(DecoderEntry)
     int deleteOldKeys(DecoderEntry)
     ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
-    LabelVersion getLabelVersionMaxFor(Integer decoderId)
-    void insertLabelVersion(LabelVersion entry)
     void insertSavedLabel(SavedLabel)
     
 }

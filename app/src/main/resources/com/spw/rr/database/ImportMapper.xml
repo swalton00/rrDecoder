@@ -48,33 +48,6 @@
         <result property="labelVersion" column="Label_Version"/>
         <result property="locked" column="Locked"/>
     </resultMap>
-    <select id="getLabelVersionMaxFor" resultType="LabelVersion" parameterType="Integer">
-        SELECT
-            decoderId,
-            version_number,
-            version_time
-        FROM
-            Label_Versions a
-        WHERE
-            a.decoderId = #{decoderId}
-          AND version_number =
-              (   SELECT
-                      MAX(version_number)
-                  FROM
-                      label_versions b
-                  WHERE
-                      a.decoderId = b.decoderId)
-    </select>
-    <insert id="insertLabelVersion" parameterType="LabelVersion">
-        INSERT  INTO LABEL_VERSIONS
-        ( DECODERID,
-            VERSION,
-            VERSION_TIME)
-        VALUES (
-               #{decoderId},
-               #{version},
-               #{version_time})
-    </insert>
     <insert id="insertSavedLabel" parameterType="SavedLabel">
         INSERT INTO SAVED_LABELS
             (DECODERID,

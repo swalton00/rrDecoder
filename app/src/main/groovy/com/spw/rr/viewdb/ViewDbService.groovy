@@ -55,8 +55,7 @@ class ViewDbService {
     enum ListType {
         LABEL_LIST,     // function labels
         SPEED_LIST,     // speed profiles
-        KEY_VAL_LIST,   // key value pairs
-        DEF_LIST,       // decoder definitions
+        KEY_VAL_LIST,   // key value pairs// decoder definitions
         FIXED_CVS,      // standard cvs
         CV_LIST,        // list of cvs
         ALL_CV              // used by DataController to build that list
@@ -78,9 +77,6 @@ class ViewDbService {
                     break
                 case ListType.KEY_VAL_LIST :
                     retVal = map.listValues(ViewDb.SelectType.SELECT_KEY, decoderIds, null)
-                    break
-                case ListType.DEF_LIST :
-                    retVal = map.listValues(ViewDb.SelectType.SELECT_DEF, decoderIds,null )
                     break
                 case ListType.FIXED_CVS :
                     retVal = map.listValues(ViewDb.SelectType.SELECT_FXD_CVS, decoderIds, null)

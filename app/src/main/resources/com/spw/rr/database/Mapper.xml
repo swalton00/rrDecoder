@@ -150,21 +150,6 @@
             dateUpdated   = #{dateUpdated}
         WHERE id = #{id}
     </update>
-    <insert id="insertDecoderDef" parameterType="DecoderDef" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO
-            decoderDef
-        (
-            decoderID,
-            varValue,
-            item
-        )
-        VALUES
-            (
-                #{parent},
-                #{varValue},
-                #{item}
-            )
-    </insert>
     <insert id="insertCVs" parameterType="CVvalues" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         INSERT INTO
             CvValues
@@ -271,8 +256,5 @@
     </select>
     <delete id="deleteCVs" parameterType="Integer">
         DELETE FROM CVValues WHERE decoderId = #{decoderId}
-    </delete>
-    <delete id="deleteDecoderDef" parameterType="Integer">
-        DELETE FROM DecoderDef WHERE decoderId = #{decoderId}
     </delete>
 </mapper>

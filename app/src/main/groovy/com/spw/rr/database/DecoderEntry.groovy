@@ -32,7 +32,6 @@ class DecoderEntry {
     int cvVersion
     int labelVersion
     int keyVersion
-    List<DecoderDef> defValues
     List<FunctionLabel> labelValues
     List<SpeedProfile> speedValues
     List<KeyValuePairs> keyPairs

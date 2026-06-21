@@ -53,7 +53,7 @@ class ImportService {
             return systemName
         }
         try {
-            systemName = java.net.InetAddress.getLocalHost().getHostName()
+            systemName = InetAddress.getLocalHost().getHostName()
         } catch (UnknownHostException e) {
             log.error("Unknown hostname", e)
             systemName = "*Unknown*"
@@ -75,17 +75,6 @@ class ImportService {
             decoderList.add(entry)
         }
         decoderListTime.stop()
-    }
-
-    Hashtable<String, SaverObject> saverSetup(ArrayList<SaverObject> existing) {
-        Hashtable<String, SaverObject> hash = new Hashtable<>()
-        if (existing == null) {
-            return hash     // empty list - no saved entries
-        }
-        existing.each {
-            hash.put(it.getKey(), it)
-        }
-        return hash
     }
 
     void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
@@ -344,7 +333,7 @@ class ImportService {
                 return retVal
             } catch (ParseException ex2) {
                 log.debug("that didn't work -- trying custom format", ex2)
-                DateFormat customFmt = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a");
+                DateFormat customFmt = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a")
                 try {
                     return new Timestamp(customFmt.parse(dateValue).getTime())
                 } catch (ParseException ex3) {
@@ -378,7 +367,7 @@ class ImportService {
             monitor.setMainProgress(entryCounter, "Decoder ${entryCounter} of ${decoders.size()}")
             log.debug("processing details for decoder id of ${decoderId}")
             Log4JStopWatch decoderDetail = new Log4JStopWatch("decoderDetail", "processing decoder id of ${decoderId}")
-            monitor.setIntermediateOverall(1, 5, "Read Decoder Entry", "Step 1 of 5")
+            monitor.setIntermediateOverall(1, 4, "Read Decoder Entry", "Step 1 of 4")
             DecoderEntry decoderEntry = database.getDecoderEntry(decoderId)
             RosterEntry thisEntry = null
             if (rosterEntries.containsKey(decoderEntry.rosterId)) {
@@ -398,7 +387,7 @@ class ImportService {
                 File xmlDecoderFile = new File(decoderFileName)
                 decoderText = xmlDecoderFile.text
                 fileFound = true
-            } catch (FileNotFoundException fe) {
+            } catch (FileNotFoundException e) {
                 log.error "File ${decoderFileName} was not found"
             }
             if (fileFound) {
@@ -415,21 +404,6 @@ class ImportService {
                     // clean out any old CV values and DecoderDef rows first
 
                     database.prepareDetail(decoderEntry.id)
-                  //  monitor.setIntermediateProgress(4, "Add Decoder Definition records", "Step 4 of 5")
-   /*                 monitor.setDetailOverall(0, varSize)
-
-                    log.debug("decoderDef size is ${varSize}")
-                    for (j in 0..<varSize) {
-                        monitor.setDetailProgress(j, "Step ${j} of ${varSize}")
-                        String itemString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@item'
-                        String valueString = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'[j].'@value'
-                        log.debug("value is ${valueString} and item is ${itemString}")
-                        DecoderDef decoderDef = new DecoderDef()
-                        decoderDef.parent = decoderId
-                        decoderDef.item = itemString
-                        decoderDef.varValue = valueString
-                        database.insertDecoderDef(decoderDef)
-                    }*/
                     int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
                     monitor.setIntermediateProgress(4, "Add CV records", "Step 4 of 4")
                     log.debug("CV size is ${cvSize}")

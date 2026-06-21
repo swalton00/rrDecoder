@@ -48,10 +48,10 @@ ALTER TABLE Decoder
     ADD COLUMN IF NOT EXISTS Shunt VARCHAR(16);
 
 ALTER TABLE
-    FunctionLabels ADD column IF NOT EXISTS Label_Version INTEGER;
+    functionlabels ADD column IF NOT EXISTS locked BOOLEAN;
 
 ALTER TABLE
-    functionlabels ADD column IF NOT EXISTS locked BOOLEAN;
+    FunctionLabels ADD column IF NOT EXISTS Label_Version INTEGER;
     
     DELETE
 FROM
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS
 );
 
 ALTER TABLE
-    keyvalues ADD column IF NOT EXISTS key_version CHARACTER VARYING(25);
+    keyvalues ADD column IF NOT EXISTS key_version INTEGER;
 DELETE
 FROM
     keyvalues a

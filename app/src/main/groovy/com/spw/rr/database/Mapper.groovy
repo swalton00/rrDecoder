@@ -13,15 +13,11 @@ interface Mapper {
     int updateDecoderEntry(DecoderEntry)
     void insertFunctionLabel(FunctionLabel)
     void insertKeyValuePairs(KeyValuePairs)
-    void insertSpeedSprofile(SpeedProfile)
-
     void updateDecoderEntry(DecoderEntry entry)
     RosterEntry findRosterEntry(String systemName, String fullPath)
     void insertDecoderTypeEntry(DecoderType)
     void insertSpeedProfile(SpeedProfile)
     int deleteCVs(Integer decoderId)
-    int deleteDecoderDef(Integer decoderId)
-    void insertDecoderDef(DecoderDef decoderDef)
     void insertCVs(CvValues cVvalues)
     int updateDecoderDetailTime(Integer decoderId)
 }
