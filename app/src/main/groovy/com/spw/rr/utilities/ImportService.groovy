@@ -389,7 +389,7 @@ class ImportService {
                 String path = thisEntry.fullPath.substring(0, thisEntry.fullPath.lastIndexOf(File.separator))
                 rosterFiles.put(thisEntry.id, path)
             }
-            monitor.setIntermediateProgress(2, "Read XML File", "Step 2 of 5")
+            monitor.setIntermediateProgress(2, "Read XML File", "Step 2 of 4")
             String decoderFileName = rosterFiles.get(decoderEntry.rosterId) +
                     File.separator + "roster" + File.separator + decoderEntry.fileName
             boolean fileFound = false
@@ -402,7 +402,7 @@ class ImportService {
                 log.error "File ${decoderFileName} was not found"
             }
             if (fileFound) {
-                monitor.setIntermediateProgress(3, "Parse XML File", "Step 3 of 5")
+                monitor.setIntermediateProgress(3, "Parse XML File", "Step 3 of 4")
                 log.debug("found roster xml for id ${decoderEntry.id}")
                 XmlSlurper slurper = new XmlSlurper()
                 slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
@@ -415,8 +415,8 @@ class ImportService {
                     // clean out any old CV values and DecoderDef rows first
 
                     database.prepareDetail(decoderEntry.id)
-                    monitor.setIntermediateProgress(4, "Add Decoder Definition records", "Step 4 of 5")
-                    monitor.setDetailOverall(0, varSize)
+                  //  monitor.setIntermediateProgress(4, "Add Decoder Definition records", "Step 4 of 5")
+   /*                 monitor.setDetailOverall(0, varSize)
 
                     log.debug("decoderDef size is ${varSize}")
                     for (j in 0..<varSize) {
@@ -429,9 +429,9 @@ class ImportService {
                         decoderDef.item = itemString
                         decoderDef.varValue = valueString
                         database.insertDecoderDef(decoderDef)
-                    }
+                    }*/
                     int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
-                    monitor.setIntermediateProgress(5, "Add CV records", "Step 5 of 5")
+                    monitor.setIntermediateProgress(4, "Add CV records", "Step 4 of 4")
                     log.debug("CV size is ${cvSize}")
                     monitor.setDetailOverall(0, cvSize)
                     for (j in 0..<cvSize) {
