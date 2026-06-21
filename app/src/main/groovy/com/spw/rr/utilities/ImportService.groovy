@@ -88,56 +88,11 @@ class ImportService {
         return hash
     }
 
-    /**
-     * Check to see if the object has changed, if so, populate the new SaverObject
-     * @param hash the hashtable created by the saverSetup
-     * @param item the new item - has it changed?
-     * @param newVersion the new version record, in case it has
-     * @param newSaver a new saver item to populate if it changed
-     * @return
-     */
-    SaverBase saverCheck(Hashtable<String,
-            SaverObject> hash,
-                         SaverObject item,
-                         AbstractVersion newVersion,
-                         SaverBase newSaver) {
-        SaverObject oldItem = hash.get(item.getKey())
-        newSaver.version = newVersion.version
-        newSaver.decoderId = item.decoderId
-        if (item.equals(oldItem)) {
-            return null
-        }
-        log.debug("differences - returning ${newSaver}")
-        return newSaver
-    }
-
     void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
         log.debug("Processing the labels for id ${decoderId} and entry ${decoderEntry}")
         int functionLabelSize = entryList.'functionlabels'.functionlabel.size()
         database.deleteOldLabels(decoderEntry)
-        /*boolean createdVersion = false
-        //LabelVersion newLabelVersion = new LabelVersion()
-        //newLabelVersion.decoderId = decoderId
-        //ArrayList<FunctionLabel> existing = importDb.get/FunctionLabelsFor(decoderId)
-        //boolean addNewFunctionLabels = false
-        //Hashtable<String, SaverObject> hash = saverSetup(existing)
-        LabelVersion newVersion
-        LabelVersion labelVersion
-        if (existing.size() == 0) {
-            log.debug("no existing Function Labels for decoderId of ${decoderId}")
-            addNewFunctionLabels = true
-        } else {
-            log.debug("have a set of existing FunctionLabels, setting up to record changeds")
-            labelVersion = importDb.getLabelVersionMaxFor(decoderId)
-            newVersion = new LabelVersion()
-            newVersion.decoderId = decoderId
-            newVersion.version_time = dbTime
-            if (labelVersion == null) {
-                newVersion.version = 0
-            } else {
-                newVersion.version = labelVersion.version + 1
-            }
-        }*/
+
         log.debug("functionLabelSize is ${functionLabelSize}")
 
         for (labelEntry in 0..<functionLabelSize) {
@@ -155,28 +110,8 @@ class ImportService {
                 funcLab.locked = false
             }
             log.debug("new function label is ${funcLab}")
-/*            if (addNewFunctionLabels) {*/
             database.insertFunctionLabel(funcLab)
-            /*       } else {
-                /* SavedLabel newSavedLabel = new SavedLabel()
-                    newSavedLabel = saverCheck(hash, funcLab, newVersion, newSavedLabel)
-                    if (newSavedLabel != null) {
-                        if (!createdVersion) {
-                            createdVersion = true
-                            decoderEntry.labelVersion = newVersion.version
-                            importDb.writeLabelVersion(newVersion)
-                            createdVersion = true
-                        }
-                        newSavedLabel.locked = funcLab.locked
-                        FunctionLabel oldLabel = (FunctionLabel)hash.get(funcLab.getKey())
-                        newSavedLabel.functionNumber = funcLab.functionNum
-                        if (!(oldLabel == null)) {
-                            newSavedLabel.locked = oldLabel.locked
-                            newSavedLabel.saved_label = oldLabel.functionLabel
-                        }
-                        importDb.writeSavedLabel(newSavedLabel)*/
-
-        }
+                    }
     }
 
 
@@ -536,5 +471,4 @@ class ImportService {
         }
         importDetail(parent, decoderList)
     }
-
 }
