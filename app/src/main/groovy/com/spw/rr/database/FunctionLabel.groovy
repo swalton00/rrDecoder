@@ -4,7 +4,6 @@ import groovy.transform.ToString
 import groovy.util.logging.Log4j
 import org.slf4j.LoggerFactory
 
-@Log4j
 @ToString(includeNames = true, includePackage = false, includeFields = true)
 class FunctionLabel extends AbstractItem {
 
@@ -17,7 +16,7 @@ class FunctionLabel extends AbstractItem {
 
     @Override
     boolean equals(Object other) {
-        log.info("invoked Function Label instance")
+        log.debug("invoked Function Label instance")
         if (!(other instanceof FunctionLabel)) {
             return false
         }

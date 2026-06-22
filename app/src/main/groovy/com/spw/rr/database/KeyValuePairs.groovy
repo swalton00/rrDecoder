@@ -6,7 +6,6 @@ import groovy.transform.ToString
 class KeyValuePairs extends AbstractItem{
 
     Integer id
-    Integer decoderId
     String  pair_key
     String  pair_value
 
@@ -19,4 +18,10 @@ class KeyValuePairs extends AbstractItem{
     void addRows(List<String> thisLine) {
         thisLine.add(pair_value)
     }
+
+    @Override
+    String getValue() {
+        return pair_value
+    }
+
 }

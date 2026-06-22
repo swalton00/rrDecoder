@@ -1,8 +1,10 @@
 package com.spw.rr.database
 
 import com.spw.rr.controllers.DataController.ViewType
+import groovy.util.logging.Log4j
 import org.slf4j.Logger
 
+@Log4j
 abstract class AbstractItem {
 
     Integer decoderId
@@ -11,5 +13,6 @@ abstract class AbstractItem {
 
     abstract void addRows(List<String> thisLine);
 
-    static Logger log
+    abstract String getValue();
+
 }

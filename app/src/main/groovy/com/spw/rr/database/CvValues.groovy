@@ -6,7 +6,6 @@ import groovy.transform.ToString
 @ToString(includeFields = true, includePackage = false, includeNames = true)
 class CvValues extends AbstractItem{
     Integer id
-    Integer decoderId
     String  cvNumber
     String  cvValue
     String  dccAddress      // included for purposes of some retrievals
@@ -20,4 +19,10 @@ class CvValues extends AbstractItem{
     void addRows(List<String> thisLine) {
         thisLine.add(cvValue)
     }
+
+    @Override
+    String getValue() {
+        return cvValue
+    }
+
 }
