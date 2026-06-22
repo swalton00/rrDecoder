@@ -5,6 +5,8 @@ import org.slf4j.Logger
 
 abstract class AbstractItem {
 
+    Integer decoderId
+
     abstract String  getKey();
 
     abstract void addRows(List<String> thisLine);

@@ -10,6 +10,4 @@ interface ImportMapper {
     int deleteOldLabels(DecoderEntry)
     int deleteOldKeys(DecoderEntry)
     ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
-    void insertSavedLabel(SavedLabel)
-    
 }

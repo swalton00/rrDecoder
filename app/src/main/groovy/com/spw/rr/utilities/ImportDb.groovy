@@ -2,11 +2,7 @@ package com.spw.rr.utilities
 
 import com.spw.rr.database.FunctionLabel
 import com.spw.rr.database.ImportMapper
-import com.spw.rr.database.LabelVersion
-import com.spw.rr.database.Mapper
 import com.spw.rr.database.RosterEntry
-import com.spw.rr.database.SavedLabel
-import com.spw.rr.database.SaverObject
 import org.apache.ibatis.session.SqlSession
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -74,22 +70,6 @@ class ImportDb {
             return map.getFunctionLabels(id)
         }, decoderId)
         return retVal
-    }
-
-    LabelVersion getLabelVersionMaxFor(int decoderId) {
-        log.debug("getting the max label version (if any) for decoder id ${decoderId}")
-        LabelVersion retVal = (LabelVersion)executeSql({ImportMapper map, int id ->
-            return map.getLabelVersionMaxFor(id)
-        }, decoderId)
-        log.debug("the max found was ${retVal}")
-        return retVal
-    }
-
-    SavedLabel writeSavedLabel(SavedLabel newLabel) {
-        executeWrite {ImportMapper map ->
-            map.insertSavedLabel(newLabel)
-        }
-        return newLabel
     }
 
     Object executeSql(  Closure method, int decoderId)

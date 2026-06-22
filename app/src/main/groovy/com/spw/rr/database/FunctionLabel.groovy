@@ -1,14 +1,12 @@
 package com.spw.rr.database
 
 import groovy.transform.ToString
+import groovy.util.logging.Log4j
 import org.slf4j.LoggerFactory
 
+@Log4j
 @ToString(includeNames = true, includePackage = false, includeFields = true)
-class FunctionLabel extends SaverObject {
-
-    FunctionLabel() {
-        log = LoggerFactory.getLogger(FunctionLabel.class)
-    }
+class FunctionLabel extends AbstractItem {
 
     Integer id
     String functionNum
@@ -33,47 +31,15 @@ class FunctionLabel extends SaverObject {
         return true
     }
 
-    @Override
     String getKey() {
         return functionNum.toString()
     }
 
-    @Override
     void addRows(List<String> thisLine) {
         thisLine.add(functionLabel)
     }
 
-    @Override
     String getValue() {
         return functionLabel
     }
-
-
-    int compareTo(SaverObject otherItem) {
-        if (this.decoderId != otherItem.decoderId) {
-            if (this.decoderId < otherItem.decoderId) {
-                return -1
-            } else {
-                return 1
-            }
-        }
-        if (!(otherItem instanceof FunctionLabel)) {
-            log.error("Attempting to compare a FunctionLabel to another type")
-            throw RuntimeException("Attempting to compare a Function Label to something else")
-        }
-        if (!functionNum.equals(otherItem.functionNum)) {
-             if (functionNum < otherItem.functionNum) {
-                 return -1
-             } else {
-                 return 1
-             }
-         }
-        if (functionLabel < otherItem.functionLabel) {
-            return -1
-        } else {
-            return 1
-        }
-        return 0
-    }
-
 }

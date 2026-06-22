@@ -48,21 +48,6 @@
         <result property="labelVersion" column="Label_Version"/>
         <result property="locked" column="Locked"/>
     </resultMap>
-    <insert id="insertSavedLabel" parameterType="SavedLabel">
-        INSERT INTO SAVED_LABELS
-            (DECODERID,
-             FUNCTIONNUMBER,
-             VERSION_NUMBER,
-             SAVED_LABEL,
-             LOCKED)
-            VALUES (
-                #{decoderId},
-                #{functionNumber},
-                #{version},
-                #{functionLabel},
-                #{locked}
-                   )
-    </insert>
     <delete id="deleteOldLabels" parameterType="DecoderEntry">
         DELETE FROM FUNCTIONLABELS WHERE decoderId = #{id}
     </delete>
