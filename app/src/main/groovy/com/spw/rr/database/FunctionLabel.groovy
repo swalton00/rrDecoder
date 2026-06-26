@@ -4,6 +4,7 @@ import groovy.transform.ToString
 import groovy.util.logging.Log4j
 import org.slf4j.LoggerFactory
 
+@Log4j
 @ToString(includeNames = true, includePackage = false, includeFields = true)
 class FunctionLabel extends AbstractItem {
 
@@ -12,7 +13,6 @@ class FunctionLabel extends AbstractItem {
     String  functionLabel
     boolean locked
     Integer rosterId
-    Integer labelVersion
 
     @Override
     boolean equals(Object other) {
@@ -40,5 +40,9 @@ class FunctionLabel extends AbstractItem {
 
     String getValue() {
         return functionLabel
+    }
+
+    void setValue(String newValue) {
+        functionLabel = newValue
     }
 }

@@ -1,7 +1,9 @@
 package com.spw.rr.database
 
-import java.sql.Timestamp
+import groovy.transform.ToString
 
+import java.sql.Timestamp
+@ToString(includeNames = true, includePackage = false, includeFields = true)
 class VersionBase {
 
     Integer decoderId

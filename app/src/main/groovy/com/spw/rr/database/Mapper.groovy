@@ -1,5 +1,8 @@
 package com.spw.rr.database
 
+import com.spw.rr.database.VersionBase.WhichTable
+import org.apache.ibatis.annotations.Param
+
 interface Mapper {
 
     List<RosterEntry> listRosters()
@@ -10,10 +13,17 @@ interface Mapper {
     List<DecoderEntry> listDecodersFor(List<Integer> rosterIds)
     DecoderEntry getDecoderEntry(int id)
     int insertDecoderEntry(DecoderEntry entry)
-    int updateDecoderEntry(DecoderEntry)
-    void insertFunctionLabel(FunctionLabel)
+    int updateDecoderEntry(DecoderEntry entry)
+    void insertFunctionLabel(FunctionLabel functionLabel)
+    int updateFunctionLabel(FunctionLabel functionLabel)
+    void insertFunctionVersion(VersionBase version)
+    void insertLabelDiff(LabelDiff labelDiff)
     void insertKeyValuePairs(KeyValuePairs)
-    void updateDecoderEntry(DecoderEntry entry)
+    void insertVersion(@Param("version")VersionBase, @Param("tableName")String tableName)
+    int deleteObsoleteItems(@Param("table")String table,
+                            @Param("columnName")String columnName,
+                            @Param("decoderId")Integer decoderId,
+                            @Param("obsoleteItems")ArrayList<String> obsoleteItems)
     RosterEntry findRosterEntry(String systemName, String fullPath)
     void insertDecoderTypeEntry(DecoderType)
     void insertSpeedProfile(SpeedProfile)

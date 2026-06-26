@@ -3,6 +3,7 @@ package com.spw.rr.utilities
 import com.spw.rr.database.FunctionLabel
 import com.spw.rr.database.ImportMapper
 import com.spw.rr.database.RosterEntry
+import com.spw.rr.database.VersionBase
 import org.apache.ibatis.session.SqlSession
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -61,6 +62,36 @@ class ImportDb {
             if (session) {
                 session.close()
             }
+        }
+    }
+
+    VersionBase getLastVersion(Integer decoderId, VersionBase.WhichTable sourceTable ) {
+        log.debug("getting the last version record for ${sourceTable}")
+        String tableName = ""
+        switch (sourceTable) {
+            case VersionBase.WhichTable.CV :
+                tableName = "CV_VERSIONS"
+                break
+            case VersionBase.WhichTable.LABEL :
+                tableName = "LABEL_VERSIONS"
+                break
+            case VersionBase.WhichTable.KEYVALUE :
+                tableName = "KEYVALUES_VERSIONS"
+                break
+            default:
+                log.error("incorrect table passed to getLastVersion - ${sourceTable}")
+        }
+        SqlSession session
+        VersionBase version = null
+        try {
+            session = parent.sqlSessionFactory.openSession(true)
+            ImportMapper map = session.getMapper(ImportMapper.class)
+            version = map.getLastVersion(decoderId, tableName)
+            log.debug("version number returned is ${version}")
+        } catch (Exception e) {
+            log.error("Exception attempting to get the last version", e)
+        } finally {
+        return version
         }
     }
 

@@ -186,16 +186,84 @@
         (
             decoderID,
             FunctionNumber,
-            FunctionLabel
+            FunctionLabel,
+            Locked
         )
         VALUES
             (
                 #{decoderId},
                 #{functionNum},
-                #{functionLabel}
+                #{functionLabel},
+                #{locked}
             );
 
     </insert>
+    <update id="updateFunctionLabel" parameterType="FunctionLabel">
+        UPDATE FunctionLabels
+            SET FunctionLabel = #{functionLabel},
+                Locked = #{locked}
+        WHERE decoderID = #{decoderId} AND FunctionNumber = #{functionNum}
+    </update>
+    <insert id="insertFunctionVersion" parameterType="VersionBase" useGeneratedKeys="true">
+        INSERT INTO LabelVersions
+        (
+            decoderId,
+            version,
+            created_on
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{version},
+                #{createdOn}
+            )
+    </insert>
+    <insert id="insertLabelDiff" parameterType="LabelDiff">
+        INSERT INTO LABEL_DIFF
+        (
+            decoderid,
+            version_number,
+            function_number,
+            old_value,
+            new_value,
+            old_locked,
+            new_locked
+        )
+        VALUES
+            (
+                #{decoderId},
+                #{versionNumber},
+                #{functionNumber},
+                #{oldValue},
+                #{newValue},
+                #{oldLocked},
+                #{newLocked}
+            )
+    </insert>
+    <insert id="insertVersion">
+        INSERT INTO \${tableName}
+        (
+            decoderid,
+            version_number,
+            created_on
+        ) VALUES (
+            #{version.decoderId},
+            #{version.versionNumber},
+            #{version.createdOn}
+        )
+    </insert>
+    <delete id="deleteObsoleteItems">
+        DELETE FROM ${table}
+        WHERE DECODERID = #{decoderId}
+        AND ${columnName} IN
+            <foreach collection="obsoleteItems"
+                     item="itemValue"
+                     open="("
+                     separator=","
+                     close=")">
+                #{itemValue}
+        </foreach>
+    </delete>
     <insert id="insertKeyValuePairs" parameterType="KeyValuePairs" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         INSERT    INTO
             KeyValues

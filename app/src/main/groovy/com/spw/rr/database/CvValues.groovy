@@ -25,4 +25,8 @@ class CvValues extends AbstractItem{
         return cvValue
     }
 
+    void setValue(String newValue) {
+        cvValue = newValue
+    }
+
 }

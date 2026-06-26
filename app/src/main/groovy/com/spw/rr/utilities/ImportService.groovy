@@ -80,18 +80,37 @@ class ImportService {
     void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
         log.debug("Processing the labels for id ${decoderId} and entry ${decoderEntry}")
         int functionLabelSize = entryList.'functionlabels'.functionlabel.size()
-        database.deleteOldLabels(decoderEntry)
+        // database.deleteOldLabels(decoderEntry)
 
         log.debug("functionLabelSize is ${functionLabelSize}")
-
+        VersionBase functionVersion = importDb.getLastVersion(decoderId, VersionBase.WhichTable.LABEL)
+        if (functionVersion == null) {
+            functionVersion = new VersionBase()
+            functionVersion.decoderId = decoderId
+            functionVersion.versionNumber = 1
+        } else {
+            functionVersion.versionNumber += 1
+        }
+        functionVersion.createdOn = dbTime
+        functionVersion.tableSource = VersionBase.WhichTable.LABEL
+        Hashtable<String, AbstractItem> functionHash = new Hashtable<>()
+        ArrayList<FunctionLabel> existingEntries = importDb.getFunctionLabelsFor(decoderId)
+        boolean newDecoderFunctions = false
+        if (existingEntries == null | existingEntries.size() == 0) {
+            newDecoderFunctions = true
+        } else {
+            existingEntries.each {
+                functionHash.put(it.getKey(), it)
+            }
+        }
+        log.debug("Existing list has ${existingEntries.size()} and hash has ${functionHash.size()}")
         for (labelEntry in 0..<functionLabelSize) {
             log.debug("LabelEntry (index) is ${labelEntry}")
             log.debug("this function label entry has ${entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList.'functionlabels'.functionlabel[labelEntry].text()}")
             FunctionLabel funcLab = new FunctionLabel()
             funcLab.decoderId = decoderEntry.id
-            funcLab.functionNum = Integer.valueOf(entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text())
+            funcLab.functionNum = entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()
             funcLab.functionLabel = entryList.'functionlabels'.functionlabel[labelEntry].text()
-
             String lockable = entryList.'functionlabels'.functionlabel[labelEntry].'@lockable'.text()
             if ("true".equals(lockable)) {
                 funcLab.locked = true
@@ -99,8 +118,85 @@ class ImportService {
                 funcLab.locked = false
             }
             log.debug("new function label is ${funcLab}")
-            database.insertFunctionLabel(funcLab)
+            if (newDecoderFunctions) {
+                database.insertFunctionLabel(funcLab)
+            } else {
+                LabelDiff diff = new LabelDiff()
+                diff.decoderId = decoderId
+                diff.functionNumber = funcLab.functionNum
+                diff.newValue = funcLab.functionLabel
+                diff.newLocked = funcLab.locked
+                boolean useUpdate = processDiff(functionHash, funcLab, functionVersion, diff)
+                if (diff.wasChanged()) {
+                    // item was changed - write it
+                    log.debug("found a changed item - ${diff}")
+                    database.insertFunctionLabel(funcLab, useUpdate)
+                    if (!functionVersion.hasBeenWritten) {
+                        database.insertVersion(functionVersion)
+                        functionVersion.hasBeenWritten = true
                     }
+                    database.insertLabelDiff(diff)
+                }
+            }
+        }
+        if (functionHash.size() > 0) {
+            ArrayList<String> deleteList = new ArrayList<>()
+            log.debug("Remain items count in hash list is ${functionHash.size()}")
+            if (!functionVersion.hasBeenWritten) {
+                database.insertVersion(functionVersion)
+                functionVersion.hasBeenWritten = true
+            }
+            functionHash.eachWithIndex { entry, int i ->
+                /* create a diff entry each old (but deleted in new) entry
+                copy existing values to diff and write it
+                create list of functionNumbers to be deleted
+                */
+                LabelDiff newDiff = new LabelDiff()
+                newDiff.decoderId = decoderId
+                newDiff.versionNumber = functionVersion.versionNumber
+                def oldEntry = entry.value as FunctionLabel
+                newDiff.oldLocked = oldEntry.locked
+                newDiff.functionNumber = oldEntry.functionNum
+                deleteList.add(newDiff.functionNumber)
+                database.insertLabelDiff(newDiff)
+            }
+            database.deleteOldItems(VersionBase.WhichTable.LABEL, decoderId, deleteList)
+        }
+    }
+
+    /**
+     * Takes the values - checks to see if it is already in the hash, and compares
+     * @param newItem the new item
+     * @param version the version record, which might need to be written
+     * @param diff the appropriate diff record
+     * @return true if the item was found (and thus needs to be updated)
+     *      deletes the existing item from the hash if found
+     *      sets the createdOn to dbTime
+     *      sets the versionNumber to the value passed in the version item
+     *      newItem won't be null (wouldn't be here if that would be the case)
+     *      existing might be null if it wasn't found (and thus shouldn't be in the hash)
+     */
+    boolean processDiff(Hashtable<String, AbstractItem> existingHash, AbstractItem newItem, VersionBase version, AbstractDiff diff) {
+        log.debug("process new ${newItem} with version of ${version}")
+        boolean updateNeeded = false
+        AbstractItem existing = existingHash.get(newItem.getKey())
+        diff.versionNumber = version.versionNumber
+        if (existing == null) {
+            updateNeeded = false
+        } else {
+            updateNeeded = true
+            version.createdOn = dbTime
+            diff.versionNumber = version.versionNumber
+            existingHash.remove(newItem.getKey())
+            diff.newValue = newItem.getValue()
+            diff.oldValue = existing.getValue()
+            if (newItem instanceof FunctionLabel) {
+                ((LabelDiff) diff).oldLocked = ((FunctionLabel) existing).locked
+                ((LabelDiff) diff).newLocked = ((FunctionLabel) newItem).locked
+            }
+            updateNeeded = diff.wasChanged()
+        }
+        return updateNeeded
     }
 
 
@@ -221,6 +317,7 @@ class ImportService {
                     }
                     speedStopWatch.stop()
                 }
+                log.debug("now commiting this decoder")
                 database.commitWork()
             }
             if (rosterFound && existingList.size() > 0) {
@@ -315,7 +412,7 @@ class ImportService {
         return found
     }
 
-    Timestamp doDateModified(String dateValue) {
+    static Timestamp doDateModified(String dateValue) {
         Timestamp retVal = null
         if (dateValue == null || dateValue.equals("")) {
             return new Timestamp(new Date().getTime())
@@ -330,7 +427,6 @@ class ImportService {
             try {
 
                 return new Timestamp(DateFormat.getTimeInstance().parse(dateValue).getTime())
-                return retVal
             } catch (ParseException ex2) {
                 log.debug("that didn't work -- trying custom format", ex2)
                 DateFormat customFmt = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a")

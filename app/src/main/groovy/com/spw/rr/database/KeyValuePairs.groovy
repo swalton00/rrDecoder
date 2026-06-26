@@ -24,4 +24,8 @@ class KeyValuePairs extends AbstractItem{
         return pair_value
     }
 
+    void setValue(String newValue) {
+        pair_value = newValue
+    }
+
 }

@@ -1,7 +1,9 @@
 package com.spw.rr.database
 
 import groovy.transform.ToString
+import groovy.util.logging.Log4j
 
+@Log4j
 @ToString(includeFields = true,includePackage = false, includeNames = true)
 class SpeedProfile extends AbstractItem {
     Integer id
@@ -24,5 +26,9 @@ class SpeedProfile extends AbstractItem {
     @Override
     String getValue() {
         return forwardValue.toString() + reverseValue.toString()
+    }
+
+    void setValue(String newValue) {
+        log.error("Speed Profiles should not be receiving setValue, getValue requests")
     }
 }

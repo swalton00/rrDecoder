@@ -1,5 +1,7 @@
 package com.spw.rr.database
 
+import org.apache.ibatis.annotations.Param
+
 import java.sql.Timestamp
 
 interface ImportMapper {
@@ -10,4 +12,5 @@ interface ImportMapper {
     int deleteOldLabels(DecoderEntry)
     int deleteOldKeys(DecoderEntry)
     ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
+    VersionBase getLastVersion(@Param("decoderId")int decoderId, @Param("tableName")String tableName)
 }

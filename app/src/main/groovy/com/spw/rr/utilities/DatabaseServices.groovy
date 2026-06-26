@@ -303,15 +303,84 @@ class DatabaseServices {
         map.updateDecoderEntry(decoderEntry)
     }
 
-    FunctionLabel insertFunctionLabel(FunctionLabel newValue) {
+    FunctionLabel insertFunctionLabel(FunctionLabel newValue, boolean useUpdate = false) {
         log.debug("inserting new FunctionLabel as part of a transaction - ${newValue}")
         if (session == null) {
             throw new RuntimeException("attempting to run insertFunctionLabels outside of a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
-        map.insertFunctionLabel(newValue)
+        if (useUpdate) {
+            int updateCount = map.updateFunctionLabel(newValue)
+            if (updateCount != 1) {
+                log.error("Update count for ${newValue} expected to be 1, was actually #{updateCount}")
+            }
+        } else {
+            map.insertFunctionLabel(newValue)
+        }
         log.debug("returning result: ${newValue}")
         return newValue
+    }
+
+    void insertVersion(VersionBase version) {
+        log.debug("inserting ${version}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run insertVersion outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        String tableName = ""
+        switch (version.tableSource) {
+            case VersionBase.WhichTable.LABEL :
+                tableName = "LABEL_VERSIONS"
+                break
+            case VersionBase.WhichTable.KEYVALUE :
+                tableName = "KEYVALUES_VERSIONS"
+                break
+            case VersionBase.WhichTable.CV :
+                tableName = "CV_VERSIONS"
+                break
+            default:
+                thrown new RuntimeException("Unknown value for table source ${version} and ${version.tableSource}")
+        }
+        map.insertVersion(version, tableName)
+    }
+
+    void deleteOldItems(VersionBase.WhichTable table, Integer decoderId, ArrayList<String> itemList) {
+        log.debug("deleting old items from ${table}, decoder was ${decoderId} and item list ${itemList}")
+        if (session == null) {
+            throw new RuntimeException("attempting to run insertVersion outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        String tableName = ""
+        String columnName = ""
+        switch (table) {
+            case VersionBase.WhichTable.LABEL :
+                tableName = "FUNCTIONLABELS"
+                columnName = "FUNCTIONNUMBER"
+                break
+            case VersionBase.WhichTable.KEYVALUE :
+                tableName = "KEYVALUES"
+                columnName = "PAIR_KEY"
+                break
+            case VersionBase.WhichTable.CV :
+                tableName = "CVVALUES"
+                columnName = "CVNUMBER"
+                break
+            default:
+                thrown new RuntimeException("Unknown value for table source ${version} and ${version.tableSource}")
+        }
+        int itemCount = map.deleteObsoleteItems(tableName, columnName, decoderId, itemList)
+        if (itemCount != itemList.size()) {
+            throw new RuntimeException("Delete count doesn't match expected - expected ${itemList.size()} and was ${itemCount}")
+        }
+    }
+
+    void insertLabelDiff(LabelDiff labelDiff) {
+        log.debug("inserting new LabelDiff ${labelDiff}")
+        if (session == null) {
+            throw new RuntimeException("attempting to insert LabelDiff outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.insertLabelDiff(labelDiff)
     }
 
     void deleteOldKeyValues(DecoderEntry decoderEntry) {

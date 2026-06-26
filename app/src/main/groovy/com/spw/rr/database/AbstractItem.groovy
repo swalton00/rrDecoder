@@ -15,4 +15,6 @@ abstract class AbstractItem {
 
     abstract String getValue();
 
+    abstract void setValue(String newValue);
+
 }
