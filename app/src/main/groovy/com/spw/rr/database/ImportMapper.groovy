@@ -12,5 +12,4 @@ interface ImportMapper {
     int deleteOldLabels(DecoderEntry)
     int deleteOldKeys(DecoderEntry)
     ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
-    VersionBase getLastVersion(@Param("decoderId")int decoderId, @Param("tableName")String tableName)
 }

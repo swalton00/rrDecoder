@@ -325,4 +325,20 @@
     <delete id="deleteCVs" parameterType="Integer">
         DELETE FROM CVValues WHERE decoderId = #{decoderId}
     </delete>
+    <select id="getLastVersion" resultType="VersionBase">
+        SELECT
+        decoderId,
+        Version_Number as versionNumber
+        FROM
+        \${tableName} a
+        WHERE
+        decoderId = #{decoderId}
+        AND version_number =
+        (   SELECT
+        MAX(version_number)
+        FROM
+        \${tableName} b
+        WHERE
+        a.decoderId = b.decoderId)
+    </select>
 </mapper>

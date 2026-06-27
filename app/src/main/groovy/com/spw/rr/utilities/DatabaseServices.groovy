@@ -473,4 +473,44 @@ class DatabaseServices {
         session = null
     }
 
+
+    VersionBase getLastVersion(Integer decoderId, VersionBase.WhichTable sourceTable ) {
+        log.debug("getting the last version record for ${sourceTable}")
+        String tableName = ""
+        SqlSession session
+        boolean inTransaction = false
+        switch (sourceTable) {
+            case VersionBase.WhichTable.CV :
+                tableName = "CV_VERSIONS"
+                break
+            case VersionBase.WhichTable.LABEL :
+                tableName = "LABEL_VERSIONS"
+                break
+            case VersionBase.WhichTable.KEYVALUE :
+                tableName = "KEYVALUES_VERSIONS"
+                break
+            default:
+                log.error("incorrect table passed to getLastVersion - ${sourceTable}")
+        }
+        VersionBase version = null
+        try {
+            if (this.session == null) {
+                session = sqlSessionFactory.openSession(true)
+            } else {
+                session = this.session
+                inTransaction = true
+            }
+            Mapper map = session.getMapper(Mapper.class)
+            version = map.getLastVersion(decoderId, tableName)
+            log.debug("version number returned is ${version}")
+        } catch (Exception e) {
+            log.error("Exception attempting to get the last version", e)
+        } finally {
+            if (!inTransaction) {
+                session.close()
+            }
+            return version
+        }
+    }
+
 }

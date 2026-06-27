@@ -30,4 +30,7 @@ interface Mapper {
     int deleteCVs(Integer decoderId)
     void insertCVs(CvValues cVvalues)
     int updateDecoderDetailTime(Integer decoderId)
+    VersionBase getLastVersion(@Param("decoderId")int decoderId,
+                               @Param("tableName")String tableName)
+
 }

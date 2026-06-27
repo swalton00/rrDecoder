@@ -77,13 +77,20 @@ class ImportService {
         decoderListTime.stop()
     }
 
+    void importKeyDefs(def entryList, int decoderId, DecoderEntry decoderEntry) {
+        log.debug("Processing the Key Value pairs for ${decoderEntry}")
+        int keyPairSize = entryList.size()
+        log.debug("size of keyValue pair list is ${keyPairSize}")
+      //  VersionBase version =
+    }
+
+
+
     void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
         log.debug("Processing the labels for id ${decoderId} and entry ${decoderEntry}")
         int functionLabelSize = entryList.'functionlabels'.functionlabel.size()
-        // database.deleteOldLabels(decoderEntry)
-
         log.debug("functionLabelSize is ${functionLabelSize}")
-        VersionBase functionVersion = importDb.getLastVersion(decoderId, VersionBase.WhichTable.LABEL)
+        VersionBase functionVersion = database.getLastVersion(decoderId, VersionBase.WhichTable.LABEL)
         if (functionVersion == null) {
             functionVersion = new VersionBase()
             functionVersion.decoderId = decoderId
@@ -290,6 +297,8 @@ class ImportService {
                     log.debug("Deleting old keyValues entries")
                     database.deleteOldKeyValues(newEntry)
                 }
+            //    importKeyDefs(entryList[i].attributepairs.keyvaluepair, newEntry.id, newEntry)
+
                 if (keyValuesSize > 0) {
                     Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
                     for (j in 0..<keyValuesSize) {
