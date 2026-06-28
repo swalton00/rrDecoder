@@ -101,7 +101,7 @@ class ImportService {
         functionVersion.createdOn = dbTime
         functionVersion.tableSource = VersionBase.WhichTable.LABEL
         Hashtable<String, AbstractItem> functionHash = new Hashtable<>()
-        ArrayList<FunctionLabel> existingEntries = database.getFunctionLabelsFor(decoderId)
+        ArrayList<FunctionLabel> existingEntries = database.getItemsFors(decoderId, VersionBase.WhichTable.LABEL)
         boolean newDecoderFunctions = false
         if (existingEntries == null | existingEntries.size() == 0) {
             newDecoderFunctions = true

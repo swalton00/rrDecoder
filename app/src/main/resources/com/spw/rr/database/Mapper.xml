@@ -355,6 +355,26 @@
         <id property="id" column="id"/>
         <result property="functionNum" column="FunctionNumber"/>
         <result property="functionLabel" column="FunctionLabel"/>
-        <result property="locked" column="Locked"/>
+        <result property="locked" column="Locked" jdbcType="BOOLEAN"/>
     </resultMap>
+    <select id="getKeyValuesFor" parameterType="int" resultType = "KeyValuePairs">
+        SELECT
+            id,
+            PAIR_KEY as pair_key,
+            PAIR_VALUE as pair_value
+        FROM
+            KEYVALUES
+        WHERE
+            decoderId = #{decoderId}
+    </select>
+    <select id="getCvValuesFor" parameterType="int" resultType = "CvValues">
+        SELECT
+            id,
+            CVNUMBER as cv_number,
+            CVVALUE as cv_value
+        FROM
+            CVVALUES
+        WHERE
+            decoderId = #{decoderId}
+    </select>
 </mapper>

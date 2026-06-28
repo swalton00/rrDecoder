@@ -1,6 +1,7 @@
 package com.spw.rr.utilities
 
 import com.spw.rr.database.*
+import com.spw.rr.database.VersionBase.WhichTable
 import org.apache.ibatis.io.Resources
 import org.apache.ibatis.session.SqlSession
 import org.apache.ibatis.session.SqlSessionFactory
@@ -513,28 +514,47 @@ class DatabaseServices {
         }
     }
 
-    Object executeSql(  Closure method, int decoderId)
-    {
-        SqlSession session
-        Object retVal = null
+    ArrayList<AbstractItem> getItemsFors(int decoderId, WhichTable tableType) {
+        ArrayList<AbstractItem> returnList = null
         try {
-            session = sqlSessionFactory.openSession(true)
+            SqlSession session = setup()
             Mapper map = session.getMapper(Mapper.class)
-            retVal = (Object)method(map, decoderId)
-        } finally {
-            if (session) {
-                session.close()
+            switch (tableType) {
+                case WhichTable.LABEL :
+                    returnList =  map.getFunctionLabels(decoderId)
+                    break
+                case WhichTable.KEYVALUE :
+                    returnList = map.getFunctionLabels(decoderId)
+                    break
+                case WhichTable.CV :
+                    returnList = map.getFunctionLabels(decoderId)
+                    break
+                default :
+                    log.error("incorrect selection of tableType - value ${tableType}")
+                    throw new RuntimeException("Incorrect Table Type ${tableType}")
             }
+        } catch (Exception e) {
+            log.error("Exception running sql for ${tableType}", e)
+        } finally {
+            tearDown(session)
         }
-        return retVal
+        return returnList
     }
 
-    ArrayList<FunctionLabel> getFunctionLabelsFor(int decoderId) {
-        log.debug("getting a list of FunctionLabels for decoderId ${decoderId}")
-        ArrayList<FunctionLabel> retVal  = (ArrayList<FunctionLabel>)executeSql({Mapper map, int id ->
-            return map.getFunctionLabels(id)
-        }, decoderId)
-        return retVal
+    SqlSession setup() {
+        SqlSession returnSession = null
+        if (this.session == null) {
+            returnSession = sqlSessionFactory.openSession(true)
+        } else {
+            returnSession = this.session
+        }
+        return returnSession
+    }
+
+    void tearDown(SqlSession currentSession) {
+        if (this.session == null) {
+            currentSession.close()
+        }
     }
 
 

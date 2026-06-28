@@ -33,4 +33,6 @@ interface Mapper {
     VersionBase getLastVersion(@Param("decoderId")int decoderId,
                                @Param("tableName")String tableName)
     ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
+    ArrayList<KeyValuePairs> getKeyValuesFor(int decoderId)
+    ArrayList<CvValues> getCvValuesFor(int decoderId)
 }
