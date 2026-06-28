@@ -513,4 +513,29 @@ class DatabaseServices {
         }
     }
 
+    Object executeSql(  Closure method, int decoderId)
+    {
+        SqlSession session
+        Object retVal = null
+        try {
+            session = sqlSessionFactory.openSession(true)
+            Mapper map = session.getMapper(Mapper.class)
+            retVal = (Object)method(map, decoderId)
+        } finally {
+            if (session) {
+                session.close()
+            }
+        }
+        return retVal
+    }
+
+    ArrayList<FunctionLabel> getFunctionLabelsFor(int decoderId) {
+        log.debug("getting a list of FunctionLabels for decoderId ${decoderId}")
+        ArrayList<FunctionLabel> retVal  = (ArrayList<FunctionLabel>)executeSql({Mapper map, int id ->
+            return map.getFunctionLabels(id)
+        }, decoderId)
+        return retVal
+    }
+
+
 }

@@ -11,5 +11,4 @@ interface ImportMapper {
     int deleteDecoderEntry(DecoderEntry)
     int deleteOldLabels(DecoderEntry)
     int deleteOldKeys(DecoderEntry)
-    ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
 }

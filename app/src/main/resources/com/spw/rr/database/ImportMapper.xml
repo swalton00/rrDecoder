@@ -30,22 +30,6 @@
         FROM Decoder
         WHERE id = #{id};
     </delete>
-    <select id="getFunctionLabels" parameterType="int" resultMap="functionLabelMap">
-        SELECT
-            id,
-            FUNCTIONNUMBER,
-            FUNCTIONLABEL,
-            Coalesce(LOCKED, 'false') as locked
-            FROM FUNCTIONLABELS
-        WHERE DECODERID = #{decoderId}
-        ORDER BY FUNCTIONNUMBER
-    </select>
-    <resultMap id="functionLabelMap" type="FunctionLabel">
-        <id property="id" column="id"/>
-        <result property="functionNum" column="FunctionNumber"/>
-        <result property="functionLabel" column="FunctionLabel"/>
-        <result property="locked" column="Locked"/>
-    </resultMap>
     <delete id="deleteOldLabels" parameterType="DecoderEntry">
         DELETE FROM FUNCTIONLABELS WHERE decoderId = #{id}
     </delete>

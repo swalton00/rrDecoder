@@ -32,5 +32,5 @@ interface Mapper {
     int updateDecoderDetailTime(Integer decoderId)
     VersionBase getLastVersion(@Param("decoderId")int decoderId,
                                @Param("tableName")String tableName)
-
+    ArrayList<FunctionLabel> getFunctionLabels(int decoderId)
 }

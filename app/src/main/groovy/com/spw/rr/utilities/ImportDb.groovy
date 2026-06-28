@@ -65,36 +65,6 @@ class ImportDb {
         }
     }
 
-    VersionBase getLastVersion(Integer decoderId, VersionBase.WhichTable sourceTable ) {
-        log.debug("getting the last version record for ${sourceTable}")
-        String tableName = ""
-        switch (sourceTable) {
-            case VersionBase.WhichTable.CV :
-                tableName = "CV_VERSIONS"
-                break
-            case VersionBase.WhichTable.LABEL :
-                tableName = "LABEL_VERSIONS"
-                break
-            case VersionBase.WhichTable.KEYVALUE :
-                tableName = "KEYVALUES_VERSIONS"
-                break
-            default:
-                log.error("incorrect table passed to getLastVersion - ${sourceTable}")
-        }
-        SqlSession session
-        VersionBase version = null
-        try {
-            session = parent.sqlSessionFactory.openSession(true)
-            ImportMapper map = session.getMapper(ImportMapper.class)
-            version = map.getLastVersion(decoderId, tableName)
-            log.debug("version number returned is ${version}")
-        } catch (Exception e) {
-            log.error("Exception attempting to get the last version", e)
-        } finally {
-        return version
-        }
-    }
-
     ArrayList<FunctionLabel> getFunctionLabelsFor(int decoderId) {
         log.debug("getting a list of FunctionLabels for decoderId ${decoderId}")
         ArrayList<FunctionLabel> retVal  = (ArrayList<FunctionLabel>)executeSql({ImportMapper map, int id ->
