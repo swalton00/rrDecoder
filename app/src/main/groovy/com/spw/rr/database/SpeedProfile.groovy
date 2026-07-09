@@ -3,8 +3,6 @@ package com.spw.rr.database
 import groovy.transform.ToString
 import groovy.util.logging.Log4j
 
-@Log4j
-@ToString(includeFields = true,includePackage = false, includeNames = true)
 class SpeedProfile extends AbstractItem {
     Integer id
     Integer speedStep
@@ -30,5 +28,15 @@ class SpeedProfile extends AbstractItem {
 
     void setValue(String newValue) {
         log.error("Speed Profiles should not be receiving setValue, getValue requests")
+    }
+
+    @Override
+    void setOldValue(AbstractDiff diff) {
+        log.error("Speed profiles should not invoke Diffs")
+    }
+
+    @Override
+    void setNewValue(AbstractDiff diff) {
+        log.error("Speed profiles should not invoke Diffs")
     }
 }

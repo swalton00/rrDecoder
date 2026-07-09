@@ -2,7 +2,9 @@ package com.spw.rr.database
 
 import com.spw.rr.controllers.DataController
 import groovy.transform.ToString
+import groovy.util.logging.Log4j
 
+@Log4j
 @ToString(includeFields = true, includePackage = false, includeNames = true)
 class CvValues extends AbstractItem{
     Integer id
@@ -29,4 +31,22 @@ class CvValues extends AbstractItem{
         cvValue = newValue
     }
 
+    @Override
+    void setOldValue(AbstractDiff diff) {
+        if (!(diff instanceof CV_Diff)) {
+            log.error("Wrong type of diff passed to setOldValue - ${diff}")
+            throw new RuntimeException("Wrong type pass to CV setOldValue")
+        }
+        ((CV_Diff)diff).oldValue = cvValue
+    }
+
+    @Override
+    void setNewValue(AbstractDiff diff) {
+        if (!(diff instanceof CV_Diff)) {
+            log.error("Wrong type of diff passed to setNewValue - ${diff}")
+            throw new RuntimeException("Wrong type pass to CV setNewValue")
+        }
+        ((CV_Diff)diff).newalue = cvValue
+
+    }
 }

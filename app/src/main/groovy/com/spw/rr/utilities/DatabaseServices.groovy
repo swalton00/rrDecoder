@@ -340,9 +340,11 @@ class DatabaseServices {
                 tableName = "CV_VERSIONS"
                 break
             default:
-                thrown new RuntimeException("Unknown value for table source ${version} and ${version.tableSource}")
+                log.error("VersionBase table source not set")
+                throw new RuntimeException("Unknown value for table source ${version} and ${version.tableSource}")
         }
         map.insertVersion(version, tableName)
+        version.hasBeenWritten = true
     }
 
     void deleteOldItems(VersionBase.WhichTable table, Integer decoderId, ArrayList<String> itemList) {
@@ -384,6 +386,15 @@ class DatabaseServices {
         map.insertLabelDiff(labelDiff)
     }
 
+    void insertKeyDiff(KeyDiff diff) {
+        log.debug("inserting new KeyDiff ${diff}")
+        if (session == null) {
+            throw new RuntimeException("attempting to insert LabelDiff outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        map.insertKeyValueDiff(diff)
+    }
+
     void deleteOldKeyValues(DecoderEntry decoderEntry) {
         log.debug("delete all keyValues for this decoder")
         if (session == null) {
@@ -402,14 +413,21 @@ class DatabaseServices {
         map.deleteOldLabels(decoderEntry)
     }
 
-    KeyValuePairs insertKeyValuePair(KeyValuePairs kvp) {
+    KeyValuePairs insertKeyValuePair(KeyValuePairs kvp, boolean useUpdate = false) {
         log.debug("adding a new KeyValuePair: ${kvp}")
         if (session == null) {
             throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
-        map.insertKeyValuePairs(kvp)
-        log.debug("inserted value was ${kvp}")
+        if (useUpdate) {
+            int updatedCount = map.updateKeyValuePairs(kvp)
+            if (updatedCount != 1) {
+                log.error("update count was not equal to 1 - was ${updatedCount}")
+            }
+        } else {
+            map.insertKeyValuePairs(kvp)
+        }
+            log.debug("inserted value was ${kvp}")
         return kvp
     }
 
@@ -510,6 +528,9 @@ class DatabaseServices {
             if (!inTransaction) {
                 session.close()
             }
+            if (version) {
+                version.tableSource = sourceTable
+            }
             return version
         }
     }
@@ -524,10 +545,10 @@ class DatabaseServices {
                     returnList =  map.getFunctionLabels(decoderId)
                     break
                 case WhichTable.KEYVALUE :
-                    returnList = map.getFunctionLabels(decoderId)
+                    returnList = map.getKeyValuesFor(decoderId)
                     break
                 case WhichTable.CV :
-                    returnList = map.getFunctionLabels(decoderId)
+                    returnList = map.getCvValuesFor(decoderId)
                     break
                 default :
                     log.error("incorrect selection of tableType - value ${tableType}")

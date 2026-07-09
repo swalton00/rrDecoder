@@ -45,4 +45,24 @@ class FunctionLabel extends AbstractItem {
     void setValue(String newValue) {
         functionLabel = newValue
     }
+
+    @Override
+    void setOldValue(AbstractDiff diff) {
+        if (!(diff instanceof LabelDiff) ) {
+            log.error("FunctionLabel was asked to set old in the wrong type of Diff")
+            throw new RuntimeException("Wrong type of diff passed to FunctionLabel ${diff}")
+        }
+        ((LabelDiff)diff).oldValue = functionLabel
+        ((LabelDiff)diff).oldLocked = locked
+    }
+
+    @Override
+    void setNewValue(AbstractDiff diff) {
+        if (!(diff instanceof LabelDiff) ) {
+            log.error("FunctionLabel was asked to set old in the wrong type of Diff")
+            throw new RuntimeException("Wrong type of diff passed to FunctionLabel ${diff}")
+        }
+        ((LabelDiff)diff).newValue = functionLabel
+        ((LabelDiff)diff).newLocked = locked
+    }
 }

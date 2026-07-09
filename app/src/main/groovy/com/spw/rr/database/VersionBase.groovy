@@ -7,16 +7,24 @@ import java.sql.Timestamp
 class VersionBase {
 
     Integer decoderId
-    String  key
     Integer versionNumber
     Timestamp createdOn
 
     enum WhichTable {
         CV,
         LABEL,
-        KEYVALUE
+        KEYVALUE,
+        UNKNOWN
     }
 
-    WhichTable tableSource
+    VersionBase() {
+
+    }
+
+    VersionBase(WhichTable which) {
+        this.tableSource = which
+    }
+
+    WhichTable tableSource = WhichTable.UNKNOWN
     boolean hasBeenWritten = false
 }

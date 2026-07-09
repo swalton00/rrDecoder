@@ -2,6 +2,7 @@ package com.spw.rr.utilities
 
 import com.spw.rr.controllers.SeeProgressController
 import com.spw.rr.database.*
+import com.spw.rr.database.VersionBase.WhichTable
 import groovy.xml.XmlSlurper
 import org.perf4j.log4j.Log4JStopWatch
 import org.slf4j.Logger
@@ -79,38 +80,84 @@ class ImportService {
 
     void importKeyDefs(def entryList, int decoderId, DecoderEntry decoderEntry) {
         log.debug("Processing the Key Value pairs for ${decoderEntry}")
-        int keyPairSize = entryList.size()
+        def entry = entryList.keyvaluepair
+        int keyPairSize = entry.size()
         log.debug("size of keyValue pair list is ${keyPairSize}")
-      //  VersionBase version =
+        VersionBase version = diffPhaseOne(decoderId, VersionBase.WhichTable.KEYVALUE)
+        boolean newKeyDefs = false
+        Hashtable<String, AbstractItem> existingHash = diffPhaseTwo(decoderId, WhichTable.KEYVALUE)
+        if (existingHash == null) {
+            newKeyDefs = true
+        }
+        for (index in 0..<keyPairSize) {
+            log.debug("KVP Entry index is ${index} and this entry is ${entry[index].'key'.text()}")
+            KeyValuePairs kvp = new KeyValuePairs()
+            kvp.decoderId = decoderId
+            kvp.pair_key = entry[index].'key'.text()
+            kvp.pair_value = entry[index].'value'.text()
+            log.debug("new keyValuePair is ${kvp}")
+            log.debug("new KVP is Decoder: ${kvp.decoderId} , pairKey: ${kvp.pair_key} and value: ${kvp.pair_value}")
+            if (newKeyDefs) {
+                database.insertKeyValuePair(kvp)
+            } else {
+                KeyDiff diff = new KeyDiff()
+                diff.pairKey = kvp.pair_key
+                diff.newValue = kvp.pair_value
+                log.debug("now going to processDiff")
+                boolean  useUpdate = processDiff(existingHash, kvp, version, diff)
+                if (diff.wasChanged()) {
+                    log.debug("kvp was changed ${diff}")
+
+                    database.insertKeyValuePair(kvp, useUpdate)
+                    database.insertKeyDiff(diff)
+                }
+            }
+        }
     }
 
+    VersionBase diffPhaseOne(int decoderId, WhichTable tableType) {
+        log.debug("processing diff phase one for decoder ${decoderId}")
+        VersionBase version = database.getLastVersion(decoderId, tableType)
+        if (version == null) {
+            version = new VersionBase(tableType)
+            version.versionNumber = 1
+            version.decoderId = decoderId
+            version.tableSource = tableType
+        } else {
+            version.decoderId = decoderId
+            version.tableSource = tableType
+            version.versionNumber += 1
+        }
+        version.createdOn = dbTime
+        log.debug("returning version ${version}")
+        return version
+    }
 
+    Hashtable<String, AbstractItem> diffPhaseTwo(int decoderId, WhichTable tableType) {
+        log.debug("getting existing entries for ${decoderId} of type ${tableType}")
+        ArrayList<AbstractItem> existing = database.getItemsFors(decoderId, tableType)
+        if (existing == null | existing.size() == 0) {
+            log.debug("no existing entries for decoder ${decoderId} of type ${tableType}")
+            return null
+        }
+        Hashtable<String, AbstractItem> existingHash = new Hashtable<>()
+        existing.each {
+            existingHash.put(it.getKey(), it)
+        }
+
+        return existingHash
+    }
 
     void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
         log.debug("Processing the labels for id ${decoderId} and entry ${decoderEntry}")
         int functionLabelSize = entryList.'functionlabels'.functionlabel.size()
         log.debug("functionLabelSize is ${functionLabelSize}")
-        VersionBase functionVersion = database.getLastVersion(decoderId, VersionBase.WhichTable.LABEL)
-        if (functionVersion == null) {
-            functionVersion = new VersionBase()
-            functionVersion.decoderId = decoderId
-            functionVersion.versionNumber = 1
-        } else {
-            functionVersion.versionNumber += 1
-        }
-        functionVersion.createdOn = dbTime
-        functionVersion.tableSource = VersionBase.WhichTable.LABEL
-        Hashtable<String, AbstractItem> functionHash = new Hashtable<>()
-        ArrayList<FunctionLabel> existingEntries = database.getItemsFors(decoderId, VersionBase.WhichTable.LABEL)
+        VersionBase functionVersion = diffPhaseOne(decoderId, WhichTable.LABEL)
         boolean newDecoderFunctions = false
-        if (existingEntries == null | existingEntries.size() == 0) {
+        Hashtable<String, AbstractItem> functionHash = diffPhaseTwo(decoderId, WhichTable.LABEL)
+        if (functionHash == null) {
             newDecoderFunctions = true
-        } else {
-            existingEntries.each {
-                functionHash.put(it.getKey(), it)
-            }
         }
-        log.debug("Existing list has ${existingEntries.size()} and hash has ${functionHash.size()}")
         for (labelEntry in 0..<functionLabelSize) {
             log.debug("LabelEntry (index) is ${labelEntry}")
             log.debug("this function label entry has ${entryList.'functionlabels'.functionlabel[labelEntry].'@num'.text()} and ${entryList.'functionlabels'.functionlabel[labelEntry].text()}")
@@ -129,24 +176,16 @@ class ImportService {
                 database.insertFunctionLabel(funcLab)
             } else {
                 LabelDiff diff = new LabelDiff()
-                diff.decoderId = decoderId
-                diff.functionNumber = funcLab.functionNum
-                diff.newValue = funcLab.functionLabel
-                diff.newLocked = funcLab.locked
                 boolean useUpdate = processDiff(functionHash, funcLab, functionVersion, diff)
                 if (diff.wasChanged()) {
                     // item was changed - write it
                     log.debug("found a changed item - ${diff}")
                     database.insertFunctionLabel(funcLab, useUpdate)
-                    if (!functionVersion.hasBeenWritten) {
-                        database.insertVersion(functionVersion)
-                        functionVersion.hasBeenWritten = true
-                    }
                     database.insertLabelDiff(diff)
                 }
             }
         }
-        if (functionHash.size() > 0) {
+        if (functionHash != null && functionHash.size() > 0) {
             ArrayList<String> deleteList = new ArrayList<>()
             log.debug("Remain items count in hash list is ${functionHash.size()}")
             if (!functionVersion.hasBeenWritten) {
@@ -179,6 +218,7 @@ class ImportService {
      * @return true if the item was found (and thus needs to be updated)
      *      deletes the existing item from the hash if found
      *      sets the createdOn to dbTime
+     *      fills in the diff fields
      *      sets the versionNumber to the value passed in the version item
      *      newItem won't be null (wouldn't be here if that would be the case)
      *      existing might be null if it wasn't found (and thus shouldn't be in the hash)
@@ -186,22 +226,33 @@ class ImportService {
     boolean processDiff(Hashtable<String, AbstractItem> existingHash, AbstractItem newItem, VersionBase version, AbstractDiff diff) {
         log.debug("process new ${newItem} with version of ${version}")
         boolean updateNeeded = false
+        boolean changed = false
         AbstractItem existing = existingHash.get(newItem.getKey())
         diff.versionNumber = version.versionNumber
+        diff.decoderId = newItem.decoderId
+        diff.newValue = newItem.value
+        if (newItem.decoderId == 143 && newItem instanceof KeyValuePairs) {
+            log.debug("got here now")
+        }
         if (existing == null) {
             updateNeeded = false
+            changed = true
+            log.debug("no existing item - an insert is needed ")
         } else {
             updateNeeded = true
             version.createdOn = dbTime
+            diff.decoderId = newItem.decoderId
             diff.versionNumber = version.versionNumber
             existingHash.remove(newItem.getKey())
-            diff.newValue = newItem.getValue()
-            diff.oldValue = existing.getValue()
-            if (newItem instanceof FunctionLabel) {
-                ((LabelDiff) diff).oldLocked = ((FunctionLabel) existing).locked
-                ((LabelDiff) diff).newLocked = ((FunctionLabel) newItem).locked
-            }
-            updateNeeded = diff.wasChanged()
+            newItem.setNewValue(diff)
+            existing.setOldValue(diff)
+            changed = diff.wasChanged()
+            log.debug("testing version")
+
+        }
+        if (changed && !version.hasBeenWritten) {
+            log.debug("inserting the version record - ${version}")
+            database.insertVersion(version)
         }
         return updateNeeded
     }
@@ -291,15 +342,12 @@ class ImportService {
                     importFunctionLabels(entryList[i], newEntry.id, newEntry)
                     functionsStopWatch.stop()
                 }
-                int keyValuesSize = entryList[i].attributepairs.keyvaluepair.size()
+                int keyValuesSize = entryList[i].attributepairs.size()
+                def keyPairs = entryList[i].attributepairs
                 log.debug("key value size is ${keyValuesSize}")
-                if (decoderExists) {
-                    log.debug("Deleting old keyValues entries")
-                    database.deleteOldKeyValues(newEntry)
-                }
-            //    importKeyDefs(entryList[i].attributepairs.keyvaluepair, newEntry.id, newEntry)
+                importKeyDefs(keyPairs, newEntry.id, newEntry)
 
-                if (keyValuesSize > 0) {
+             /*   if (keyValuesSize > 0) {
                     Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
                     for (j in 0..<keyValuesSize) {
                         KeyValuePairs kvp = new KeyValuePairs()
@@ -307,10 +355,11 @@ class ImportService {
                         kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
                         kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
                         log.debug("new key value pair is: ${kvp}")
+
                         database.insertKeyValuePair(kvp)
                     }
                     keyValsStopWatch.stop()
-                }
+                }*/
                 int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
                 log.debug("speed profile size is ${speedProfileSize}")
                 if (speedProfileSize > 0) {

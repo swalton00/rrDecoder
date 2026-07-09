@@ -3,6 +3,8 @@ package com.spw.rr.database
 import com.spw.rr.database.VersionBase.WhichTable
 import org.apache.ibatis.annotations.Param
 
+import java.security.Key
+
 interface Mapper {
 
     List<RosterEntry> listRosters()
@@ -18,7 +20,9 @@ interface Mapper {
     int updateFunctionLabel(FunctionLabel functionLabel)
     void insertFunctionVersion(VersionBase version)
     void insertLabelDiff(LabelDiff labelDiff)
-    void insertKeyValuePairs(KeyValuePairs)
+    void insertKeyValuePairs(KeyValuePairs keyValuePairs)
+    int updateKeyValuePairs(KeyValuePairs keyValuePairs)
+    void insertKeyValueDiff(KeyDiff keyDiff)
     void insertVersion(@Param("version")VersionBase, @Param("tableName")String tableName)
     int deleteObsoleteItems(@Param("table")String table,
                             @Param("columnName")String columnName,

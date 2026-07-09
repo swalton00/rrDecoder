@@ -204,6 +204,11 @@
                 Locked = #{locked}
         WHERE decoderID = #{decoderId} AND FunctionNumber = #{functionNum}
     </update>
+    <update id="updateKeyValuePairs" parameterType="KeyValuePairs">
+            UPDATE KEYVALUES
+            SET pair_value = #{pairValue}
+            WHERE decoderID = #{decoderId} AND PAIR_KEY = #{pairKey}
+    </update>
     <insert id="insertFunctionVersion" parameterType="VersionBase" useGeneratedKeys="true">
         INSERT INTO LabelVersions
         (
@@ -239,6 +244,11 @@
                 #{oldLocked},
                 #{newLocked}
             )
+    </insert>
+    <insert id="insertKeyValueDiff" parameterType="KeyDiff">
+        INSERT INTO KEYVALUES_DIFF
+            (DECODERID, VERSION_NUMBER, PAIR_KEY, OLD_VALUE, NEW_VALUE)
+        VALUES ( #{decoderId}, #{versionNumber}, #{pairKey}, #{oldValue}, #{newValue}  )
     </insert>
     <insert id="insertVersion">
         INSERT INTO \${tableName}
