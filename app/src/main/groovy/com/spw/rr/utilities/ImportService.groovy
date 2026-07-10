@@ -113,6 +113,31 @@ class ImportService {
                 }
             }
         }
+        if (existingHash && existingHash.size() > 0) {
+            log.debug("have some KeyValues to remove - ${existingHash.size()}")
+            ArrayList<String> deleteList = new ArrayList()
+            if (!version.hasBeenWritten) {
+                log.debug("Version hasn't been written yet - write it")
+                database.insertVersion(version)
+                version.hasBeenWritten = true
+            }
+            existingHash.eachWithIndex{  existingEntry, int i ->
+                /*
+                    create a new diff entry for each entry in the array
+                    set the values, write it
+                    then add to the list of entries to be deleted
+                 */
+                KeyDiff newDiff = new KeyDiff()
+                newDiff.decoderId = decoderId
+                newDiff.versionNumber = version.versionNumber
+                def oldEntry = existingEntry.value as KeyValuePairs
+                newDiff.oldValue = oldEntry.pair_value
+                newDiff.pairKey = oldEntry.pair_key
+                deleteList.add(newDiff.pairKey)
+                database.insertKeyDiff(newDiff)
+            }
+            database.deleteOldItems(WhichTable.KEYVALUE, decoderId, deleteList)
+        }
     }
 
     VersionBase diffPhaseOne(int decoderId, WhichTable tableType) {
