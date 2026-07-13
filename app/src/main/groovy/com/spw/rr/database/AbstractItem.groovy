@@ -14,6 +14,8 @@ abstract class AbstractItem {
 
     abstract String  getKey();
 
+    abstract void setKey(String key);
+
     abstract void addRows(List<String> thisLine);
 
     abstract String getValue();

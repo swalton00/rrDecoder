@@ -245,6 +245,18 @@
                 #{newLocked}
             )
     </insert>
+    <insert id="insertCVDiff" parameterType="CV_Diff">
+        INSERT INTO CV_DIFF
+            (DECODERID, VERSION_NUMBER, CVNUMBER, OLD_VALUE, NEW_VALUE)
+        VALUES
+            (
+                #{decoderId},
+                #{versionNumber},
+                #{cvNumber},
+                #{oldValue},
+                #{newValue}
+            )
+    </insert>
     <insert id="insertKeyValueDiff" parameterType="KeyDiff">
         INSERT INTO KEYVALUES_DIFF
             (DECODERID, VERSION_NUMBER, PAIR_KEY, OLD_VALUE, NEW_VALUE)

@@ -17,6 +17,10 @@ class CvValues extends AbstractItem{
         return cvNumber
     }
 
+    void setKey(String key) {
+        cvNumber = key
+    }
+
     @Override
     void addRows(List<String> thisLine) {
         thisLine.add(cvValue)

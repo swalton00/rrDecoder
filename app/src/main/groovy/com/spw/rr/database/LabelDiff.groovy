@@ -23,6 +23,12 @@ class LabelDiff extends AbstractDiff{
     }
 
     @Override
+    void setKey(String key) {
+        functionNumber = key
+    }
+
+
+    @Override
     boolean wasChanged() {
         if ((!oldValue || oldValue.isBlank()) && (!newValue || newValue.isBlank())) {
             return false

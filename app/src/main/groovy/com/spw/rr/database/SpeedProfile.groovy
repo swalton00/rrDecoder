@@ -15,6 +15,10 @@ class SpeedProfile extends AbstractItem {
         return speedStep.toString()
     }
 
+    void setKey(String key) {
+        throw new RuntimeException("Cannot set the key of Speed Profile item")
+    }
+
     @Override
     void addRows(List<String> thisLine) {
         thisLine.add(String.format("%.3f", forwardValue))

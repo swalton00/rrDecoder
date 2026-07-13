@@ -104,7 +104,7 @@ class ImportService {
                 diff.pairKey = kvp.pair_key
                 diff.newValue = kvp.pair_value
                 log.debug("now going to processDiff")
-                boolean  useUpdate = processDiff(existingHash, kvp, version, diff)
+                boolean useUpdate = processDiff(existingHash, kvp, version, diff)
                 if (diff.wasChanged()) {
                     log.debug("kvp was changed ${diff}")
 
@@ -113,6 +113,7 @@ class ImportService {
                 }
             }
         }
+
         if (existingHash && existingHash.size() > 0) {
             log.debug("have some KeyValues to remove - ${existingHash.size()}")
             ArrayList<String> deleteList = new ArrayList()
@@ -121,12 +122,25 @@ class ImportService {
                 database.insertVersion(version)
                 version.hasBeenWritten = true
             }
-            existingHash.eachWithIndex{  existingEntry, int i ->
-                /*
+            diffCleanUp(existingHash,
+                decoderId,
+                WhichTable.KEYVALUE,
+                    version,
+                    {AbstractItem oldItem ->
+                        AbstractDiff newDiff = new KeyDiff()
+                        log.debug("in the closure - new diff is ${newDiff}")
+                        return newDiff
+                    })
+/*
+
+            existingHash.eachWithIndex { existingEntry, int i ->
+                */
+/*
                     create a new diff entry for each entry in the array
                     set the values, write it
                     then add to the list of entries to be deleted
-                 */
+                 *//*
+
                 KeyDiff newDiff = new KeyDiff()
                 newDiff.decoderId = decoderId
                 newDiff.versionNumber = version.versionNumber
@@ -137,6 +151,7 @@ class ImportService {
                 database.insertKeyDiff(newDiff)
             }
             database.deleteOldItems(WhichTable.KEYVALUE, decoderId, deleteList)
+*/
         }
     }
 
@@ -171,6 +186,54 @@ class ImportService {
         }
 
         return existingHash
+    }
+
+    /**
+     * Called to process with the existing data and remove any left over items
+     * @param existingHash  HashTable with the remaining items (if any)
+     * @param decoderId     the decoder that we are processing
+     * @param tableType     which type of diff are working with
+     * @param version       the version record for this diff
+     * @param
+     */
+    void diffCleanUp(Hashtable<String, AbstractItem> existingHash,
+                     int decoderId,
+                     WhichTable tableType,
+                     VersionBase version,
+                    Closure<AbstractDiff> createClosure ) {
+        if (!existingHash) {
+            log.debug("no hashtable - nothing to clean up")
+            return
+        }
+        log.debug("Cleaning up the hash with a size of ${existingHash.size()}")
+        if (existingHash.size() == 0) {
+            log.debug("no previous entries - done with cleanup")
+            return
+        }
+        ArrayList<String> deleteList = new ArrayList<>()
+        if (!version.hasBeenWritten) {
+            log.debug("version hasn't been written yet - write it now")
+            database.insertVersion(version)
+            version.hasBeenWritten = true
+        }
+        existingHash.eachWithIndex { existingEntry, int i ->
+            /*
+          create a new diff entry for each entry in the array
+          set the values, write it
+          then add to the list of entries to be deleted
+            */
+            AbstractItem entry = existingEntry.value
+            log.debug("asking to create a new diff - table type is ${tableType}")
+            AbstractDiff newDiff = createClosure(entry)
+            log.debug("created a new diff - ${newDiff}")
+            newDiff.decoderId = decoderId
+            newDiff.versionNumber = version.versionNumber
+            newDiff.key = entry.key
+            newDiff.oldValue = entry.value
+            deleteList.add(newDiff.key)
+            database.insertDiff(newDiff, tableType)
+        }
+        database.deleteOldItems(tableType, decoderId, deleteList)
     }
 
     void importFunctionLabels(def entryList, int decoderId, DecoderEntry decoderEntry) {
@@ -210,7 +273,13 @@ class ImportService {
                 }
             }
         }
-        if (functionHash != null && functionHash.size() > 0) {
+        diffCleanUp(functionHash, decoderId, WhichTable.LABEL, functionVersion,
+                {AbstractItem oldItem ->
+                    AbstractDiff newDiff = new LabelDiff()
+                    newDiff.oldLocked = ((FunctionLabel)oldItem).locked
+                    return newDiff
+                })
+        /*if (functionHash != null && functionHash.size() > 0) {
             ArrayList<String> deleteList = new ArrayList<>()
             log.debug("Remain items count in hash list is ${functionHash.size()}")
             if (!functionVersion.hasBeenWritten) {
@@ -218,10 +287,10 @@ class ImportService {
                 functionVersion.hasBeenWritten = true
             }
             functionHash.eachWithIndex { entry, int i ->
-                /* create a diff entry each old (but deleted in new) entry
+                *//* create a diff entry each old (but deleted in new) entry
                 copy existing values to diff and write it
                 create list of functionNumbers to be deleted
-                */
+                *//*
                 LabelDiff newDiff = new LabelDiff()
                 newDiff.decoderId = decoderId
                 newDiff.versionNumber = functionVersion.versionNumber
@@ -232,7 +301,7 @@ class ImportService {
                 database.insertLabelDiff(newDiff)
             }
             database.deleteOldItems(VersionBase.WhichTable.LABEL, decoderId, deleteList)
-        }
+        }*/
     }
 
     /**
@@ -256,6 +325,7 @@ class ImportService {
         diff.versionNumber = version.versionNumber
         diff.decoderId = newItem.decoderId
         diff.newValue = newItem.value
+        diff.setKey(newItem.getKey())
         if (newItem.decoderId == 143 && newItem instanceof KeyValuePairs) {
             log.debug("got here now")
         }
@@ -372,19 +442,19 @@ class ImportService {
                 log.debug("key value size is ${keyValuesSize}")
                 importKeyDefs(keyPairs, newEntry.id, newEntry)
 
-             /*   if (keyValuesSize > 0) {
-                    Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
-                    for (j in 0..<keyValuesSize) {
-                        KeyValuePairs kvp = new KeyValuePairs()
-                        kvp.decoderId = newEntry.id
-                        kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
-                        kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
-                        log.debug("new key value pair is: ${kvp}")
+                /*   if (keyValuesSize > 0) {
+                       Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
+                       for (j in 0..<keyValuesSize) {
+                           KeyValuePairs kvp = new KeyValuePairs()
+                           kvp.decoderId = newEntry.id
+                           kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
+                           kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
+                           log.debug("new key value pair is: ${kvp}")
 
-                        database.insertKeyValuePair(kvp)
-                    }
-                    keyValsStopWatch.stop()
-                }*/
+                           database.insertKeyValuePair(kvp)
+                       }
+                       keyValsStopWatch.stop()
+                   }*/
                 int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
                 log.debug("speed profile size is ${speedProfileSize}")
                 if (speedProfileSize > 0) {

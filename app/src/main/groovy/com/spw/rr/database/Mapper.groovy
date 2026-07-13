@@ -23,6 +23,7 @@ interface Mapper {
     void insertKeyValuePairs(KeyValuePairs keyValuePairs)
     int updateKeyValuePairs(KeyValuePairs keyValuePairs)
     void insertKeyValueDiff(KeyDiff keyDiff)
+    void insertCVDiff(CV_Diff cvDiff)
     void insertVersion(@Param("version")VersionBase, @Param("tableName")String tableName)
     int deleteObsoleteItems(@Param("table")String table,
                             @Param("columnName")String columnName,

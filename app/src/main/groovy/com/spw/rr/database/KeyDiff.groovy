@@ -8,4 +8,8 @@ class KeyDiff extends AbstractDiff {
     String getKey() {
         return pairKey
     }
+
+    void setKey(String key) {
+        pairKey = key
+    }
 }

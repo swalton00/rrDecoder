@@ -347,7 +347,7 @@ class DatabaseServices {
         version.hasBeenWritten = true
     }
 
-    void deleteOldItems(VersionBase.WhichTable table, Integer decoderId, ArrayList<String> itemList) {
+    void deleteOldItems(WhichTable table, Integer decoderId, ArrayList<String> itemList) {
         log.debug("deleting old items from ${table}, decoder was ${decoderId} and item list ${itemList}")
         if (session == null) {
             throw new RuntimeException("attempting to run insertVersion outside of a transaction")
@@ -394,6 +394,29 @@ class DatabaseServices {
         Mapper map = session.getMapper(Mapper.class)
         map.insertKeyValueDiff(diff)
     }
+
+    void insertDiff(AbstractDiff newDiff, WhichTable tableType)
+    {
+        log.debug("inserting a new Diff - ${newDiff}")
+        if (session == null){
+            throw new RuntimeException("attempting to insert AbstractDiff outside of a transaction")
+        }
+        Mapper map = session.getMapper(Mapper.class)
+        switch (tableType) {
+            case WhichTable.LABEL :
+                map.insertLabelDiff((LabelDiff) newDiff)
+                break
+            case WhichTable.KEYVALUE :
+                map.insertKeyValueDiff((KeyDiff) newDiff)
+                break
+            case WhichTable.CV :
+                map.insertCVDiff((CV_Diff) newDiff)
+                break
+            default :
+                log.error("unknown Diff type requested")
+        }
+    }
+
 
     void deleteOldKeyValues(DecoderEntry decoderEntry) {
         log.debug("delete all keyValues for this decoder")

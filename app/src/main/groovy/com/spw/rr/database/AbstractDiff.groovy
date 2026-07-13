@@ -12,6 +12,8 @@ abstract class AbstractDiff {
 
     abstract String getKey();
 
+    abstract void setKey(String key);
+
     boolean wasChanged() {
         if (oldValue != null) {
             if (oldValue.equals(newValue)) {

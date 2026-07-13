@@ -9,6 +9,10 @@ class CV_Diff extends AbstractDiff {
         return cvNumber
     }
 
+    void setKey(String key) {
+        cvNumber = key
+    }
+
     @Override
     boolean wasChanged() {
         return false

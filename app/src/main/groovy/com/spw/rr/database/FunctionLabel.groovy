@@ -34,6 +34,10 @@ class FunctionLabel extends AbstractItem {
         return functionNum.toString()
     }
 
+    void setKey(String key) {
+        functionNum = key
+    }
+
     void addRows(List<String> thisLine) {
         thisLine.add(functionLabel)
     }

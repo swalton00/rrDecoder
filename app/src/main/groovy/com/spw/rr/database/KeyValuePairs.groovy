@@ -23,6 +23,11 @@ class KeyValuePairs extends AbstractItem{
     }
 
     @Override
+    void setKey(String key) {
+        pair_key = key
+    }
+
+    @Override
     void addRows(List<String> thisLine) {
         thisLine.add(pair_value)
     }
