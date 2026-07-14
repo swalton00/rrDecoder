@@ -50,7 +50,7 @@ class CvValues extends AbstractItem{
             log.error("Wrong type of diff passed to setNewValue - ${diff}")
             throw new RuntimeException("Wrong type pass to CV setNewValue")
         }
-        ((CV_Diff)diff).newalue = cvValue
+        ((CV_Diff)diff).newValue = cvValue
 
     }
 }

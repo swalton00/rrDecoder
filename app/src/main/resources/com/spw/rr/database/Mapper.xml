@@ -165,10 +165,16 @@
                 #{cvValue}
             )
     </insert>
-    <update id="updateDecoderDetailTime" parameterType="Integer">
+    <update id="updateCVs" parameterType="CVvalues">
+        UPDATE CvValues
+        SET cvValue = #{cvValue}
+        WHERE decoderId = #{decoderId}
+          AND cvNumber = #{cvNumber}
+    </update>
+    <update id="updateDecoderDetailTime">
         UPDATE Decoder
-        set detailTime = CURRENT_TIMESTAMP
-        WHERE ID = #{Id}
+        set detailTime = #{arg1}
+        WHERE ID = #{arg0}
     </update>
     <select id="findRosterEntry" resultType="RosterEntry">
         SELECT id,
@@ -392,8 +398,8 @@
     <select id="getCvValuesFor" parameterType="int" resultType = "CvValues">
         SELECT
             id,
-            CVNUMBER as cv_number,
-            CVVALUE as cv_value
+            CVNUMBER as cvNumber,
+            CVVALUE as cvValue
         FROM
             CVVALUES
         WHERE

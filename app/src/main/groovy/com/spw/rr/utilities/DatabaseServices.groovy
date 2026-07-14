@@ -13,6 +13,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.Timestamp
 
 @Singleton
 class DatabaseServices {
@@ -65,8 +66,8 @@ class DatabaseServices {
         log.debug("Testing database connection")
         Connection conn = null
         try {
-           conn = DriverManager.getConnection(url, userid, password)
-           if (conn != null) {
+            conn = DriverManager.getConnection(url, userid, password)
+            if (conn != null) {
                 log.debug("connection succeeded")
                 PreparedStatement stmt = conn.prepareStatement(SCHEMA_TEST)
                 stmt.setString(1, schema.toUpperCase())
@@ -123,12 +124,12 @@ class DatabaseServices {
 
                 }
                 returnValue = true
-                }
+            }
         } catch (Exception e) {
             log.error("exception working with the database", e)
             errorMessage = e.getMessage()
             errorFound = true
-          //  throw new RuntimeException("exception working with the database")
+            //  throw new RuntimeException("exception working with the database")
         } finally {
             if (conn != null) {
                 log.debug("closing connection")
@@ -148,7 +149,7 @@ class DatabaseServices {
         } else {
             newURL = settings.url
         }
-        newURL =  newURL + "SCHEMA=" + settings.schema
+        newURL = newURL + "SCHEMA=" + settings.schema
         log.debug("Mybatis will be using URL of ${newURL}")
         dbProps.put("url", newURL)
         dbProps.put("username", settings.userid)
@@ -264,7 +265,7 @@ class DatabaseServices {
             session = sqlSessionFactory.openSession(true)
             Mapper map = session.getMapper(Mapper.class)
             results = map.listDecodersFor(rosters)
-        }  finally {
+        } finally {
             session.close()
         }
     }
@@ -330,13 +331,13 @@ class DatabaseServices {
         Mapper map = session.getMapper(Mapper.class)
         String tableName = ""
         switch (version.tableSource) {
-            case VersionBase.WhichTable.LABEL :
+            case VersionBase.WhichTable.LABEL:
                 tableName = "LABEL_VERSIONS"
                 break
-            case VersionBase.WhichTable.KEYVALUE :
+            case VersionBase.WhichTable.KEYVALUE:
                 tableName = "KEYVALUES_VERSIONS"
                 break
-            case VersionBase.WhichTable.CV :
+            case VersionBase.WhichTable.CV:
                 tableName = "CV_VERSIONS"
                 break
             default:
@@ -356,15 +357,15 @@ class DatabaseServices {
         String tableName = ""
         String columnName = ""
         switch (table) {
-            case VersionBase.WhichTable.LABEL :
+            case VersionBase.WhichTable.LABEL:
                 tableName = "FUNCTIONLABELS"
                 columnName = "FUNCTIONNUMBER"
                 break
-            case VersionBase.WhichTable.KEYVALUE :
+            case VersionBase.WhichTable.KEYVALUE:
                 tableName = "KEYVALUES"
                 columnName = "PAIR_KEY"
                 break
-            case VersionBase.WhichTable.CV :
+            case VersionBase.WhichTable.CV:
                 tableName = "CVVALUES"
                 columnName = "CVNUMBER"
                 break
@@ -395,24 +396,23 @@ class DatabaseServices {
         map.insertKeyValueDiff(diff)
     }
 
-    void insertDiff(AbstractDiff newDiff, WhichTable tableType)
-    {
+    void insertDiff(AbstractDiff newDiff, WhichTable tableType) {
         log.debug("inserting a new Diff - ${newDiff}")
-        if (session == null){
+        if (session == null) {
             throw new RuntimeException("attempting to insert AbstractDiff outside of a transaction")
         }
         Mapper map = session.getMapper(Mapper.class)
         switch (tableType) {
-            case WhichTable.LABEL :
+            case WhichTable.LABEL:
                 map.insertLabelDiff((LabelDiff) newDiff)
                 break
-            case WhichTable.KEYVALUE :
+            case WhichTable.KEYVALUE:
                 map.insertKeyValueDiff((KeyDiff) newDiff)
                 break
-            case WhichTable.CV :
+            case WhichTable.CV:
                 map.insertCVDiff((CV_Diff) newDiff)
                 break
-            default :
+            default:
                 log.error("unknown Diff type requested")
         }
     }
@@ -450,7 +450,7 @@ class DatabaseServices {
         } else {
             map.insertKeyValuePairs(kvp)
         }
-            log.debug("inserted value was ${kvp}")
+        log.debug("inserted value was ${kvp}")
         return kvp
     }
 
@@ -465,24 +465,32 @@ class DatabaseServices {
         return sp
     }
 
-    CvValues insertCVs(CvValues cVvalues) {
+    CvValues insertCVs(CvValues cVvalues, boolean usUpdate) {
         log.debug("adding new CV value: ${cVvalues} for a transaction")
         if (session == null) {
             throw new RuntimeException("attempting to insert a new CV outside a transaction")
         }
         Mapper mapper = session.getMapper(Mapper.class)
-        mapper.insertCVs(cVvalues)
+        if (usUpdate) {
+            int updateCount = mapper.updateCVs(cVvalues)
+            if (updateCount != 1) {
+                log.error("update count should be 1 - was ${updateCount}")
+                throw new RuntimeException("Update count should be 1 - was ${updateCount}")
+            }
+        } else {
+            mapper.insertCVs(cVvalues)
+        }
         log.debug("result was ${cVvalues}")
         return cVvalues
     }
 
-    int updateDetailTime(Integer decoderId) {
+    int updateDetailTime(Integer decoderId, Timestamp timestamp) {
         log.debug("update detail timestamp for decoder id ${decoderId} in a transaction")
         if (session == null) {
             throw new RuntimeException("attempting to insert a new KeyValuePair outside a transaction")
         }
         Mapper mapper = session.getMapper(Mapper.class)
-        return mapper.updateDecoderDetailTime(decoderId)
+        return mapper.updateDecoderDetailTime(decoderId, timestamp)
     }
 
     int deleteDecoderEntry(DecoderEntry decoderEntry) {
@@ -516,19 +524,19 @@ class DatabaseServices {
     }
 
 
-    VersionBase getLastVersion(Integer decoderId, VersionBase.WhichTable sourceTable ) {
+    VersionBase getLastVersion(Integer decoderId, VersionBase.WhichTable sourceTable) {
         log.debug("getting the last version record for ${sourceTable}")
         String tableName = ""
         SqlSession session
         boolean inTransaction = false
         switch (sourceTable) {
-            case VersionBase.WhichTable.CV :
+            case VersionBase.WhichTable.CV:
                 tableName = "CV_VERSIONS"
                 break
-            case VersionBase.WhichTable.LABEL :
+            case VersionBase.WhichTable.LABEL:
                 tableName = "LABEL_VERSIONS"
                 break
-            case VersionBase.WhichTable.KEYVALUE :
+            case VersionBase.WhichTable.KEYVALUE:
                 tableName = "KEYVALUES_VERSIONS"
                 break
             default:
@@ -564,16 +572,16 @@ class DatabaseServices {
             SqlSession session = setup()
             Mapper map = session.getMapper(Mapper.class)
             switch (tableType) {
-                case WhichTable.LABEL :
-                    returnList =  map.getFunctionLabels(decoderId)
+                case WhichTable.LABEL:
+                    returnList = map.getFunctionLabels(decoderId)
                     break
-                case WhichTable.KEYVALUE :
+                case WhichTable.KEYVALUE:
                     returnList = map.getKeyValuesFor(decoderId)
                     break
-                case WhichTable.CV :
+                case WhichTable.CV:
                     returnList = map.getCvValuesFor(decoderId)
                     break
-                default :
+                default:
                     log.error("incorrect selection of tableType - value ${tableType}")
                     throw new RuntimeException("Incorrect Table Type ${tableType}")
             }

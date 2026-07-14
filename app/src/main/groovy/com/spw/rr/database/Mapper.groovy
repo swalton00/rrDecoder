@@ -4,6 +4,7 @@ import com.spw.rr.database.VersionBase.WhichTable
 import org.apache.ibatis.annotations.Param
 
 import java.security.Key
+import java.sql.Timestamp
 
 interface Mapper {
 
@@ -34,7 +35,8 @@ interface Mapper {
     void insertSpeedProfile(SpeedProfile)
     int deleteCVs(Integer decoderId)
     void insertCVs(CvValues cVvalues)
-    int updateDecoderDetailTime(Integer decoderId)
+    int updateCVs(CvValues cvValues)
+    int updateDecoderDetailTime(Integer decoderId, Timestamp)
     VersionBase getLastVersion(@Param("decoderId")int decoderId,
                                @Param("tableName")String tableName)
     ArrayList<FunctionLabel> getFunctionLabels(int decoderId)

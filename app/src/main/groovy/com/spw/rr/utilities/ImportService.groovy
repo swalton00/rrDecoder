@@ -46,7 +46,7 @@ class ImportService {
         return database.getRosterEntry(systemName, fullPath)
     }
 
-    public static String getSystemName() {
+    static String getSystemName() {
         log.debug("getting System name")
         String systemName = System.getenv("COMPUTERNAME")
         log.debug("System name found was ${systemName}")
@@ -83,7 +83,7 @@ class ImportService {
         def entry = entryList.keyvaluepair
         int keyPairSize = entry.size()
         log.debug("size of keyValue pair list is ${keyPairSize}")
-        VersionBase version = diffPhaseOne(decoderId, VersionBase.WhichTable.KEYVALUE)
+        VersionBase version = diffPhaseOne(decoderId, WhichTable.KEYVALUE)
         boolean newKeyDefs = false
         Hashtable<String, AbstractItem> existingHash = diffPhaseTwo(decoderId, WhichTable.KEYVALUE)
         if (existingHash == null) {
@@ -116,7 +116,7 @@ class ImportService {
 
         if (existingHash && existingHash.size() > 0) {
             log.debug("have some KeyValues to remove - ${existingHash.size()}")
-            ArrayList<String> deleteList = new ArrayList()
+           // ArrayList<String> deleteList = new ArrayList()
             if (!version.hasBeenWritten) {
                 log.debug("Version hasn't been written yet - write it")
                 database.insertVersion(version)
@@ -319,15 +319,17 @@ class ImportService {
      */
     boolean processDiff(Hashtable<String, AbstractItem> existingHash, AbstractItem newItem, VersionBase version, AbstractDiff diff) {
         log.debug("process new ${newItem} with version of ${version}")
-        boolean updateNeeded = false
-        boolean changed = false
+        boolean updateNeeded
+        boolean changed
         AbstractItem existing = existingHash.get(newItem.getKey())
         diff.versionNumber = version.versionNumber
         diff.decoderId = newItem.decoderId
         diff.newValue = newItem.value
         diff.setKey(newItem.getKey())
-        if (newItem.decoderId == 143 && newItem instanceof KeyValuePairs) {
-            log.debug("got here now")
+        if (newItem.decoderId == 146 && newItem instanceof CvValues) {
+            if (newItem.getKey().equals("3")) {
+                log.debug("got here now")
+            }
         }
         if (existing == null) {
             updateNeeded = false
@@ -342,7 +344,7 @@ class ImportService {
             newItem.setNewValue(diff)
             existing.setOldValue(diff)
             changed = diff.wasChanged()
-            log.debug("testing version")
+            log.debug("testing version ")
 
         }
         if (changed && !version.hasBeenWritten) {
@@ -500,6 +502,7 @@ class ImportService {
             }
             importTime.stop()
         }
+        rosterStopWatch.st
         log.debug(" there are  ${arraySize} entries in this roster - releasing the lock ")
         thisEntry.decCount = arraySize
         return thisEntry
@@ -566,7 +569,6 @@ class ImportService {
     }
 
     static Timestamp doDateModified(String dateValue) {
-        Timestamp retVal = null
         if (dateValue == null || dateValue.equals("")) {
             return new Timestamp(new Date().getTime())
         }
@@ -597,6 +599,65 @@ class ImportService {
         return new Timestamp(new Date().getTime())
     }
 
+    void importCVs(Object cvXML, int decoderId, DecoderEntry decoder) {
+        log.debug("imprting CV values for decoder ${decoderId}")
+        VersionBase version = diffPhaseOne(decoderId, WhichTable.CV)
+        def cvValues = cvXML.'CVvalue'
+        log.trace("CV array size is ${cvValues.size()}")
+        boolean newCVs = false
+        Hashtable<String, AbstractItem> existingHash = diffPhaseTwo(decoderId, WhichTable.CV)
+        if (!existingHash) {
+            log.debug("no CV's yet for this decoder")
+            newCVs = true
+        }
+        for (j in 0..<(cvXML.'CVvalue'.size())) {
+            String cvName = cvXML.'CVvalue'[j].'@name'
+            String cvValue = cvXML.'CVvalue'[j].'@value'
+            log.debug("processing cv value ${cvName} with a value of ${cvValue}")
+            CvValues cvs = new CvValues()
+            cvs.decoderId = decoderId
+            cvs.cvNumber = cvName
+            cvs.cvValue = cvValue
+            log.debug("new CVvalues is ${cvs}")
+            if (newCVs) {
+                database.insertCVs(cvs, false)
+            } else {
+                CV_Diff diff = new CV_Diff()
+                diff.cvNumber = cvs.cvNumber
+                diff.newValue = cvs.cvValue
+                boolean useUpdate = processDiff(existingHash, cvs, version, diff)
+                if (cvs.cvNumber.equals("3") || cvs.cvNumber.equals("4")) {
+                    log.debug("cnumber is 3 or 4 - diff is ${diff}")
+                }
+                if (diff.wasChanged()) {
+                    log.debug("CVs entry was changed ${diff}")
+                    database.insertCVs(cvs, useUpdate)
+                    database.insertDiff(diff, WhichTable.CV)
+                }
+            }
+        }
+        if (existingHash && existingHash.size() > 0) {
+            log.debug("Have some CV values to remove ${existingHash.size()}")
+            if (!version.hasBeenWritten) {
+                database.insertVersion(version)
+                version.hasBeenWritten = true
+            }
+            diffCleanUp(existingHash,
+                decoderId,
+                WhichTable.CV,
+                    version,
+                    {   AbstractItem oldItem ->
+                        AbstractDiff newDiff = new CV_Diff()
+                        log.debug("in the closure - new diff is ${newDiff}")
+                        return newDiff
+                    })
+        }
+        if (!version.hasBeenWritten) {
+            log.debug("no changes - time update")
+        }
+        database.updateDetailTime(decoderId, dbTime)
+    }
+
     void importDetail(Component parent, List<Integer> decoders) {
         log.debug("importing details for ${decoders.size()} decoders")
         if (detailLock.tryAcquire()) {
@@ -605,6 +666,7 @@ class ImportService {
             log.error("second import requested")
             throw new RuntimeException("attempt to run a second import")
         }
+        dbTime = importDb.getCurrentDbTime()
         HashMap<Integer, RosterEntry> rosterEntries = new HashMap<>()
         HashMap<Integer, String> rosterFiles = new HashMap<>()
         SeeProgressController monitor = new SeeProgressController(parent)
@@ -652,11 +714,13 @@ class ImportService {
                     int varSize = decoderXML.'locomotive'.'values'.'decoderDef'.'varValue'.size()
                     // clean out any old CV values and DecoderDef rows first
 
-                    database.prepareDetail(decoderEntry.id)
+                  //  database.prepareDetail(decoderEntry.id)
                     int cvSize = decoderXML.'locomotive'.'values'.'CVvalue'.size()
                     monitor.setIntermediateProgress(4, "Add CV records", "Step 4 of 4")
                     log.debug("CV size is ${cvSize}")
                     monitor.setDetailOverall(0, cvSize)
+                    importCVs(decoderXML.'locomotive'.'values', decoderId, decoderEntry)
+                 /*
                     for (j in 0..<cvSize) {
                         monitor.setDetailProgress(j, "${j} of ${cvSize}")
                         String name = decoderXML.'locomotive'.'values'.'CVvalue'[j].'@name'
@@ -669,7 +733,7 @@ class ImportService {
                         database.insertCVs(cVvalues)
                     }
                     database.updateDetailTime(decoderId)
-                    database.commitWork()
+                 */   database.commitWork()
                     log.trace("work now committed")
                     individualStopWatch.stop()
                 } catch (Exception dbEx) {

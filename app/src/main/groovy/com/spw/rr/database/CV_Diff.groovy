@@ -13,8 +13,4 @@ class CV_Diff extends AbstractDiff {
         cvNumber = key
     }
 
-    @Override
-    boolean wasChanged() {
-        return false
-    }
 }

@@ -18,7 +18,6 @@ create table if not exists CV_DIFF (
         DECODERID       integer not null,
         VERSION_NUMBER  integer not null,
         CVNUMBER        VARCHAR(255) not null,
-        DIFF_VERSION    int null,
         OLD_VALUE       VARCHAR(255),
         NEW_VALUE       VARCHAR(255),
         constraint cv_diff_pri PRIMARY KEY (DECODERID, CVNUMBER, VERSION_NUMBER),
