@@ -160,10 +160,6 @@ class DatabaseServices {
         settings.databaseOpen = true
     }
 
-    void dbClose() {
-        log.debug("closing the Mybatis database")
-    }
-
     void close() {
         log.debug("closing the session from the transaction")
         if (session == null) {
@@ -246,17 +242,6 @@ class DatabaseServices {
         return entry
     }
 
-
-    void prepareDetail(Integer decoderId) {
-        log.debug("preparing for Detail import by deleting CvValue where decoderId = ${decoderId}")
-        if (session == null) {
-            throw new RuntimeException("attempting to run decoderss for roster outside of a transaction")
-        }
-        Mapper mapper = session.getMapper(Mapper.class)
-        int rowsDeleted = mapper.deleteCVs(decoderId)
-        log.debug("CVvalues rows deleted = ${rowsDeleted}")
-    }
-
     List<DecoderEntry> decodersForRosterList(List<Integer> rosters) {
         log.debug("Getting a list of decoders for ${rosters.size()}")
         SqlSession session
@@ -331,13 +316,13 @@ class DatabaseServices {
         Mapper map = session.getMapper(Mapper.class)
         String tableName = ""
         switch (version.tableSource) {
-            case VersionBase.WhichTable.LABEL:
+            case WhichTable.LABEL:
                 tableName = "LABEL_VERSIONS"
                 break
-            case VersionBase.WhichTable.KEYVALUE:
+            case WhichTable.KEYVALUE:
                 tableName = "KEYVALUES_VERSIONS"
                 break
-            case VersionBase.WhichTable.CV:
+            case WhichTable.CV:
                 tableName = "CV_VERSIONS"
                 break
             default:
@@ -415,25 +400,6 @@ class DatabaseServices {
             default:
                 log.error("unknown Diff type requested")
         }
-    }
-
-
-    void deleteOldKeyValues(DecoderEntry decoderEntry) {
-        log.debug("delete all keyValues for this decoder")
-        if (session == null) {
-            throw new RuntimeException("attempting to run delete old Key Values outside of a transaction")
-        }
-        ImportMapper map = session.getMapper(ImportMapper.class)
-        map.deleteOldKeys(decoderEntry)
-    }
-
-    void deleteOldLabels(DecoderEntry decoderEntry) {
-        log.debug("delete all Labels for this decoder")
-        if (session == null) {
-            throw new RuntimeException("attempting to run delete old Labels  outside of a transaction")
-        }
-        ImportMapper map = session.getMapper(ImportMapper.class)
-        map.deleteOldLabels(decoderEntry)
     }
 
     KeyValuePairs insertKeyValuePair(KeyValuePairs kvp, boolean useUpdate = false) {
@@ -594,7 +560,7 @@ class DatabaseServices {
     }
 
     SqlSession setup() {
-        SqlSession returnSession = null
+        SqlSession returnSession
         if (this.session == null) {
             returnSession = sqlSessionFactory.openSession(true)
         } else {

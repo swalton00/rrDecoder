@@ -131,27 +131,6 @@ class ImportService {
                         log.debug("in the closure - new diff is ${newDiff}")
                         return newDiff
                     })
-/*
-
-            existingHash.eachWithIndex { existingEntry, int i ->
-                */
-/*
-                    create a new diff entry for each entry in the array
-                    set the values, write it
-                    then add to the list of entries to be deleted
-                 *//*
-
-                KeyDiff newDiff = new KeyDiff()
-                newDiff.decoderId = decoderId
-                newDiff.versionNumber = version.versionNumber
-                def oldEntry = existingEntry.value as KeyValuePairs
-                newDiff.oldValue = oldEntry.pair_value
-                newDiff.pairKey = oldEntry.pair_key
-                deleteList.add(newDiff.pairKey)
-                database.insertKeyDiff(newDiff)
-            }
-            database.deleteOldItems(WhichTable.KEYVALUE, decoderId, deleteList)
-*/
         }
     }
 
@@ -279,29 +258,6 @@ class ImportService {
                     newDiff.oldLocked = ((FunctionLabel)oldItem).locked
                     return newDiff
                 })
-        /*if (functionHash != null && functionHash.size() > 0) {
-            ArrayList<String> deleteList = new ArrayList<>()
-            log.debug("Remain items count in hash list is ${functionHash.size()}")
-            if (!functionVersion.hasBeenWritten) {
-                database.insertVersion(functionVersion)
-                functionVersion.hasBeenWritten = true
-            }
-            functionHash.eachWithIndex { entry, int i ->
-                *//* create a diff entry each old (but deleted in new) entry
-                copy existing values to diff and write it
-                create list of functionNumbers to be deleted
-                *//*
-                LabelDiff newDiff = new LabelDiff()
-                newDiff.decoderId = decoderId
-                newDiff.versionNumber = functionVersion.versionNumber
-                def oldEntry = entry.value as FunctionLabel
-                newDiff.oldLocked = oldEntry.locked
-                newDiff.functionNumber = oldEntry.functionNum
-                deleteList.add(newDiff.functionNumber)
-                database.insertLabelDiff(newDiff)
-            }
-            database.deleteOldItems(VersionBase.WhichTable.LABEL, decoderId, deleteList)
-        }*/
     }
 
     /**
@@ -443,20 +399,6 @@ class ImportService {
                 def keyPairs = entryList[i].attributepairs
                 log.debug("key value size is ${keyValuesSize}")
                 importKeyDefs(keyPairs, newEntry.id, newEntry)
-
-                /*   if (keyValuesSize > 0) {
-                       Log4JStopWatch keyValsStopWatch = new Log4JStopWatch("kvp", "key value pairs")
-                       for (j in 0..<keyValuesSize) {
-                           KeyValuePairs kvp = new KeyValuePairs()
-                           kvp.decoderId = newEntry.id
-                           kvp.pair_key = entryList[i].attributepairs.keyvaluepair[j].'key'.text()
-                           kvp.pair_value = entryList[i].attributepairs.keyvaluepair[j].'value'.text()
-                           log.debug("new key value pair is: ${kvp}")
-
-                           database.insertKeyValuePair(kvp)
-                       }
-                       keyValsStopWatch.stop()
-                   }*/
                 int speedProfileSize = entryList[i].'speedprofile'.speeds.speed.size()
                 log.debug("speed profile size is ${speedProfileSize}")
                 if (speedProfileSize > 0) {
@@ -489,6 +431,7 @@ class ImportService {
                 thisEntry.dateUpdated = dbTime
                 importDb.updateRosterEntry(thisEntry)
             }
+            rosterStopWatch.stop()
         }
         catch (Exception e) {
             log.error("Caught an exception working with the import", e)
@@ -502,9 +445,9 @@ class ImportService {
             }
             importTime.stop()
         }
-        rosterStopWatch.st
         log.debug(" there are  ${arraySize} entries in this roster - releasing the lock ")
         thisEntry.decCount = arraySize
+        importTime.stop()
         return thisEntry
     }
 
