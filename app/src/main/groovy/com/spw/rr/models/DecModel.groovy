@@ -57,6 +57,16 @@ class DecModel extends RrBaseModel implements  FocusListener {
     JMenuItem viewStandCvItem
     JMenuItem ViewAllCvItem
 
+    JMenuItem viewChangedSelectedCVs
+    JMenuItem viewAllChangesCVs
+    JMenuItem viewAllChangeLabels
+    JMenuItem viewAllChangeKeys
+
+    JMenuItem viewDiffSelectedCVs
+    JMenuItem viewDiffAllCvs
+    JMenuItem viewDiffLabels
+    JMenuItem viewDiffKeys
+
     JTextField cvListField
 
 

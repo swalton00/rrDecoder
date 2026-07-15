@@ -187,6 +187,38 @@ class DecController {
         doDataView( DataController.ViewType.ALL_CVS, selList, null)
     }
 
+    def viewChangedSelectedCVs = { ActionEvent e ->
+        log.debug("viewing the changes for selected CVs")
+    }
+
+    def viewChangedAllCVs = { ActionEvent e ->
+
+    }
+
+    def viewChangedAllLabels = { ActionEvent e ->
+
+    }
+
+    def viewChangedAllKeys = { ActionEvent e ->
+
+    }
+
+    def viewDiffSelectedCVs = { ActionEvent e ->
+
+    }
+
+    def viewDiffAllCVs = { ActionEvent e ->
+
+    }
+
+    def viewDiffLabels = { ActionEvent e ->
+
+    }
+
+    def viewDiffKeys = { ActionEvent e ->
+
+    }
+
     def helpAction = { ActionEvent e ->
         log.debug("Help action requested")
     }
