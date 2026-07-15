@@ -76,6 +76,9 @@ class DecController {
             nextLine.add(entry.dateUpdated)
             nextLine.add(entry.importDate )
             nextLine.add(entry.detailTime)
+            nextLine.add(entry.cvVersionCount)
+            nextLine.add(entry.labelVersionCount)
+            nextLine.add(entry.keyVersionCount)
             model.tableList.add(nextLine)
             if (view.tableModel != null) {
                 // view.tableModel will be null since we haven't done view.init yet

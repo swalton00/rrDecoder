@@ -316,7 +316,7 @@ class ImportService {
         if (!importLock.tryAcquire()) {
             throw new RuntimeException("attempting to import a file while an import is in progress")
         }
-        dbTime = importDb.getCurrentDbTime()
+        dbTime = database.getCurrentDbTime()
         Timestamp rosterUpdate = new Timestamp(rosterFile.lastModified())
         String rosterText = rosterFile.text
         Log4JStopWatch importTime = new Log4JStopWatch("import", "Starting the import")
@@ -369,7 +369,7 @@ class ImportService {
                             existingList.remove(newEntry.decoderId)
                             log.info("Decoder type was changed for entry ${previous.decoderId} with DCC address ${previous.dccAddress}")
                             // since type was changed, we need to delete the old (to delete all dependents) and the reinsert
-                            importDb.deleteDecoderEntry(previous)
+                            database.deleteDecoderEntry(previous)
                             decoderExists = false
                         } else {
                             newEntry = previous
@@ -429,7 +429,7 @@ class ImportService {
             }
             if (rosterFound) {
                 thisEntry.dateUpdated = dbTime
-                importDb.updateRosterEntry(thisEntry)
+                database.updateRosterEntry(thisEntry)
             }
             rosterStopWatch.stop()
         }
@@ -609,7 +609,7 @@ class ImportService {
             log.error("second import requested")
             throw new RuntimeException("attempt to run a second import")
         }
-        dbTime = importDb.getCurrentDbTime()
+        dbTime = database.getCurrentDbTime()
         HashMap<Integer, RosterEntry> rosterEntries = new HashMap<>()
         HashMap<Integer, String> rosterFiles = new HashMap<>()
         SeeProgressController monitor = new SeeProgressController(parent)

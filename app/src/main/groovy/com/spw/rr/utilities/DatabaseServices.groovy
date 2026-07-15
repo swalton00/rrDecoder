@@ -169,6 +169,22 @@ class DatabaseServices {
         session = null
     }
 
+    Timestamp getCurrentDbTime() {
+        Timestamp retVal = null
+        SqlSession session = null
+        try {
+            session = sqlSessionFactory.openSession(true)
+            ImportMapper mapper = session.getMapper(ImportMapper)
+            retVal = mapper.getDBtime()
+        } finally {
+            if (session) {
+                session.close()
+            }
+        }
+        return retVal
+    }
+
+
     List<RosterEntry> listRosters() {
         log.debug("getting a list of the rosters")
         SqlSession session = sqlSessionFactory.openSession(true)

@@ -17,24 +17,6 @@ class ImportDb {
 
     DatabaseServices parent = null
 
-    Timestamp getCurrentDbTime() {
-        if (parent == null) {
-            parent = DatabaseServices.getInstance()
-        }
-        Timestamp retVal = null
-        SqlSession session = null
-        try {
-            session = parent.sqlSessionFactory.openSession(true)
-            ImportMapper mapper = session.getMapper(ImportMapper)
-            retVal = mapper.getDBtime()
-        } finally {
-            if (session) {
-                session.close()
-            }
-        }
-        return retVal
-    }
-
     RosterEntry addRoster(RosterEntry entry) {
         log.debug("adding a new RosterEntry ${entry}")
         SqlSession session

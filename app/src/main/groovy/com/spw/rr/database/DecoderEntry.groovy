@@ -36,6 +36,9 @@ class DecoderEntry {
     List<SpeedProfile> speedValues
     List<KeyValuePairs> keyPairs
     List<CvValues> cvValues
+    Integer cvVersionCount
+    Integer keyVersionCount
+    Integer labelVersionCount
 
     Hashtable<String, AbstractItem> keyHash
 

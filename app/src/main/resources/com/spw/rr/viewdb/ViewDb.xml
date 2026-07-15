@@ -78,52 +78,98 @@
     </select>
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
-            p.id,
-            p.decoderId  as cvdecoderId,
-            p.fileName,
-            p.roadNumber,
-            p.roadName,
-            p.manufacturer,
-            p.owner,
-            p.model,
-            p.dccAddress,
-            p.manufacturerId,
-            p.productId,
-            p.dateUpdated,
-            p.dateImported as importDate,
-            p.detailTime,
-            p.decoderTypeId,
-            p.detailTime,
-            p.rosterId,
-            COALESCE(hasSpeedProfile, '-') as hasSpeedProfile,
-            COALESCE(hasDetail, '-') as hasDetail,
-            t.decoderFamily,
-            t.decoderModel
-        FROM decoder p
-            INNER JOIN DecoderType t
-            ON p.decoderTypeId = t.id
-            LEFT OUTER JOIN
-        ( SELECT
-            'Yes' AS hasSpeedProfile,
-            t1.Id
+        p.id,
+        p.decoderId AS cvdecoderId,
+        p.fileName,
+        p.roadNumber,
+        p.roadName,
+        p.manufacturer,
+        p.owner,
+        p.model,
+        p.dccAddress,
+        p.manufacturerId,
+        p.productId,
+        p.dateUpdated,
+        p.dateImported AS importDate,
+        p.detailTime,
+        p.decoderTypeId,
+        p.detailTime,
+        p.rosterId,
+        COALESCE(hasSpeedProfile, '-') AS hasSpeedProfile,
+        COALESCE(hasDetail, '-')       AS hasDetail,
+        t.decoderFamily,
+        t.decoderModel,
+        t_cvv.cv_version_count as cvVersionCount,
+        t_key.key_count as keyVersionCount,
+        t_label.label_count as labelVersionCount
+        FROM
+        decoder p
+        INNER JOIN
+        DecoderType t
+        ON
+        p.decoderTypeId = t.id
+        LEFT OUTER JOIN
+        (   SELECT
+        'Yes' AS hasSpeedProfile,
+        t1.Id
         FROM
         decoder t1
         WHERE
-            EXISTS ( SELECT * FROM speedprofile sp
+        EXISTS
+        (   SELECT
+        *
+        FROM
+        speedprofile sp
         WHERE
-            sp.decoderid = t1.id)) AS t11
-        ON p.id = t11.id
+        sp.decoderid = t1.id)) AS t11
+        ON
+        p.id = t11.id
         LEFT OUTER JOIN
-            ( SELECT
-                'Yes' AS hasdetail,
-                t1.id
-            FROM
-                decoder t1
-            WHERE
-                EXISTS ( SELECT * FROM cvvalues cv
-                WHERE cv.decoderid = t1.id)
-                ) AS t21
-        ON t21.id = p.id
+        (   SELECT
+        'Yes' AS hasdetail,
+        t1.id
+        FROM
+        decoder t1
+        WHERE
+        EXISTS
+        (   SELECT
+        *
+        FROM
+        cvvalues cv
+        WHERE
+        cv.decoderid = t1.id) ) AS t21
+        ON
+        t21.id = p.id
+        LEFT OUTER JOIN
+        (   SELECT
+        decoderid,
+        COUNT(*) AS cv_version_count
+        FROM
+        CV_Versions cvv
+        GROUP BY
+        decoderId ) AS t_cvv
+        ON
+        t_cvv.decoderId = p.id
+        LEFT OUTER JOIN
+        (   SELECT
+        decoderid,
+        COUNT(*) AS key_count
+        FROM
+        keyvalues_versions ckey
+        GROUP BY
+        decoderId ) AS t_key
+        ON
+        t_key.decoderId = p.id
+        LEFT OUTER JOIN
+        (   SELECT
+        decoderId,
+        COUNT(*) AS label_count
+        FROM
+        label_versions clabel
+        GROUP BY
+        decoderId ) AS t_label
+        ON
+        t_label.decoderId = p.id
         <where>
             <foreach collection="list" index="index" item="item"
                      open="rosterid IN (" separator="," close=")">

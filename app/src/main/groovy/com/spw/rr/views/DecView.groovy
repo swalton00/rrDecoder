@@ -185,6 +185,9 @@ class DecView {
         classList.add(12, Timestamp.class)  //Date updated
         classList.add(13, Timestamp.class)  //import date
         classList.add(14, Timestamp.class)  //detail time
+        classList.add(15, Integer.class) // CV version count
+        classList.add(16, Integer.class) // Key Values version count
+        classList.add(17, Integer.class) // Function label version count
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
         log.debug("setting tableClasses to ${classList}")

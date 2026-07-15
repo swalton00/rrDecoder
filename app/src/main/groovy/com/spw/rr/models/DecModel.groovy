@@ -31,8 +31,11 @@ class DecModel extends RrBaseModel implements  FocusListener {
                             "Owner",
                             "Updated",
                             "Imported",
-                            "Details Read"])
-        preferredWidths.addAll([10, 10, 10, 5, 5, 30, 20, 10, 10, 15, 20])
+                            "Details Read",
+                            "# CV Versions",
+                            "# Label Versions",
+                            "# Key Values Versions"])
+        preferredWidths.addAll([10, 10, 10, 5, 5, 30, 20, 10, 10, 15, 20, 15, 15, 15])
     }
 
     boolean selectedViewImportGood = false
