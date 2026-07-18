@@ -119,7 +119,7 @@ class ViewDbService {
             session = baseDb.sqlSessionFactory.openSession(true)
             ViewDb mapper = session.getMapper(ViewDb.class)
             retVal = mapper.listDiffs(selectType, howMany, decoderIds, null)
-            log.debug("result set is ${retVal}")
+           // log.debug("result set is ${retVal}")
         } catch (Exception e) {
             log.error("Caught an exception attempting to retrieve the data", e)
         } finally {

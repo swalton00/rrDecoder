@@ -1,0 +1,14 @@
+set schema upgrade;
+delete from saved_keys;
+delete from saved_labels;
+delete from savedcvvals;
+delete from speedprofile;
+delete from label_versions;
+delete from key_versions;
+delete from keyvalues;
+delete from functionlabels;
+delete from decoderdef;
+delete from cv_versions;
+delete from cvvalues;
+delete from decoder;
+delete from roster;

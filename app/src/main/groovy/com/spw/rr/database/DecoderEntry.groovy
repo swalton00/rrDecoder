@@ -8,7 +8,10 @@ import groovy.transform.ToString
 
 import java.sql.Timestamp
 
-@ToString(includeNames = true, includePackage = false, includeFields = true)
+@ToString(includeNames = true,
+        includePackage = false,
+        includeFields = true,
+        excludes = ["cvValues", "keyPairs", "labelValues"])
 class DecoderEntry {
     Integer id
     String decoderId

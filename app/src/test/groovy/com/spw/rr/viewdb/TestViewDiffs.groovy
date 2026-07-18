@@ -80,8 +80,13 @@ class TestViewDiffs {
         ArrayList<DecoderEntry> entries = viewDb.getDecoderDiffs(ViewDb.SelectType.SELECT_ALL_CVS,
                 ViewDb.DiffType.ALL_VALUES,
                 getList)
-        log.debug("returned list was ${entries}")
+        /*
+           don't log here - it will trigger the proxies
+         */
         assertEquals(3, entries.size())
+        log.debug("about to reference cvvalues in entries")
+        assertEquals(143, entries.get(0).id)
+        assertEquals(65, entries.get(0).cvValues.size())
     }
 
     @Test

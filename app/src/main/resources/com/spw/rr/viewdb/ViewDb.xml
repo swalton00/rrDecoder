@@ -76,7 +76,7 @@
         </if>
         </where>
     </select>
-    <select id="listDiffs" resultType="DecoderEntry">
+    <select id="listDiffs" resultMap="diffMap">
         Select id,
   decoderid,
   roadname,
@@ -90,6 +90,23 @@
         </where>
         ORDER BY p.id
     </select>
+    <resultMap id="diffMap" type="DecoderEntry">
+        <id property="id" column="id"/>
+        <result property="decoderId" column="decoderid"/>
+        <result property="roadName" column="roadname"/>
+        <result property="roadNumber" column="roadnumber"/>
+        <collection property="cvValues" javaType="ArrayList" column="id" select="viewCvSelect" fetchType="lazy"/>
+    </resultMap>
+    <select id="viewCvSelect" resultMap="viewCVselectMap">
+            Select cvnumber,
+                   cvvalue
+                       FROM CVValues cv
+                       WHERE cv.decoderId = #{id}
+    </select>
+    <resultMap id="viewCVselectMap" type="CvValues">
+        <id property="cvNumber" column="cvnumber"/>
+        <result property="cvValue" column="cvvalue"/>
+    </resultMap>
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
         p.id,
