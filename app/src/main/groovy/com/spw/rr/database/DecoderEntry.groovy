@@ -1,6 +1,9 @@
 package com.spw.rr.database
 
 import com.spw.rr.controllers.DataController.ViewType
+import com.spw.rr.views.CvViewItem
+import com.spw.rr.views.KeyViewItem
+import com.spw.rr.views.LabelViewItem
 import groovy.transform.ToString
 
 import java.sql.Timestamp
@@ -65,5 +68,11 @@ class DecoderEntry {
                 throw new RuntimeException("unrecognized view type passed to getList - ${viewType}")
         }
     }
+
+    ArrayList<LabelViewItem> labelViewHistory
+
+    ArrayList<CvViewItem> cvViewHistory
+
+    ArrayList<KeyViewItem> keyHistory
 }
 

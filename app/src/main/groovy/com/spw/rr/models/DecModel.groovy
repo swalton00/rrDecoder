@@ -5,6 +5,7 @@ import com.spw.rr.utilities.ObservableBean
 import com.spw.rr.views.DecView
 import groovy.transform.ToString
 
+import javax.swing.JMenu
 import javax.swing.JMenuItem
 import javax.swing.JTextField
 import java.awt.Component
@@ -56,6 +57,7 @@ class DecModel extends RrBaseModel implements  FocusListener {
     JMenuItem viewSelCvItem
     JMenuItem viewStandCvItem
     JMenuItem ViewAllCvItem
+    JMenu changeMenu
 
     JMenuItem viewChangedSelectedCVs
     JMenuItem viewAllChangesCVs
@@ -96,6 +98,9 @@ class DecModel extends RrBaseModel implements  FocusListener {
                 if (goodValue) {
                     viewSelCvItem.setEnabled(true)
                     view.saver.putField(DecView.D_NAME, DecView.D_CVLIST, cvListField.getText())
+                    view.itemList.add(viewSelCvItem)
+                } else {
+                    view.itemList.remove(viewSelCvItem)
                 }
             }
         }

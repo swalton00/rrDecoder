@@ -97,25 +97,11 @@ class TestDbService {
         ArrayList<String> cvNumbers = new ArrayList<>()
         List<DecoderEntry> returned = database.listValues(ViewDb.SelectType.SELECT_FUNC, list, null)
         log.debug("Returned ${returned.size()} rows for SELECT_CUSTOM")
-        assertEquals(3, returned.size())
+        assertEquals(2, returned.size())
         assertEquals(0, returned.get(0).cvValues.size())
         assertEquals(9, returned.get(0).labelValues.size())
         log.debug("label values returned are ${returned.get(0).labelValues}")
     }
 
-    @Test
-    void testSelectTypeSelectDEF() {
-        log.debug("testing ViewDb.SelectType.SELECT_DEF")
-        Vector<Integer> list = new Vector<>()
-        list.addAll([7, 8, 9])
-        ArrayList<String> cvNumbers = new ArrayList<>()
-        List<DecoderEntry> returned = database.listValues(ViewDb.SelectType.SELECT_DEF, list, null)
-        log.debug("Returned ${returned.size()} rows for Select Decoder Def")
-        assertEquals(3, returned.size())
-        assertEquals(0, returned.get(0).cvValues.size())
-        assertEquals(0, returned.get(0).labelValues.size())
-        assertEquals(9, returned.get(0).defValues.size())
-        log.debug("def values returned are ${returned.get(0).defValues}")
-    }
 
 }

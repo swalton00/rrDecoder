@@ -18,11 +18,19 @@ class DbService {
     private static SqlSessionFactory sqlSessionFactory
     private static final String MYBATIS_RESOURCE = "mybatis.xml"
     private static final String DATA_RESOURCE = "insertData.sql"
+    private static final String URL = "jdbc:h2:mem:testdb;INIT=create schema decoder\\;set schema decoder\\;runscript from 'src/main/resources/createTables.sql'"
+    private static final String USERID = "test"
+    private static final String PASSWORD = "testpw"
 
     void dbStart() {
         log.debug("setting up the database resources")
         InputStream inputStream = Resources.getResourceAsStream(MYBATIS_RESOURCE)
-        sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream, "test")
+        Properties props = new Properties()
+        props.setProperty("userid", USERID)
+        props.setProperty("password", PASSWORD)
+        props.setProperty("url", URL)
+
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream, "test", props)
         SqlSession session
         ApplyResources resources = new ApplyResources()
             try {

@@ -29,7 +29,7 @@ class DatabaseServices {
     private static final String UPDATE_NAME_FRONT = "updateVersion_"
     private static final String MYBATIS_RESOURCE = "mybatis.xml"
     private static final Integer DB_MAJOR = 1
-    private static final Integer DB_MINOR = 3
+    private static final Integer DB_MINOR = 4
 
     SqlSessionFactory sqlSessionFactory
     SqlSession session

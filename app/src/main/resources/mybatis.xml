@@ -21,7 +21,9 @@
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
                 <property name="driver" value="org.h2.Driver"/>
-                <property name="url" value="jdbc:h2:mem:testdb;INIT=create schema decoder\;set schema decoder\;runscript from 'c:/projects/decodder3/decoder/app/src/main/resources/createTables.sql'"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
             </dataSource>
         </environment>
     </environments>

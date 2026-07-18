@@ -31,7 +31,7 @@ class DecView {
     static final Pattern REGEX_NUMBER = Pattern.compile("^[\\d]*\$")
 
     RrTableModel tableModel
-    ArrayList<JMenuItem> itemList = new ArrayList<>()
+    ArrayList<Component> itemList = new ArrayList<>()
 
     DecView(Component parent, DecController controller, DecModel model) {
         this.parent = parent
@@ -130,11 +130,11 @@ class DecView {
         model.viewAllCvItem.setEnabled(false)
         viewMenu.add(model.viewAllCvItem)
         model.viewAllCvItem.addActionListener(controller.viewAllCvAction)
-        JMenu changeMenu = new JMenu("View Changes")
+        model.changeMenu = new JMenu("View Changes")
 
         JMenu changeAll = new JMenu("All Items")
 
-        changeMenu.add(changeAll)
+        model.changeMenu.add(changeAll)
         model.viewChangedSelectedCVs = new JMenuItem("Changed SelectedCVs")
         changeAll.add(model.viewChangedSelectedCVs)
         model.viewChangedSelectedCVs.addActionListener(controller.viewChangedSelectedCVs)
@@ -162,9 +162,9 @@ class DecView {
         model.viewDiffKeys = new JMenuItem("Changed Key Values")
         model.viewDiffKeys.addActionListener(controller.viewDiffKeys)
         onlyChanged.add(model.viewDiffKeys)
-
-        changeMenu.add(onlyChanged)
-        viewMenu.add(changeMenu)
+        model.changeMenu.setEnabled(false)
+        model.changeMenu.add(onlyChanged)
+        viewMenu.add(model.changeMenu)
 
         menuBar.add(viewMenu)
         JMenu helpMenu = new JMenu("Help")
@@ -176,6 +176,7 @@ class DecView {
                                model.viewDecDetailItem, model.viewFunctionItem,
                                model.viewKeyPairsItem, model.viewStandCvItem,
                                model.viewAllCvItem]
+        itemList.add(model.changeMenu)
         addList.each {
             itemList.add(it)
         }

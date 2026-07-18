@@ -3,14 +3,14 @@ package com.spw.rr.viewdb
 
 import com.spw.rr.database.DecoderEntry
 import com.spw.rr.utilities.DatabaseServices
+import groovy.util.logging.Slf4j
 import org.apache.ibatis.session.SqlSession
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+@Slf4j
 @Singleton
 class ViewDbService {
-
-    private static final Logger log = LoggerFactory.getLogger(ViewDbService.class)
 
     DatabaseServices baseDb = DatabaseServices.getInstance()
 
@@ -97,6 +97,37 @@ class ViewDbService {
             session.close()
         }
         log.debug("returning a list with ${retVal.size()} entries")
+        return retVal
+    }
+
+    /**
+     * Retrieve a list of decoders with an array (lazy) of the specific Diff type
+     * @param selectType    CV, SpecificCv, FunctionLabel, or KeyValue
+     * @param howMany       either All, or only the changed keys
+     * @param decoderIds    only for these decodors
+     * @param cvList        optionally for only specific CVs
+     * @return
+     */
+    ArrayList<DecoderEntry> getDecoderDiffs(ViewDb.SelectType selectType,
+                                            ViewDb.DiffType howMany,
+                                            ArrayList<Integer> decoderIds,
+                                            ArrayList<String> cvList = null) {
+        log.debug("getting the decoders with their diffs for ${selectType} with ${howMany} and decoderids ${decoderIds}")
+        SqlSession session = null
+        ArrayList<DecoderEntry> retVal
+        try {
+            session = baseDb.sqlSessionFactory.openSession(true)
+            ViewDb mapper = session.getMapper(ViewDb.class)
+            retVal = mapper.listDiffs(selectType, howMany, decoderIds, null)
+            log.debug("result set is ${retVal}")
+        } catch (Exception e) {
+            log.error("Caught an exception attempting to retrieve the data", e)
+        } finally {
+            if (session) {
+                session.close()
+                return retVal
+            }
+        }
         return retVal
     }
 }

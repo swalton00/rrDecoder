@@ -76,6 +76,20 @@
         </if>
         </where>
     </select>
+    <select id="listDiffs" resultType="DecoderEntry">
+        Select id,
+  decoderid,
+  roadname,
+  roadnumber
+  from decoder p
+             <where>
+            <foreach collection="arg2" index="index" item="item"
+                     open="id IN (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        ORDER BY p.id
+    </select>
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
         p.id,
