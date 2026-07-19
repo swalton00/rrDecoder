@@ -11,6 +11,7 @@ abstract class AbstractItem {
 
     Integer id
     Integer decoderId
+    ArrayList<AbstractDiff> History
 
     abstract String  getKey();
 

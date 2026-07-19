@@ -46,6 +46,14 @@ class DecoderEntry {
     Integer keyVersionCount
     Integer labelVersionCount
 
+    ArrayList<VersionBase> cvVersions
+    ArrayList<VersionBase> labelVersions
+    ArrayList<VersionBase> keyVersions
+
+    ArrayList<LabelViewItem> labelViewHistory
+    ArrayList<CvViewItem> cvViewHistory
+    ArrayList<KeyViewItem> keyHistory
+
     Hashtable<String, AbstractItem> keyHash
 
     List<AbstractItem> getList(ViewType viewType) {
@@ -54,9 +62,6 @@ class DecoderEntry {
             case ViewType.STANDARD_CVS:
             case ViewType.SELECTED_CVS:
                 return cvValues
-                break
-            case ViewType.DECODER_DETAIL:
-                return defValues
                 break
             case ViewType.FUNCTION_LABELS:
                 return labelValues
@@ -71,11 +76,5 @@ class DecoderEntry {
                 throw new RuntimeException("unrecognized view type passed to getList - ${viewType}")
         }
     }
-
-    ArrayList<LabelViewItem> labelViewHistory
-
-    ArrayList<CvViewItem> cvViewHistory
-
-    ArrayList<KeyViewItem> keyHistory
 }
 

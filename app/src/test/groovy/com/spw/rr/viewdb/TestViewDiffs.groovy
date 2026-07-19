@@ -85,8 +85,10 @@ class TestViewDiffs {
          */
         assertEquals(3, entries.size())
         log.debug("about to reference cvvalues in entries")
+        log.debug("values in entry 0 are ${entries.get(0).cvVersions} ${entries.get(0).keyVersions} ${entries.get(0).labelVersions}")
         assertEquals(143, entries.get(0).id)
         assertEquals(65, entries.get(0).cvValues.size())
+        assertEquals(2, entries.get(0).cvVersions.size())
     }
 
     @Test

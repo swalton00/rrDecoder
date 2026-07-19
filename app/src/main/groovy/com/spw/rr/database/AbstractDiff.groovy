@@ -1,6 +1,7 @@
 package com.spw.rr.database
 
 import groovy.transform.ToString
+import java.sql.Timestamp
 
 @ToString(includeFields = true, includePackage = false, includeNames = true)
 abstract class AbstractDiff {
@@ -9,6 +10,7 @@ abstract class AbstractDiff {
     Integer versionNumber
     String oldValue
     String newValue
+    Timestamp createdOn
 
     abstract String getKey();
 

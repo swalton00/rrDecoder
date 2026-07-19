@@ -2,6 +2,7 @@ package com.spw.rr.viewdb
 
 
 import com.spw.rr.database.DecoderEntry
+import org.apache.ibatis.annotations.Param
 
 interface ViewDb {
     enum  SelectType {
@@ -18,8 +19,15 @@ interface ViewDb {
         ALL_VALUES
     }
 
-    List<DecoderEntry> listDecodersByRosterID(List<Integer> array)
-    List<DecoderEntry> listWithCvs(Vector<Integer> decoderID, List<String> cvs, Boolean listAll)
-    List<DecoderEntry> listValues(selectType, Vector<Integer> ids, List<String> cvs)
-    List<DecoderEntry> listDiffs(SelectType selectType, DiffType diffType, List<Integer> ids, List<String> cvs)
+    List<DecoderEntry> listDecodersByRosterID(@Param("array")List<Integer> array)
+    List<DecoderEntry> listWithCvs(@Param("decoderID")Vector<Integer> decoderID,
+                                   @Param("cvs")List<String> cvs,
+                                   @Param("listAll")Boolean listAll)
+    List<DecoderEntry> listValues(@Param("selectType")SelectType selectType,
+                                  @Param("ids")Vector<Integer> ids,
+                                  @Param("cvs")List<String> cvs)
+    List<DecoderEntry> listDiffs(@Param("selectType")SelectType selectType,
+                                 @Param("diffType")DiffType diffType,
+                                 @Param("ids")List<Integer> ids,
+                                 @Param("cvs")List<String> cvs)
 }

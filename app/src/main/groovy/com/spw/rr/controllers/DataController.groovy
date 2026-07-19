@@ -36,10 +36,8 @@ class DataController {
         STANDARD_CVS,       // CVs across, 3 lines, decoders down
         FUNCTION_LABELS,    // decoders down, label across
         SPEED_PROFILE,      // decoders across, profiles down
-        KEY_PAIRS,          // decoders down, pairs across
-        DECODER_DETAIL      // decoders across, defs down
-
-    }
+        KEY_PAIRS           // decoders down, pairs across
+        }
 
     ViewType viewType
     ViewDbService database = ViewDbService.getInstance()
@@ -74,9 +72,6 @@ class DataController {
                 break
             case ViewType.FUNCTION_LABELS: buildFunctionLabels()
                 printTitle = "Function Labels"
-                break
-            case ViewType.DECODER_DETAIL: buildDecPetail()
-                printTitle = "Decoder Details"
                 break
             case ViewType.SPEED_PROFILE: buildSpeedProfile()
                 printTitle = "Speed Profiles"
@@ -123,8 +118,6 @@ class DataController {
 
         switch (listType) {
             case ViewType.ALL_CVS: theKeys.sort(new CvNameComparator())
-                break
-            case ViewType.DECODER_DETAIL: theKeys.sort(new StringCvComparator())
                 break
             case ViewType.FUNCTION_LABELS:
             case ViewType.SPEED_PROFILE:
@@ -278,15 +271,6 @@ class DataController {
         model.columnNames.add("Key")
         model.tableClasses.add(String.class)
         doColumnHeaders(decs, ViewType.KEY_PAIRS)
-    }
-
-    void buildDecPetail() {
-        view = new DataView(parent, this, model, "Decoder Definition View", "decdetview")
-        log.debug("creating a list of decoder definitions for decoders")
-        List<DecoderEntry> decs = database.getList(ViewDbService.ListType.DEF_LIST, decoderIds, null)
-        model.columnNames.add("Decoder Def")
-        model.tableClasses.add(String.class)
-        doColumnHeaders(decs, ViewType.DECODER_DETAIL)
     }
 
     def printSAction = { ActionEvent e ->

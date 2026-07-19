@@ -78,12 +78,32 @@
     </select>
     <select id="listDiffs" resultMap="diffMap">
         Select id,
-  decoderid,
+  p.decoderid,
   roadname,
-  roadnumber
+  roadnumber,
+  cv.version_number as cvVersion,
+  cv.created_on as cvDate,
+  k.version_number as keyVersion,
+  k.created_on as keyDate,
+  l.version_number as labelVersion,
+  l.created_on as labelDate,
+  <choose>
+           <when test='diffType != null and "ALL_VALUES".equals(diffType.name())'>
+            'ALL' as diffType
+        </when>
+        <when test='diffType != null and  "ONLY_CHANGED".equals(diffType.name())'>
+            'ONLY' as diffType
+        </when>
+  </choose>
   from decoder p
+        LEFT OUTER JOIN CV_VERSIONS cv
+            ON p.id = cv.decoderid
+        LEFT OUTER JOIN KEYVALUES_VERSIONS k
+            ON p.id = k.decoderid
+        LEFT OUTER JOIN LABEL_VERSIONS l
+            ON p.id = l.decoderid
              <where>
-            <foreach collection="arg2" index="index" item="item"
+            <foreach collection="ids" index="index" item="item"
                      open="id IN (" separator="," close=")">
                 #{item}
             </foreach>
@@ -95,17 +115,76 @@
         <result property="decoderId" column="decoderid"/>
         <result property="roadName" column="roadname"/>
         <result property="roadNumber" column="roadnumber"/>
-        <collection property="cvValues" javaType="ArrayList" column="id" select="viewCvSelect" fetchType="lazy"/>
+        <collection property="cvVersions" ofType="VersionBase">
+            <id property="decoderId" column="cvVersion"/>
+            <result property="versionNumber" column="cvVersion"/>
+            <result property="createdOn" column="cvDate"/>
+        </collection>
+        <collection property="labelVersions" ofType="VersionBase">
+            <id property="decoderId" column="labelVersion"/>
+            <result property="createdOn" column="labelDate"/>
+            <result property="versionNumber" column="labelVersion"/>
+        </collection>
+        <collection property="keyVersions" ofType="VersionBase">
+            <id property="decoderId" column="keyVersion"/>
+            <result property="createdOn" column="keyDate"/>
+            <result property="versionNumber" column="keyVersion"/>
+        </collection>
+        <collection property="cvValues"
+                    javaType="ArrayList"
+                    column="{id=id, diffType=diffType}"
+                    select="viewCvSelect"
+                    fetchType="lazy"/>
     </resultMap>
     <select id="viewCvSelect" resultMap="viewCVselectMap">
-            Select cvnumber,
-                   cvvalue
-                       FROM CVValues cv
-                       WHERE cv.decoderId = #{id}
+SELECT
+    cv.decoderid,
+    cv.cvNumber,
+    cv.cvValue,
+    ver.version_number,
+    ver.created_on,
+    ver.old_value,
+    ver.new_value
+FROM
+    cvValues cv
+        <choose>
+        <when test='diffType != null and "ALL".equals(diffType.toString())'>
+            LEFT OUTER JOIN
+        </when>
+        <when test='diffType != null and  "ONLY".equals(diffType.toString())'>
+            INNER JOIN
+        </when>
+  </choose>
+    (   SELECT
+            d.decoderid,
+            d.cvnumber,
+            d.version_number,
+            d.old_value,
+            d.new_value,
+            v.created_on
+        FROM
+            cv_versions v
+        INNER JOIN
+            cv_diff d
+        ON
+            v.decoderid = d.decoderid
+        AND v.version_number = d.version_number ) ver
+ON
+    ver.decoderId = cv.decoderId
+AND ver.cvnumber = cv.cvnumber
+WHERE
+    cv.decoderId = ${id}
     </select>
     <resultMap id="viewCVselectMap" type="CvValues">
         <id property="cvNumber" column="cvnumber"/>
         <result property="cvValue" column="cvvalue"/>
+        <collection property="history" ofType="CV_Diff">
+            <id property="cvNumber" column="cvnumber"/>
+            <id property="decoderId" column="decoderid"/>
+            <result property="oldValue" column="old_value"/>
+            <result property="versionNumber" column="version_number"/>
+            <result property="createdOn" column="created_on"/>
+        </collection>
     </resultMap>
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
