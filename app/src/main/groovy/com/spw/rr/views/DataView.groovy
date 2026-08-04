@@ -48,8 +48,17 @@ class DataView {
         log.trace("dialogTitle is ${dialogTitle} and view name is ${viewName}")
     }
 
+    boolean haveSeenInit = false
+
     void init() {
         log.debug("initializing the new view")
+        if (haveSeenInit) {
+            log.error("called init a second time!")
+            throw new RuntimeException("Second time into DataView.init()")
+        } else {
+            haveSeenInit = true
+        }
+
         model.dialog = new JDialog(parent, dialogTitle, true)
         model.dialog.setName(viewName)
         FrameHelper frameHelper = new FrameHelper()

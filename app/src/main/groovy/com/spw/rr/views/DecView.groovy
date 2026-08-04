@@ -106,10 +106,6 @@ class DecView {
         model.viewSpeedGraphItem.setEnabled(false)
         model.viewSpeedGraphItem.addActionListener(controller.viewSpeedGraphAction)
         viewMenu.add(model.viewSpeedGraphItem)
-        model.viewDecDetailItem = new JMenuItem("View Decoder Details")
-        model.viewDecDetailItem.setEnabled(false)
-        model.viewDecDetailItem.addActionListener(controller.viewDecDetailAction)
-       // viewMenu.add(model.viewDecDetailItem)
         model.viewFunctionItem = new JMenuItem("View Function Labels")
         model.viewFunctionItem.setEnabled(false)
         viewMenu.add(model.viewFunctionItem)
@@ -135,11 +131,7 @@ class DecView {
         JMenu changeAll = new JMenu("All Items")
 
         model.changeMenu.add(changeAll)
-        model.viewChangedSelectedCVs = new JMenuItem("Changed SelectedCVs")
-        changeAll.add(model.viewChangedSelectedCVs)
-        model.viewChangedSelectedCVs.addActionListener(controller.viewChangedSelectedCVs)
-        changeAll.add(model.viewChangedSelectedCVs)
-        model.viewAllChangesCVs = new JMenuItem("All CVs")
+        model.viewAllChangesCVs = new JMenuItem("All CVS - changes")
         model.viewAllChangesCVs.addActionListener(controller.viewChangedAllCVs)
         changeAll.add(model.viewAllChangesCVs)
         model.viewAllChangeLabels = new JMenuItem("All Function Labels")
@@ -150,11 +142,8 @@ class DecView {
         changeAll.add(model.viewAllChangeKeys)
 
         JMenu onlyChanged = new JMenu("Only Changed")
-        model.viewDiffSelectedCVs = new JMenuItem("Selected CVs")
-        onlyChanged.add(model.viewDiffSelectedCVs)
-        model.viewDiffSelectedCVs.addActionListener(controller.viewDiffSelectedCVs)
-        model.viewDiffAllCvs = new JMenuItem("Changed CVs")
-        model.viewDiffAllCvs.addActionListener(controller.viewChangedAllCVs)
+        model.viewDiffAllCvs = new JMenuItem("Only Changed CVs")
+        model.viewDiffAllCvs.addActionListener(controller.viewChangedCVs)
         onlyChanged.add(model.viewDiffAllCvs)
         model.viewDiffLabels = new JMenuItem("Changed Function Labels")
         model.viewDiffLabels.addActionListener(controller.viewDiffLabels)
@@ -173,7 +162,7 @@ class DecView {
         menuBar.add(helpMenu)
         tempDialog.setJMenuBar(menuBar)
         JMenuItem[] addList = [model.viewSpeedProfileItem, model.viewSpeedGraphItem,
-                               model.viewDecDetailItem, model.viewFunctionItem,
+                               model.viewFunctionItem,
                                model.viewKeyPairsItem, model.viewStandCvItem,
                                model.viewAllCvItem]
         itemList.add(model.changeMenu)

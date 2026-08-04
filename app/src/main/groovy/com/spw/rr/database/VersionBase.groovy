@@ -9,6 +9,7 @@ class VersionBase {
     Integer decoderId
     Integer versionNumber
     Timestamp createdOn
+    Hashtable<Object, Object> keyValues
 
     enum WhichTable {
         CV,
@@ -25,6 +26,7 @@ class VersionBase {
         this.tableSource = which
     }
 
+    List<AbstractDiff> diffList
     WhichTable tableSource = WhichTable.UNKNOWN
     boolean hasBeenWritten = false
 }

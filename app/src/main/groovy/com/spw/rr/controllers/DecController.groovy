@@ -1,7 +1,7 @@
 package com.spw.rr.controllers
 
+import com.spw.rr.controllers.DataController.ViewType
 import com.spw.rr.database.DecoderEntry
-import com.spw.rr.database.RosterEntry
 import com.spw.rr.models.DecModel
 import com.spw.rr.utilities.BackgroundWorker
 import com.spw.rr.utilities.FrameHelper
@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory
 import javax.swing.JDialog
 import javax.swing.JTable
 import javax.swing.SwingUtilities
-import javax.swing.SwingWorker
 import java.awt.Component
 import java.awt.event.ActionEvent
 import java.text.MessageFormat
@@ -129,7 +128,7 @@ class DecController {
             } else {
                 new DataController((JDialog) model.thisDialog, viewType, selList)
             }
-            log.trace("worker finished executing view std cvs")
+            log.trace("worker finished executing creating new DataController")
         }
     }
 
@@ -146,12 +145,6 @@ class DecController {
             log.debug("starting a task to build a graph")
             GraphController graphController = new GraphController(model.thisDialog, selList)
         })
-    }
-
-    def viewDecDetailAction = { ActionEvent e ->
-        log.debug("view Decoder Detail action requested")
-        List<Integer> selList = buildSelectedList()
-        doDataView(DataController.ViewType.DECODER_DETAIL, selList, null)
     }
 
     def viewFunctionAction = { ActionEvent e ->
@@ -187,36 +180,40 @@ class DecController {
         doDataView( DataController.ViewType.ALL_CVS, selList, null)
     }
 
-    def viewChangedSelectedCVs = { ActionEvent e ->
-        log.debug("viewing the changes for selected CVs")
+    void viewDiffs(ViewType viewType) {
+        List<Integer> selList = buildSelectedList()
+        doDataView(viewType, selList, null)
     }
 
     def viewChangedAllCVs = { ActionEvent e ->
-
+        log.debug("view of Diffs of all CVs")
+        viewDiffs(ViewType.CV_DIFF_ALL)
     }
 
-    def viewChangedAllLabels = { ActionEvent e ->
+    def viewChangedCVs = { ActionEvent e ->
+        log.debug("view of Diffs of all CVs")
+        viewDiffs(ViewType.CV_DIFF_CHANGED)
+    }
 
+
+    def viewChangedAllLabels = { ActionEvent e ->
+        log.debug("getting a list of DIFFs for all Labels")
+        viewDiffs(ViewType.LABELS_DIFF_ALL)
     }
 
     def viewChangedAllKeys = { ActionEvent e ->
-
-    }
-
-    def viewDiffSelectedCVs = { ActionEvent e ->
-
-    }
-
-    def viewDiffAllCVs = { ActionEvent e ->
-
+        log.debug("getting a list of all changed Keys")
+        viewDiffs(ViewType.KEY_DIFF_ALL)
     }
 
     def viewDiffLabels = { ActionEvent e ->
-
+        log.debug("getting a list of Changes of all Labels")
+        viewDiffs(ViewType.LABELS_DIFF_ALL)
     }
 
     def viewDiffKeys = { ActionEvent e ->
-
+        log.debug("getting a list of changed keys")
+        viewDiffs(ViewType.KEY_DIFF_CHANGED)
     }
 
     def helpAction = { ActionEvent e ->

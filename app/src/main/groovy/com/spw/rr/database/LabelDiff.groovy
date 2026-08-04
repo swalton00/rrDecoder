@@ -28,6 +28,7 @@ class LabelDiff extends AbstractDiff{
     }
 
 
+
     @Override
     boolean wasChanged() {
         if ((!oldValue || oldValue.isBlank()) && (!newValue || newValue.isBlank())) {

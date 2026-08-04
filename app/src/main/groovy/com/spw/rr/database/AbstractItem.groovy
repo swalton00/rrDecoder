@@ -7,7 +7,7 @@ import org.slf4j.Logger
 
 @ToString(includeNames = true, includePackage = false, includeFields = true)
 @Log4j
-abstract class AbstractItem {
+abstract class AbstractItem  implements Comparable {
 
     Integer id
     Integer decoderId
@@ -26,5 +26,12 @@ abstract class AbstractItem {
     abstract void setOldValue(AbstractDiff diff);
 
     abstract void setNewValue(AbstractDiff diff);
+
+    int compareTo(Object other) {
+        if (!(other instanceof AbstractItem)) {
+            throw new RuntimeException("Attempt to compare an AbstractItem to something that is not an AbstractItem - ${other}")
+        }
+        return this.getKey().compareTo(other.getKey())
+    }
 
 }

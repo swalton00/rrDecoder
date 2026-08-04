@@ -1,19 +1,31 @@
 package com.spw.rr.controllers
 
+import com.spw.rr.database.AbstractDiff
 import com.spw.rr.database.AbstractItem
+import com.spw.rr.database.CV_Diff
+import com.spw.rr.database.CvValues
 import com.spw.rr.database.DecoderEntry
+import com.spw.rr.database.LabelDiff
+import com.spw.rr.database.VersionBase
 import com.spw.rr.models.DataModel
+import com.spw.rr.utilities.BuildKeyList
 import com.spw.rr.utilities.CvNameComparator
 import com.spw.rr.utilities.StringCvComparator
+import com.spw.rr.viewdb.ViewDb
+import com.spw.rr.viewdb.ViewDb.DiffType
+import com.spw.rr.viewdb.ViewDb.SelectType
 import com.spw.rr.viewdb.ViewDbService
 import com.spw.rr.views.DataView
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.*
+import javax.swing.text.View
 import java.awt.event.ActionEvent
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class DataController {
 
@@ -36,19 +48,39 @@ class DataController {
         STANDARD_CVS,       // CVs across, 3 lines, decoders down
         FUNCTION_LABELS,    // decoders down, label across
         SPEED_PROFILE,      // decoders across, profiles down
-        KEY_PAIRS           // decoders down, pairs across
-        }
+        KEY_PAIRS,          // decoders down, pairs across
+        CV_DIFF_ALL,        // decoders across, with CV versions, CV's down
+        CV_DIFF_CHANGED,    //    as above, but only changed cv's
+        KEY_DIFF_ALL,       // decoders across, with key versions, key's down
+        KEY_DIFF_CHANGED,   //    as above, but only changed keys
+        LABELS_DIFF_ALL,    // decoders across, with label changes, labels down
+        LABELS_DIFF_CHANGED //    as above, but only changed labels
+    }
 
     ViewType viewType
     ViewDbService database = ViewDbService.getInstance()
     DataModel model
     DataView view
 
+
+    /**
+     * Constructor for use when not selecting specific CVs
+     * @param parent the Window parent
+     * @param viewType the type of view
+     * @param decIds the decoders to show
+     */
     DataController(JDialog parent, ViewType viewType, List<Integer> decIds) {
         this(parent, viewType, decIds, null)
 
     }
 
+    /**
+     * Constructor to set required values
+     * @param parent the parent Window
+     * @param viewType type of view (enum)
+     * @param decIds decoders to show (ids for each in an ArrayList)
+     * @param cvList the specific CV values requested if ViewType is SelectedCVs (otherwise null)
+     */
     DataController(JDialog parent, ViewType viewType, List<Integer> decIds, String cvList) {
         this.cvList = cvList
         this.parent = parent
@@ -79,10 +111,37 @@ class DataController {
             case ViewType.KEY_PAIRS: buildKeyPairs()
                 printTitle = "Key Value pairs"
                 break
+            case ViewType.CV_DIFF_ALL: buildCvDiffAll()
+                printTitle = "CV Changes - All CV's"
+                break
+            case ViewType.CV_DIFF_CHANGED: buildCvDiff()
+                printTitle = "CV Changes - Only Changed CV's"
+                break
+            case ViewType.KEY_DIFF_ALL: buildKeyDiffAll()
+                printTitle = "Changes to Key Value Pairs - all Keys"
+                break
+            case ViewType.KEY_DIFF_CHANGED: buildKeyDiff()
+                printTitle = "Changes to Key Value Pairs - Only Changed Keys"
+                break
+            case ViewType.LABELS_DIFF_ALL: buildLabelDiffAll()
+                printTitle = "Changes to Function Labels - All Functions"
+                break
+            case ViewType.LABELS_DIFF_CHANGED: buildLabelDiff()
+                break
             default:
                 throw new RuntimeException("Unrecognized View type ${viewType}")
         }
     }
+
+    /*
+        General flow - begin with Constructor
+            DataModel is created in constructor
+            ViewType switch goes to build.... depending on type of view desired
+                specific view creates view,
+                invokes headers to create correct view column headers
+                builds an ArrayList of lines to fill out model.tableList
+     */
+
 
     String fixRoadName(DecoderEntry entry) {
         String title = entry.roadName + entry.roadNumber
@@ -93,12 +152,141 @@ class DataController {
     }
 
     void doColumnHeaders(List<DecoderEntry> entries, ViewType listType) {
-        entries.each {
-            String title = fixRoadName(it)
-            model.columnNames.add(title)
-            model.tableClasses.add(String.class)
+        if (listType == ViewType.CV_DIFF_ALL ||
+                listType == ViewType.CV_DIFF_CHANGED ||
+                listType == ViewType.LABELS_DIFF_ALL ||
+                listType == ViewType.LABELS_DIFF_CHANGED ||
+                listType == ViewType.KEY_DIFF_ALL ||
+                listType == ViewType.KEY_DIFF_CHANGED) {
+            doHeaderDiffs(entries, listType)
+        } else {
+            entries.each {
+                String title = fixRoadName(it)
+                model.columnNames.add(title)
+                model.tableClasses.add(String.class)
+            }
+            restDecoderDown(entries, listType)
         }
-        restDecoderDown(entries, listType)
+    }
+
+    void doHeaderDiffs(List<DecoderEntry> entries, ViewType listType) {
+        String titleBase = ""
+        HashSet<String> keyCollection = new HashSet<>()
+        switch (listType) {
+            case ViewType.CV_DIFF_ALL:
+            case ViewType.CV_DIFF_CHANGED:
+                model.columnNames.add("CV Number")
+                titleBase = "\nCV Value"
+                break
+            case ViewType.LABELS_DIFF_ALL:
+            case ViewType.LABELS_DIFF_CHANGED:
+                model.columnNames.add("Function\nNumber")
+                titleBase = "\nLabel"
+                break
+            case ViewType.KEY_DIFF_ALL:
+            case viewType.KEY_DIFF_CHANGED:
+                model.columnNames.add("Key Name")
+                titleBase = "\nKey Value"
+                break
+            default:
+                log.error("unrecognized ViewType (${listType}) in doHeaderDiffs")
+        }
+        log.debug("There are ${entries.size()} decoders to process for change type ${listType}")
+        entries.each { decoder ->
+            List<VersionBase> theVersions
+            List<AbstractItem> theItems
+            switch (listType) {
+                case ViewType.CV_DIFF_ALL:
+                case ViewType.CV_DIFF_CHANGED:
+                    theVersions = decoder.cvVersions
+                    theItems = decoder.cvValues
+                    break
+                case ViewType.LABELS_DIFF_ALL:
+                case ViewType.LABELS_DIFF_CHANGED:
+                    theVersions = decoder.labelVersions
+                    theItems = decoder.labelValues
+                    break
+                case ViewType.KEY_DIFF_ALL:
+                case viewType.KEY_DIFF_CHANGED:
+                    theVersions = decoder.keyVersions
+                    theItems = decoder.keyPairs
+                    break
+                default:
+                    log.error("unrecognized ViewType (${listType}) in doHeaderDiffs")
+            }
+            decoder.metaClass.theVersions = theVersions
+            theVersions.each {
+                String theValue = fixRoadName(decoder) + "${it.versionNumber}\n${it.createdOn}"
+                if (listType.equals(ViewType.LABELS_DIFF_ALL) || listType.equals(ViewType.LABELS_DIFF_CHANGED)) {
+                    model.columnNames.add(theValue)
+                    model.tableClasses.add(String.class)
+                    theValue = theValue + "\nLocked?"
+                    model.columnNames.add(theValue)
+                    model.tableClasses.add(Boolean.class)
+                } else {
+                    model.columnNames.add(theValue)
+                    model.tableClasses.add(String.class)
+                }
+            }
+            model.columnNames.add(fixRoadName(decoder) + titleBase)
+            model.tableClasses.add(String.class)
+            ArrayList<ArrayList<String>> lines = new ArrayList<>()
+            Hashtable<Integer, VersionBase> versionHash
+            Hashtable<String, AbstractItem> itemHash = new Hashtable<>()
+            theItems.each {
+                keyCollection.add(it.getKey())
+                if (theVersions != null) {
+                    versionHash = new Hashtable()
+                    theVersions.each({
+                        versionHash.put(it.versionNumber, it)
+                    })
+                }
+                it.metaClass.versionHash = versionHash
+                itemHash.put(it.getKey(), it)
+            }
+            decoder.metaClass.itemHash = itemHash
+        }
+        log.debug("completed header - now build key list")
+        boolean useCVcomparator = false
+        if (viewType.equals(ViewType.CV_DIFF_ALL) || viewType.equals(ViewType.CV_DIFF_CHANGED)) {
+            useCVcomparator = true
+        }
+        CvNameComparator comparator = new CvNameComparator()
+        List<String> sortedList = keyCollection.stream()
+                .sorted(useCVcomparator ? comparator : Comparator.naturalOrder())
+                .toList()
+        log.debug("there are ${sortedList.size()} in the key list - the number of rows (+1)")
+        ArrayList<ArrayList<String>> allLines = new ArrayList<>()
+        boolean addLatching = (viewType.equals(ViewType.LABELS_DIFF_ALL)) || viewType.equals(ViewType.LABELS_DIFF_CHANGED)
+        sortedList.each { String keyValue ->
+            ArrayList<String> thisLine = new ArrayList<>()
+            thisLine.add(keyValue)
+            entries.each { DecoderEntry decoder ->
+                AbstractItem thisItem = decoder.itemHash.get(keyValue)
+                decoder.theVersions.each { VersionBase thisVersion ->
+                    if (thisItem != null) {
+                        AbstractDiff thisDiff = thisItem.versionHash.get(thisVersion.versionNumber)
+                        thisLine.add(thisDiff != null ? thisDiff.oldValue : "")
+                        if (addLatching) {
+                            thisLine.add(((LabelDiff) thisItem).oldLocked ? "Latching" : "Non-Latching")
+                        }
+                    } else {
+                        thisLine.add("")
+                        if (addLatching) {
+                            thisLine.add("")
+                        }
+                    }
+                }
+                thisLine.add("")
+            }
+            allLines.add(thisLine)
+        }
+        log.debug("changed items - complete array now built - adding to tableList")
+        model.tableList.addAll(allLines)
+        SwingUtilities.invokeLater {
+            log.debug("build changed items now invoking view.init")
+            view.init()
+        }
     }
 
     void restDecoderDown(List<DecoderEntry> entries, ViewType listType) {
@@ -132,7 +320,7 @@ class DataController {
             if (viewType == ViewType.SPEED_PROFILE) {
                 Integer speedStep = Integer.valueOf(keyVal)
                 BigDecimal correctedStep = new BigDecimal(speedStep)
-                correctedStep = correctedStep /1000
+                correctedStep = correctedStep / 1000
                 Integer step = 126 * correctedStep
                 thisLine.add(String.format("%.3f", correctedStep))
                 thisLine.add(step.toString())
@@ -267,10 +455,217 @@ class DataController {
     void buildKeyPairs() {
         view = new DataView(parent, this, model, "Key Value Pairs View", "keyview")
         log.debug("creating a list of key value pairs for decoders")
-        List<DecoderEntry> decs = database.getList(ViewDbService.ListType.KEY_VAL_LIST, decoderIds, null)
+        List<DecoderEntry> decs = database.getList(ViewDbService.ListType.KEY_VAL_LIST,
+                decoderIds,
+                null)
         model.columnNames.add("Key")
         model.tableClasses.add(String.class)
         doColumnHeaders(decs, ViewType.KEY_PAIRS)
+    }
+
+
+    /**
+     *
+     * @param thisType ViewType (enum) determining the type of view
+     * @param dialogTitle title for the Dialog frame
+     * @param viewName name of the view (for use in properties saving and retrieving)
+     * @param selectType type of selection for database call
+     * @param diffType either ALL or only changed rows
+     * @param comparator a comparator for the keys, or null for native
+     * @param getHash a Closure that returns the correct type of Hashtable
+     * @param putHash a Closure that adds the correct item type to the hashtable
+     */
+    void allDiffBuild(ViewType thisType,
+                      String dialogTitle,
+                      String viewName,
+                      SelectType selectType,
+                      DiffType diffType,
+                      Comparator<Object> comparator,
+                      Closure<Hashtable<Object, Object>> getHash,
+                      Closure putHash
+    ) {
+        log.debug("building views for ${thisType} with selections of ${selectType}")
+        view = new DataView(parent,
+                this,
+                model,
+                dialogTitle,
+                viewName)
+        List<DecoderEntry> decoders = database.getDecDiffs(selectType,
+                diffType,
+                (List) decoderIds)
+        List<Object> keyList = BuildKeyList.buildList(decoders as List<Object>,
+                null,
+                BuildKeyList.retrieveVersions,
+                BuildKeyList.retrieveDiffList,
+                BuildKeyList.getKey,
+                comparator,
+                false,
+                getHash,
+                putHash)
+        keyList = BuildKeyList.buildList(decoders as List<Object>,
+                keyList,
+                BuildKeyList.retrieveValues,
+                null,
+                BuildKeyList.getKey,
+                comparator,
+                true,
+                getHash,
+                putHash)
+        doDiffColumnHeaders(thisType, decoders, keyList)
+    }
+
+    void cvDiffBuild(ViewType thisType,
+                     String dialogTItle,
+                     String viewName,
+                     SelectType selectType,
+                     DiffType diffType) {
+        allDiffBuild(thisType,
+                dialogTItle,
+                viewName,
+                selectType,
+                diffType,
+                new CvNameComparator(),
+                BuildKeyList.getCVHash,
+                BuildKeyList.putCVHash)
+    }
+
+    void buildCvDiffAll() {
+        cvDiffBuild(ViewType.CV_DIFF_ALL,
+                "CV Changes for all CVs",
+                "cvdiffall",
+                SelectType.SELECT_ALL_CVS,
+                DiffType.ALL_VALUES
+        )
+    }
+
+    void buildCvDiff() {
+        cvDiffBuild(ViewType.CV_DIFF_CHANGED,
+                "CV Changes for changed CVs",
+                "cvdiff",
+                SelectType.SELECT_ALL_CVS,
+                DiffType.ONLY_CHANGED
+        )
+    }
+
+    void allKeyDiffBuild(ViewType viewType, DiffType diffType) {
+        allDiffBuild(viewType,
+                "Key Changes for All keys",
+                "keydiffall",
+                SelectType.SELECT_KEY,
+                diffType,
+                null,
+                BuildKeyList.getKeyHash,
+                BuildKeyList.putKeyHash
+        )
+    }
+
+    void buildKeyDiffAll() {
+        allKeyDiffBuild(ViewType.KEY_DIFF_ALL, DiffType.ALL_VALUES)
+    }
+
+    void buildKeyDiff() {
+        allKeyDiffBuild(ViewType.KEY_DIFF_CHANGED, DiffType.ONLY_CHANGED)
+    }
+
+    void doDiffColumnHeaders(ViewType listType,
+                             List<DecoderEntry> entries,
+                             List<String> keys) {
+        log.debug("Processing column headers for ${entries.size()} with ${keys.size()} keys")
+        String titleBase
+        switch (listType) {
+            case ViewType.CV_DIFF_ALL:
+            case ViewType.CV_DIFF_CHANGED:
+                model.columnNames.add("CV Number")
+                model.tableClasses.add(Integer.class)
+                titleBase = "\nCV Value"
+                break
+            case ViewType.LABELS_DIFF_ALL:
+            case ViewType.LABELS_DIFF_CHANGED:
+                model.columnNames.add("Function\nNumber")
+                model.tableClasses.add(Integer.class)
+                titleBase = "\nLabel"
+                break
+            case ViewType.KEY_DIFF_ALL:
+            case viewType.KEY_DIFF_CHANGED:
+                model.columnNames.add("Key Name")
+                model.tableClasses.add(String.class)
+                titleBase = "\nKey Value"
+                break
+            default:
+                log.error("unrecognized ViewType (${listType}) in doHeaderDiffs")
+        }
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+        DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("hh:mm:ss a")
+        entries.each { DecoderEntry thisEntry ->
+            String columnHeader = ""
+            thisEntry.versions.each { VersionBase thisVersion ->
+                LocalDateTime localTime = thisVersion.createdOn.toLocalDateTime()
+                String theValue = fixRoadName(thisEntry) +
+                        "\nVersion: ${thisVersion.versionNumber}\n${localTime.format(dateFormat)}\n${localTime.format(timeFormat)}"
+                model.columnNames.add(theValue)
+                model.tableClasses.add(String.class)
+                if (viewType.equals(ViewType.LABELS_DIFF_CHANGED) ||
+                        viewType.equals(ViewType.LABELS_DIFF_ALL)) {
+                    model.columnNames.add("Locked?")
+                    model.tableClasses.add(Boolean.class)
+                    columnHeader = "Function Label"
+                } else if (viewType.equals(ViewType.CV_DIFF_CHANGED) ||
+                        viewType.equals(ViewType.CV_DIFF_ALL)) {
+                    columnHeader = "CV Value"
+                } else {
+                    columnHeader = "Key Value"
+                }
+            }
+            model.columnNames.add("${fixRoadName(thisEntry)}\n${columnHeader}")
+            model.tableClasses.add(String.class)
+        }
+        doDiffColumnValues(entries, keys)
+    }
+
+    void doDiffColumnValues(List<DecoderEntry> entries, List<String> keyList) {
+        ArrayList<ArrayList<String>> allLines = new ArrayList<>()
+        log.debug("there will be ${keyList.size()} lines of output")
+        keyList.each { String key ->
+            ArrayList<String> thisLine = new ArrayList<>()
+            thisLine.add(key)
+            entries.each { DecoderEntry thisEntry ->
+                thisEntry.versions.each { VersionBase current ->
+                    AbstractDiff thisDiff = current.keyValues.get(key)
+                    thisLine.add(thisDiff ? thisDiff.oldValue : "")
+                    if (viewType.equals(ViewType.LABELS_DIFF_CHANGED) ||
+                            viewType.equals(ViewType.LABELS_DIFF_ALL)) {
+                        thisLine.add(thisDiff ? (((LabelDiff) thisDiff).oldLocked ? "L" : "") : "")
+                    }
+                }
+                AbstractItem thisItem = thisEntry.keyValues.get(key)
+                thisLine.add(thisItem ? thisItem.getValue() : "")
+            }
+            allLines.add(thisLine)
+        }
+        model.tableList.addAll(allLines)
+        SwingUtilities.invokeLater {
+            log.debug("build changed items now invoking view.init")
+            view.init()
+        }
+    }
+
+    void allLabelDiffBuild(ViewType viewType, DiffType diffType) {
+        allDiffBuild(ViewType.LABELS_DIFF_ALL,
+                "Function Label Changes for All Functions",
+                "labelDiffAll",
+                SelectType.SELECT_FUNC,
+                DiffType.ALL_VALUES,
+                null,
+                BuildKeyList.getLabelHash,
+                BuildKeyList.putLabelHash)
+    }
+
+    void buildLabelDiffAll() {
+        allLabelDiffBuild(ViewType.LABELS_DIFF_ALL, DiffType.ALL_VALUES)
+    }
+
+    void buildLabelDiff() {
+        allLabelDiffBuild(ViewType.LABELS_DIFF_CHANGED, DiffType.ONLY_CHANGED)
     }
 
     def printSAction = { ActionEvent e ->

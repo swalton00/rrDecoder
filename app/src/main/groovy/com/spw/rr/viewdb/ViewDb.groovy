@@ -30,4 +30,7 @@ interface ViewDb {
                                  @Param("diffType")DiffType diffType,
                                  @Param("ids")List<Integer> ids,
                                  @Param("cvs")List<String> cvs)
+    List<DecoderEntry> listDecDiffs(@Param("selectType")SelectType selectType,
+                                @Param("idList")List<Integer> idList,
+                                @Param("doAll")Boolean doAll)
 }

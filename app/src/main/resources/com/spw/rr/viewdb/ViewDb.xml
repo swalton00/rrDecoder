@@ -6,32 +6,32 @@
             a.dccAddress,
             a.roadName   AS roadName,
             a.roadNumber AS roadNumber
-               <if test="arg0.name() == 'SELECT_ALL_CVS' | arg0.name() == 'SELECT_FXD_CVS' | arg0.name() == 'SELECT_SEL_CVS'">
+        <if test='selectType != null and (selectType.name()  == "SELECT_ALL_CVS" || selectType.name()  == "SELECT_FXD_CVS" || selectType.name()  == "SELECT_SEL_CVS")'>
         ,   cvNumber     AS cvNumber,
             cvValue      AS cvValue,
             cv.id        as cvid,
             cv.decoderid as cvdecoderId
-               </if>
-        <if test="arg0.name() == 'SELECT_FUNC'">
+    </if>
+        <if test='selectType != null and selectType.name()  == "SELECT_FUNC"'>
         , functionnumber ,
           functionLabel  ,
           fn.id   as fnid,
           fn.decoderid as fndecoderId
         </if>
-        <if test="arg0.name() == 'SELECT_DEF'">
+        <if test='selectType != null and selectType.name()  == "SELECT_DEF"'>
         , varvalue as varValue,
           item,
           de.id as deid,
           de.decoderid as dedecoderId
         </if>
-        <if test="arg0.name() == 'SELECT_SPD'">
+        <if test='selectType != null and selectType.name()  == "SELECT_SPD"'>
         , step ,
           forward,
           reverse,
           spd.id as spdid,
           spd.decoderid as spddecoderId
         </if>
-        <if test="arg0.name() == 'SELECT_KEY'">
+        <if test='selectType != null and selectType.name()  == "SELECT_KEY"'>
         , pair_key,
           pair_value,
           kv.id as kvid,
@@ -40,36 +40,36 @@
         FROM
             decoder a
         INNER JOIN
-        <if test="arg0.name() == 'SELECT_ALL_CVS' | arg0.name() == 'SELECT_FXD_CVS' | arg0.name() == 'SELECT_SEL_CVS'">
+        <if test='selectType != null and (selectType.name()  == "SELECT_ALL_CVS" || selectType.name()  == "SELECT_FXD_CVS" || selectType.name()  == "SELECT_SEL_CVS")'>
             cvvalues cv
         on a.id = cv.decoderid
         </if>
-        <if test="arg0.name() == 'SELECT_FUNC'">
+        <if test='selectType != null and selectType.name()  =="SELECT_FUNC"'>
             functionlabels fn
         on a.id = fn.decoderid
         </if>
-        <if test="arg0.name() == 'SELECT_SPD'">
+        <if test='selectType != null and selectType.name()  == "SELECT_SPD"'>
             speedprofile spd
             on a.id = spd.decoderid
         </if>
-        <if test="arg0.name() == 'SELECT_KEY'">
+        <if test='selectType != null and selectType.name()  == "SELECT_KEY"'>
             keyvalues kv
             on a.id = kv.decoderid
         </if>
         <where>
-            <foreach collection="arg1" index="index" item="item"
+            <foreach collection="ids" index="index" item="item"
                      open = "a.id IN (" separator="," close=")">
                 #{item}
             </foreach>
-        <if test="arg0.name() == 'SELECT_FXD_CVS'">
+        <if test='selectType != null and selectType.name()  == "SELECT_FXD_CVS"'>
             AND cvNumber IN ('1',
             '2', '3', '4', '5' , '6',
             '7', '8', '9', '10', '11',
             '12', '13', '14', '15', '16',
             '17', '18', '19')
         </if>
-        <if test="arg0.name() == 'SELECT_SEL_CVS'">
-            <foreach collection="arg2" index="index" item="item"
+        <if test='selectType != null and selectType.name()  == "SELECT_SEL_CVS"'>
+            <foreach collection="cvs" index="index" item="item"
                      open="AND cvNumber IN (" separator="," close=")">
                 #{item,jdbcType=VARCHAR}
             </foreach>
@@ -140,13 +140,13 @@
 SELECT
     cv.decoderid,
     cv.cvNumber,
-    cv.cvValue,
+    COALESCE(cv.cvValue, '&lt;Deleted&gt;') as cvValue,
     ver.version_number,
     ver.created_on,
-    ver.old_value,
-    ver.new_value
+    ver.old_value as oldValue,
+    ver.new_value as newValue
 FROM
-    cvValues cv
+            cvValues cv
         <choose>
         <when test='diffType != null and "ALL".equals(diffType.toString())'>
             LEFT OUTER JOIN
@@ -174,6 +174,22 @@ ON
 AND ver.cvnumber = cv.cvnumber
 WHERE
     cv.decoderId = ${id}
+        UNION ALL
+SELECT
+    d2.decoderid,
+    d2.cvNumber,
+    '&lt;Deleted&gt;' as cvValue,
+    v2.version_number,
+    v2.created_on,
+    d2.old_value,
+    d2.new_value
+FROM cv_diff as d2
+    inner join cv_versions as v2
+    on d2.decoderId = v2.decoderid
+    WHERE d2.decoderId = ${id} AND
+        not exists (select * from cvValues cv3
+             where cv3.decoderid = d2.decoderId AND
+        cv3.cvNumber = d2.cvNumber)
     </select>
     <resultMap id="viewCVselectMap" type="CvValues">
         <id property="cvNumber" column="cvnumber"/>
@@ -281,7 +297,7 @@ WHERE
         ON
         t_label.decoderId = p.id
         <where>
-            <foreach collection="list" index="index" item="item"
+            <foreach collection="array" index="index" item="item"
                      open="rosterid IN (" separator="," close=")">
                 #{item}
             </foreach>
@@ -304,19 +320,19 @@ WHERE
                     FROM
                     cvvalues
             <where>
-                <foreach collection="arg0" index="index" item="item"
+                <foreach collection="decoderID" index="index" item="item"
                          open = "decoderid IN (" separator="," close=")">
                     #{item}
                 </foreach>
-                <if test="arg1 == null &amp; !arg2">
+                <if test="cvs == null &amp; !listAll">
                     AND cvNumber IN ('1',
                     '2', '3', '4', '5' , '6',
                     '7', '8', '9', '10', '11',
                     '12', '13', '14', '15', '16',
                     '17', '18', '19')
                 </if>
-                <if test="arg1 != null">
-                    <foreach collection="arg1" index="index" item="item"
+                <if test="cvs != null">
+                    <foreach collection="cvs" index="index" item="item"
                              open="AND cvNumber IN (" separator="," close=")">
                         #{item,jdbcType=VARCHAR}
                     </foreach>
@@ -361,5 +377,227 @@ WHERE
                <result property="pair_key" column="pair_key"/>
                <result property="pair_value" column="pair_value"/>
            </collection>
+    </resultMap>
+    <select id="listDecDiffs" resultMap="decDiffs">
+        select id as decId,
+                DECODERID,
+                ROADNAME,
+                ROADNUMBER,
+                DCCADDRESS,
+             <choose>
+               <when test='selectType != null and "SELECT_ALL_CVS".equals(selectType.toString())'>
+                   'CV'
+               </when>
+               <when test='selectType != null and "SELECT_FUNC".equals(selectType.toString())'>
+                   'LABEL'
+               </when>
+               <when test='selectType != null and "SELECT_KEY".equals(selectType.toString())'>
+                   'KEYVALUE'
+               </when>
+               <otherwise>
+                   'UNKNOWN'
+               </otherwise>
+           </choose>
+                as selectionChoice,
+            <if test="doAll">
+                'all'
+            </if>
+            <if test="!doAll">
+                'some'
+            </if> as diffType
+        from decoder d
+           where 
+                    <foreach collection="idList" index="index" item="item"
+                     open="id IN (" separator="," close=")">
+                #{item}
+            </foreach>
+    </select>
+    <resultMap id="decDiffs" type="DecoderEntry">
+        <result property="id" column="decId"/>
+        <result property="decoderId" column="DECODERID"/>
+        <result property="roadName" column="ROADNAME"/>
+        <result property="roadNumber" column="ROADNUMBER"/>
+        <result property="dccAddress" column="DCCADDRESS"/>
+        <collection property="versions"
+                    ofType="VersionBase"
+                    select="listDiffValues"
+                    column="{decId=decId, selectType=selectionChoice}"
+                    javaType="ArrayList">
+        </collection>
+        <collection property="values"
+                    ofType="AbstractItem"
+                    javaType="ArrayList"
+                    select="listRelatedItems"
+                    column="{decId=decId, selectType=selectionChoice, howMuch=diffType}"/>
+    </resultMap>
+ <select id="listDiffValues" resultMap="diffValuesMap">
+        select 
+               ver.VERSION_NUMBER as masterVersion,
+               ver.CREATED_ON as createdOn,
+               old_Value as oldValue,
+               new_Value as newValue,
+     <choose>
+          <when test='selectType != null and "CV".equals(selectType.toString().trim())'>
+                CVNUMBER as cvNumber,
+          </when>
+         <when test='selectType != null and "LABEL".equals(selectType.toString().trim())'>
+                FUNCTION_NUMBER as functionNumber,
+         </when>
+         <when test='selectType != null and "KEYVALUE".equals(selectType.toString().trim())'>
+                PAIR_KEY as pairKey,
+         </when>
+     </choose>
+ #{selectType} as itemType
+    <if test='selectType != null and "LABEL".equals(selectType.toString().trim())'>
+           ,
+           old_locked,
+           new_locked
+    </if>
+        from
+         <choose>
+            <when test='selectType != null and "CV".equals(selectType.toString().trim())'>
+                CV_VERSIONS VER
+                inner join 
+                CV_Diff as d
+            </when>
+            <when test='selectType != null and "LABEL".equals(selectType.toString().trim())'>
+                LABEL_VERSIONS VER
+                inner join
+                Label_Diff as d
+            </when>
+            <when test='selectType != null and "KEYVALUE".equals(selectType.toString().trim())'>
+                KEYVALUES_VERSIONS VER
+                inner join 
+                KEYVALUES_DIFF as d
+            </when>
+            <otherwise>
+                (SELECT null as old_Value, null as new_Value, null as version_Number, null as old_locked, null as new_locked, null as decoderId WHERE 1=0) as d
+            </otherwise>
+         </choose>
+     ON VER.decoderid = d.decoderid
+           Where ver.decoderId=#{decId}
+    </select>
+    <!-- 1. PARENT LEVEL MAP: Exclusively constructs VersionBase and defines the list container -->
+    <resultMap id="diffValuesMap" type="VersionBase">
+        <result property="versionNumber" column="masterVersion"/>
+        <result property="createdOn" column="createdOn"/>     <!-- We use an inline discriminator choice directly on the collection mapping -->
+        <collection property="diffList" ofType="AbstractDiff">
+            <result property="oldValue" column="oldValue"/>
+            <result property="newValue" column="newValue"/>
+            <result property="tableSource" column="itemType"
+                    javaType="com.spw.rr.database.VersionBase$WhichTable"
+                    typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+
+            <!-- FIXED: The discriminator is placed cleanly inside the collection definition.
+                 It forwards row-instantiation to pure, unextended concrete leaf maps. -->
+            <discriminator javaType="string" column="itemType">
+                <case value="LABEL" resultMap="labelDiffRowMap" />
+                <case value="CV" resultMap="cvDiffRowMap" />
+                <case value="KEYVALUE" resultMap="keyDiffRowMap" />
+            </discriminator>
+        </collection>
+    </resultMap>
+
+    <!-- 2. CONCRETE ROW MAPS: These are intentionally flat, explicit, and do NOT use "extends" -->
+    <resultMap id="labelDiffRowMap" type="LabelDiff">
+        <result property="versionNumber" column="masterVersion"/>
+        <result property="oldValue" column="oldValue"/>
+        <result property="newValue" column="newValue"/>
+        <result column="old_locked" property="oldLocked"/>
+        <result column="new_locked" property="newLocked"/>
+        <result column="functionNumer" property="functionNumber"/>
+    </resultMap>
+
+    <resultMap id="cvDiffRowMap" type="CV_Diff">
+        <result property="versionNumber" column="masterVersion"/>
+        <result property="oldValue" column="oldValue"/>
+        <result property="newValue" column="newValue"/>
+        <result property="cvNumber" column="cvNumber"/>
+    </resultMap>
+
+    <resultMap id="keyDiffRowMap" type="KeyDiff">
+        <result property="versionNumber" column="masterVersion"/>
+        <result property="oldValue" column="oldValue"/>
+        <result property="newValue" column="newValue"/>
+        <result property="pairKey" column="pairKey"/>
+    </resultMap>
+    <select id="listRelatedItems" resultMap="relatedItemsMap">
+       select id,
+   decoderId,
+        #{selectType} itemType,
+        <choose>
+       <when test='selectType != null and "CV".equals(selectType.toString().trim())'>
+                cvnumber as cvNumber,
+                cvValue as cvValue
+            </when>
+            <when test='selectType != null and "LABEL".equals(selectType.toString().trim())'>
+                functionnumber as functionNum,
+                functionlabel,
+                locked
+            </when>
+            <when test='selectType != null and "KEYVALUE".equals(selectType.toString().trim())'>
+                pair_key,
+                pair_value
+            </when>
+            <otherwise>
+                'ERROR' as errorColumn
+            </otherwise>
+        </choose>
+
+ from
+        <choose>
+             <when test='selectType != null and "CV".equals(selectType.toString().trim())'>
+                CVValues v
+            </when>
+            <when test='selectType != null and "LABEL".equals(selectType.toString().trim())'>
+                FUNCTIONLABELS v
+            </when>
+            <when test='selectType != null and "KEYVALUE".equals(selectType.toString().trim())'>
+                KEYVALUES v
+            </when>
+            <otherwise>
+                (SELECT null as old_Value, null as new_Value, null as version_Number, null as old_locked, null as new_locked, null as decoderId WHERE 1=0) as d
+            </otherwise>
+        </choose>
+ where decoderid = #{decId}
+        <if test='howMuch != null and "some".equals(howMuch.toString().trim())'>
+               and exists (select * from
+            <choose>
+                 <when test='selectType != null and "CV".equals(selectType.toString().trim())'>
+                CV_DIFF d where d.cvnumber = v.cvnumber
+            </when>
+            <when test='selectType != null and "LABEL".equals(selectType.toString().trim())'>
+                LABEL_DIFF d where d.functionnumber = v.functionnumber
+            </when>
+            <when test='selectType != null and "KEYVALUE".equals(selectType.toString().trim())'>
+                KEYVALUES_DIFF d where d.pair_key = v.pair_key
+            </when>
+            <otherwise>
+                (SELECT null as old_Value, null as new_Value, null as version_Number, null as old_locked, null as new_locked, null as decoderId WHERE 1=0) as d
+            </otherwise>
+        </choose>
+            and d.decoderid = v.decoderid )
+        </if>
+    </select>
+    <resultMap id="relatedItemsMap" type="AbstractItem">
+        <result column="decoderId" property="decoderId"/>
+        <discriminator javaType="string" column="itemType">
+            <case value="CV" resultMap="valueCVMap"/>
+            <case value="LABEL" resultMap="valueLabelMap"/>
+            <case value="KEYVALUE" resultMap="valueKeyMap"/>
+        </discriminator>
+    </resultMap>
+    <resultMap id="valueCVMap" type="CvValues">
+        <result column="cvNumber" property="cvNumber"/>
+        <result column="cvValue" property="cvValue"/>
+    </resultMap>
+    <resultMap id="valueLabelMap" type="FunctionLabel">
+        <result column="functionNum" property="functionNum"/>
+        <result column="functionLabel" property="functionLabel"/>
+        <result column="locked" property="locked"/>
+    </resultMap>
+    <resultMap id="valueKeyMap" type="KeyValuePairs">
+        <result column="pairKey" property="pair_key"/>
+        <result column="keyvalue" property="pair_value"/>
     </resultMap>
 </mapper>

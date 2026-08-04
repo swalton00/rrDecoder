@@ -11,6 +11,7 @@ abstract class AbstractDiff {
     String oldValue
     String newValue
     Timestamp createdOn
+    VersionBase.WhichTable tableSource
 
     abstract String getKey();
 
