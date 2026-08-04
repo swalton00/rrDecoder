@@ -95,6 +95,12 @@ class BuildKeyList {
     }
 
     static Closure putKeyHash = { Object keyItem, Hashtable<String, KeyValuePairs> theHash ->
+        if (keyItem == null) {
+            log.error("nothing ing keyItem!")
+        }
+        if (keyItem.key == null) {
+            log.error("no key on this one ${keyItem}")
+        }
         theHash.put(keyItem.key, keyItem)
     }
 

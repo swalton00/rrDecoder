@@ -475,6 +475,7 @@ FROM cv_diff as d2
             </otherwise>
          </choose>
      ON VER.decoderid = d.decoderid
+
            Where ver.decoderId=#{decId}
     </select>
     <!-- 1. PARENT LEVEL MAP: Exclusively constructs VersionBase and defines the list container -->
@@ -487,7 +488,6 @@ FROM cv_diff as d2
             <result property="tableSource" column="itemType"
                     javaType="com.spw.rr.database.VersionBase$WhichTable"
                     typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
-
             <!-- FIXED: The discriminator is placed cleanly inside the collection definition.
                  It forwards row-instantiation to pure, unextended concrete leaf maps. -->
             <discriminator javaType="string" column="itemType">
@@ -505,7 +505,7 @@ FROM cv_diff as d2
         <result property="newValue" column="newValue"/>
         <result column="old_locked" property="oldLocked"/>
         <result column="new_locked" property="newLocked"/>
-        <result column="functionNumer" property="functionNumber"/>
+        <result column="functionNumber" property="functionNumber"/>
     </resultMap>
 
     <resultMap id="cvDiffRowMap" type="CV_Diff">
@@ -597,7 +597,7 @@ FROM cv_diff as d2
         <result column="locked" property="locked"/>
     </resultMap>
     <resultMap id="valueKeyMap" type="KeyValuePairs">
-        <result column="pairKey" property="pair_key"/>
+        <result column="pair_Key" property="pair_key"/>
         <result column="keyvalue" property="pair_value"/>
     </resultMap>
 </mapper>

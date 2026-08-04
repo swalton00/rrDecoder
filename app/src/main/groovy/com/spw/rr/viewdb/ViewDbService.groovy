@@ -135,7 +135,7 @@ class ViewDbService {
      * Retrieve a list of decoders with an array (lazy) of the specific Diff type
      * @param selectType    CV, SpecificCv, FunctionLabel, or KeyValue
      * @param howMany       either All, or only the changed keys
-     * @param decoderIds    only for these decodors
+     * @param decoderIds    only for these decoders
      * @return
      */
     ArrayList<DecoderEntry> getDecDiffs(ViewDb.SelectType selectType,

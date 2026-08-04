@@ -11,6 +11,7 @@ import com.spw.rr.models.DataModel
 import com.spw.rr.utilities.BuildKeyList
 import com.spw.rr.utilities.CvNameComparator
 import com.spw.rr.utilities.StringCvComparator
+import com.spw.rr.utilities.StringIntegerComparator
 import com.spw.rr.viewdb.ViewDb
 import com.spw.rr.viewdb.ViewDb.DiffType
 import com.spw.rr.viewdb.ViewDb.SelectType
@@ -655,7 +656,7 @@ class DataController {
                 "labelDiffAll",
                 SelectType.SELECT_FUNC,
                 DiffType.ALL_VALUES,
-                null,
+                new StringIntegerComparator(),
                 BuildKeyList.getLabelHash,
                 BuildKeyList.putLabelHash)
     }
