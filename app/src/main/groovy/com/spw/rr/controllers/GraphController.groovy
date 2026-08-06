@@ -7,7 +7,9 @@ import com.spw.rr.viewdb.ViewDbService
 import com.spw.rr.views.GraphView
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartPanel
-import org.jfree.data.category.DefaultCategoryDataset
+import org.jfree.data.xy.XYDataItem
+import org.jfree.data.xy.XYSeries
+import org.jfree.data.xy.XYSeriesCollection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -19,7 +21,6 @@ class GraphController {
     ViewDbService database = ViewDbService.getInstance()
 
     Vector<DecoderEntry> decoders = new Vector()
-    DefaultCategoryDataset dataset
     JDialog parent
 
     GraphModel model
@@ -44,24 +45,30 @@ class GraphController {
         }
         log.debug("returned list has ${decs.size()} entries")
         List<String> locoList = new ArrayList<>()
-        dataset = new DefaultCategoryDataset()
+        model.dataset = new XYSeriesCollection()
         decs.each {
             String thisLoco
             if (it.roadName == null | it.roadName.isBlank() | it.roadNumber == null) {
                 locoList.add(it.dccAddress)
                 thisLoco = it.dccAddress
             } else {
-                locoList.add(it.roadName + it.roadNumber + " Forwward")
+                locoList.add(it.roadName + it.roadNumber + " Forward")
                 locoList.add(it.roadName + it.roadNumber + " Reverse")
                 thisLoco = it.roadName + it.roadNumber
+                XYSeries thisSeriesForward = new XYSeries(thisLoco + " Forward")
+                XYSeries thisSeriesReverse = new XYSeries(thisLoco + " Reverse")
                 it.speedValues.each { SpeedProfile spd ->
-                    dataset.addValue(spd.forwardValue, thisLoco + " Forward", new BigDecimal(spd.speedStep)/1000)
-                    dataset.addValue(spd.reverseValue, thisLoco + " Reverse", new BigDecimal(spd.speedStep)/1000)
+                    Double speedStep = Double.valueOf(spd.speedStep)/1000
+                    XYDataItem forward = new XYDataItem(speedStep, spd.forwardValue)
+                    thisSeriesForward.add(forward)
+                    XYDataItem reverse = new XYDataItem(speedStep, spd.reverseValue)
+                    thisSeriesReverse.add(reverse)
                 }
+                model.dataset.addSeries(thisSeriesForward)
+                model.dataset.addSeries(thisSeriesReverse)
             }
         }
-        model.dataset = dataset
-        model.chart = ChartFactory.createLineChart("Speed Profile Value", "Throttle Percentage", "Speed", model.dataset)
+        model.chart = ChartFactory.createXYLineChart("Speed Profiles", "Throttle Percentage", "Speed", model.dataset)
         model.chartPanel = new ChartPanel(model.chart)
         model.init()
         SwingUtilities.invokeLater {
