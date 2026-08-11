@@ -42,37 +42,6 @@ class DbService {
             }
         }
 
-
-    List<DecoderEntry> listWithFixed(List<Integer> decoderIds) {
-        log.debug("listing with fixed values for ids ${decoderIds}")
-        SqlSession session
-        List<DecoderEntry> returnValues
-        try {
-            session = sqlSessionFactory.openSession()
-            ViewDb mapper = session.getMapper(ViewDb.class)
-            returnValues = mapper.listWithCvs(decoderIds, null, false)
-        } finally {
-            session.close()
-        }
-        log.debug("retuning a list of size ${returnValues.size()}")
-        return returnValues
-    }
-
-    List<DecoderEntry> listWithParameters(Vector<Integer> decoderIds, List<String> parameters) {
-        log.debug("listing with fixed values for ids ${decoderIds}")
-        SqlSession session
-        List<DecoderEntry> returnValues
-        try {
-            session = sqlSessionFactory.openSession()
-            ViewDb mapper = session.getMapper(ViewDb.class)
-            returnValues = mapper.listWithCvs(decoderIds, parameters, Boolean.valueOf(false))
-        } finally {
-            session.close()
-        }
-        log.debug("retuning a list of size ${returnValues.size()}")
-        return returnValues
-    }
-
     List<DecoderEntry> listValues(ViewDb.SelectType selectType, Vector<Integer> ids, List<String> cvs) {
         log.debug("select list of type ${selectType} for ids ${ids}")
         SqlSession session

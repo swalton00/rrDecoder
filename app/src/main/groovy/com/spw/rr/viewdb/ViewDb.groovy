@@ -20,16 +20,9 @@ interface ViewDb {
     }
 
     List<DecoderEntry> listDecodersByRosterID(@Param("array")List<Integer> array)
-    List<DecoderEntry> listWithCvs(@Param("decoderID")Vector<Integer> decoderID,
-                                   @Param("cvs")List<String> cvs,
-                                   @Param("listAll")Boolean listAll)
     List<DecoderEntry> listValues(@Param("selectType")SelectType selectType,
                                   @Param("ids")Vector<Integer> ids,
                                   @Param("cvs")List<String> cvs)
-    List<DecoderEntry> listDiffs(@Param("selectType")SelectType selectType,
-                                 @Param("diffType")DiffType diffType,
-                                 @Param("ids")List<Integer> ids,
-                                 @Param("cvs")List<String> cvs)
     List<DecoderEntry> listDecDiffs(@Param("selectType")SelectType selectType,
                                 @Param("idList")List<Integer> idList,
                                 @Param("doAll")Boolean doAll)

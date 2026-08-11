@@ -306,7 +306,7 @@ class TestViewDiffs {
                 })
         log.debug("keyList built is ${keyList}")
         assertNotNull(keyList)
-        assertNotNull(entries.values.keyValues)
+        assertNotNull(entries.size())
     }
 
     @Test

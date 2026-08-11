@@ -34,24 +34,6 @@ class ViewDbService {
         return entries
     }
 
-    List<DecoderEntry> listStandardCVs(Vector<Integer> decoderIds, List<String> cvList, boolean listall) {
-        log.debug("retrieving CVs for ${decoderIds}")
-        SqlSession session
-        List<DecoderEntry> retvals
-         try {
-            session = baseDb.sqlSessionFactory.openSession(true)
-             ViewDb map = session.getMapper(ViewDb.class)
-             retvals = map.ListWithCvs(decoderIds, cvList, listall)
-        } catch (Exception e) {
-             log.error("Exception process the SQL", e)
-         } finally {
-            session.close()
-         }
-        log.trace("returned list is ${retvals}")
-        log.debug("returning a list of ${retvals.size()}")
-        return retvals
-    }
-
     enum ListType {
         LABEL_LIST,     // function labels
         SPEED_LIST,     // speed profiles
@@ -97,37 +79,6 @@ class ViewDbService {
             session.close()
         }
         log.debug("returning a list with ${retVal.size()} entries")
-        return retVal
-    }
-
-    /**
-     * Retrieve a list of decoders with an array (lazy) of the specific Diff type
-     * @param selectType    CV, SpecificCv, FunctionLabel, or KeyValue
-     * @param howMany       either All, or only the changed keys
-     * @param decoderIds    only for these decoders
-     * @param cvList        optionally for only specific CVs
-     * @return
-     */
-    ArrayList<DecoderEntry> getDecoderDiffs(ViewDb.SelectType selectType,
-                                            ViewDb.DiffType howMany,
-                                            List<Integer> decoderIds,
-                                            List<String> cvList = null) {
-        log.debug("getting the decoders with their diffs for ${selectType} with ${howMany} and decoderids ${decoderIds}")
-        SqlSession session = null
-        ArrayList<DecoderEntry> retVal
-        try {
-            session = baseDb.sqlSessionFactory.openSession(true)
-            ViewDb mapper = session.getMapper(ViewDb.class)
-            retVal = mapper.listDiffs(selectType, howMany, decoderIds, null)
-           // log.debug("result set is ${retVal}")
-        } catch (Exception e) {
-            log.error("Caught an exception attempting to retrieve the data", e)
-        } finally {
-            if (session) {
-                session.close()
-                return retVal
-            }
-        }
         return retVal
     }
 

@@ -18,12 +18,6 @@
           fn.id   as fnid,
           fn.decoderid as fndecoderId
         </if>
-        <if test='selectType != null and selectType.name()  == "SELECT_DEF"'>
-        , varvalue as varValue,
-          item,
-          de.id as deid,
-          de.decoderid as dedecoderId
-        </if>
         <if test='selectType != null and selectType.name()  == "SELECT_SPD"'>
         , step ,
           forward,
@@ -76,132 +70,6 @@
         </if>
         </where>
     </select>
-    <select id="listDiffs" resultMap="diffMap">
-        Select id,
-  p.decoderid,
-  roadname,
-  roadnumber,
-  cv.version_number as cvVersion,
-  cv.created_on as cvDate,
-  k.version_number as keyVersion,
-  k.created_on as keyDate,
-  l.version_number as labelVersion,
-  l.created_on as labelDate,
-  <choose>
-           <when test='diffType != null and "ALL_VALUES".equals(diffType.name())'>
-            'ALL' as diffType
-        </when>
-        <when test='diffType != null and  "ONLY_CHANGED".equals(diffType.name())'>
-            'ONLY' as diffType
-        </when>
-  </choose>
-  from decoder p
-        LEFT OUTER JOIN CV_VERSIONS cv
-            ON p.id = cv.decoderid
-        LEFT OUTER JOIN KEYVALUES_VERSIONS k
-            ON p.id = k.decoderid
-        LEFT OUTER JOIN LABEL_VERSIONS l
-            ON p.id = l.decoderid
-             <where>
-            <foreach collection="ids" index="index" item="item"
-                     open="id IN (" separator="," close=")">
-                #{item}
-            </foreach>
-        </where>
-        ORDER BY p.id
-    </select>
-    <resultMap id="diffMap" type="DecoderEntry">
-        <id property="id" column="id"/>
-        <result property="decoderId" column="decoderid"/>
-        <result property="roadName" column="roadname"/>
-        <result property="roadNumber" column="roadnumber"/>
-        <collection property="cvVersions" ofType="VersionBase">
-            <id property="decoderId" column="cvVersion"/>
-            <result property="versionNumber" column="cvVersion"/>
-            <result property="createdOn" column="cvDate"/>
-        </collection>
-        <collection property="labelVersions" ofType="VersionBase">
-            <id property="decoderId" column="labelVersion"/>
-            <result property="createdOn" column="labelDate"/>
-            <result property="versionNumber" column="labelVersion"/>
-        </collection>
-        <collection property="keyVersions" ofType="VersionBase">
-            <id property="decoderId" column="keyVersion"/>
-            <result property="createdOn" column="keyDate"/>
-            <result property="versionNumber" column="keyVersion"/>
-        </collection>
-        <collection property="cvValues"
-                    javaType="ArrayList"
-                    column="{id=id, diffType=diffType}"
-                    select="viewCvSelect"
-                    fetchType="lazy"/>
-    </resultMap>
-    <select id="viewCvSelect" resultMap="viewCVselectMap">
-SELECT
-    cv.decoderid,
-    cv.cvNumber,
-    COALESCE(cv.cvValue, '&lt;Deleted&gt;') as cvValue,
-    ver.version_number,
-    ver.created_on,
-    ver.old_value as oldValue,
-    ver.new_value as newValue
-FROM
-            cvValues cv
-        <choose>
-        <when test='diffType != null and "ALL".equals(diffType.toString())'>
-            LEFT OUTER JOIN
-        </when>
-        <when test='diffType != null and  "ONLY".equals(diffType.toString())'>
-            INNER JOIN
-        </when>
-  </choose>
-    (   SELECT
-            d.decoderid,
-            d.cvnumber,
-            d.version_number,
-            d.old_value,
-            d.new_value,
-            v.created_on
-        FROM
-            cv_versions v
-        INNER JOIN
-            cv_diff d
-        ON
-            v.decoderid = d.decoderid
-        AND v.version_number = d.version_number ) ver
-ON
-    ver.decoderId = cv.decoderId
-AND ver.cvnumber = cv.cvnumber
-WHERE
-    cv.decoderId = ${id}
-        UNION ALL
-SELECT
-    d2.decoderid,
-    d2.cvNumber,
-    '&lt;Deleted&gt;' as cvValue,
-    v2.version_number,
-    v2.created_on,
-    d2.old_value,
-    d2.new_value
-FROM cv_diff as d2
-    inner join cv_versions as v2
-    on d2.decoderId = v2.decoderid
-    WHERE d2.decoderId = ${id} AND
-        not exists (select * from cvValues cv3
-             where cv3.decoderid = d2.decoderId AND
-        cv3.cvNumber = d2.cvNumber)
-    </select>
-    <resultMap id="viewCVselectMap" type="CvValues">
-        <id property="cvNumber" column="cvnumber"/>
-        <result property="cvValue" column="cvvalue"/>
-        <collection property="history" ofType="CV_Diff">
-            <id property="cvNumber" column="cvnumber"/>
-            <id property="decoderId" column="decoderid"/>
-            <result property="oldValue" column="old_value"/>
-            <result property="versionNumber" column="version_number"/>
-            <result property="createdOn" column="created_on"/>
-        </collection>
-    </resultMap>
     <select id="listDecodersByRosterID" resultType="DecoderEntry">
         SELECT
         p.id,
@@ -303,49 +171,6 @@ FROM cv_diff as d2
             </foreach>
         </where>
         ORDER BY p.id
-    </select>
-    <select id="listWithCvs" resultMap="decoderMap">
-        SELECT
-            b.id as cvid,
-            b.decoderid as cvdecoderId,
-            a.id as decid,
-            a.dccAddress,
-            a.roadName   AS roadName,
-            a.roadNumber AS roadNumber,
-            cvNumber     AS cvNumber,
-            cvValue      AS cvValue
-        FROM
-            (   SELECT
-                *
-                    FROM
-                    cvvalues
-            <where>
-                <foreach collection="decoderID" index="index" item="item"
-                         open = "decoderid IN (" separator="," close=")">
-                    #{item}
-                </foreach>
-                <if test="cvs == null &amp; !listAll">
-                    AND cvNumber IN ('1',
-                    '2', '3', '4', '5' , '6',
-                    '7', '8', '9', '10', '11',
-                    '12', '13', '14', '15', '16',
-                    '17', '18', '19')
-                </if>
-                <if test="cvs != null">
-                    <foreach collection="cvs" index="index" item="item"
-                             open="AND cvNumber IN (" separator="," close=")">
-                        #{item,jdbcType=VARCHAR}
-                    </foreach>
-                </if>
-            </where>
-        ) AS b
-        INNER JOIN
-            decoder a
-        ON
-            a.id = b.decoderId
-         ORDER BY
-            b.decoderid,
-            cvNumber
     </select>
     <resultMap id="decoderMap" type="DecoderEntry">
         <id property="id" column="decid"/>
@@ -598,6 +423,6 @@ FROM cv_diff as d2
     </resultMap>
     <resultMap id="valueKeyMap" type="KeyValuePairs">
         <result column="pair_Key" property="pair_key"/>
-        <result column="keyvalue" property="pair_value"/>
+        <result column="pair_value" property="pair_value"/>
     </resultMap>
 </mapper>
