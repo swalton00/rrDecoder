@@ -7,8 +7,12 @@ import groovy.transform.ToString
 
 import javax.swing.JMenu
 import javax.swing.JCheckBoxMenuItem
+import javax.swing.JButton
+import javax.swing.JComboBox
 import javax.swing.JMenuItem
 import javax.swing.JTextField
+import javax.swing.RowSorter
+import javax.swing.table.TableRowSorter
 import java.awt.Component
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
@@ -49,6 +53,7 @@ class DecModel extends RrBaseModel implements  FocusListener {
     DecView view
     JMenuItem importDetailItem
     JMenuItem filePrintItem
+    JMenuItem restoreColumnDefaultsItem
 
     JMenuItem viewSpeedProfileItem
     JMenuItem viewSpeedGraphItem
@@ -71,6 +76,10 @@ class DecModel extends RrBaseModel implements  FocusListener {
     JMenuItem viewDiffKeys
 
     JTextField cvListField
+    JButton sortButton
+    ArrayList<JComboBox<String>> sortBoxes = new ArrayList<>()
+    TableRowSorter sorter
+    boolean updatingSortBoxes = false
 
 
     void init() {

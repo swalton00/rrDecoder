@@ -13,9 +13,13 @@ import org.slf4j.LoggerFactory
 
 import javax.swing.JDialog
 import javax.swing.JCheckBoxMenuItem
+import javax.swing.JComboBox
 import javax.swing.JTable
+import javax.swing.SortOrder
 import javax.swing.table.TableColumn
+import javax.swing.table.TableColumnModel
 import javax.swing.SwingUtilities
+import javax.swing.RowSorter
 import java.awt.Component
 import java.awt.FontMetrics
 import java.awt.event.ActionEvent
@@ -216,12 +220,7 @@ class DecController {
         if (visible && column == null) {
             column = new TableColumn(modelIndex)
             column.setHeaderValue(model.columnNames.get(modelIndex))
-            int configuredWidth = modelIndex < model.preferredWidths.size() ?
-                    model.preferredWidths.get(modelIndex) : 0
-            FontMetrics headerMetrics = model.theTable.getTableHeader().getFontMetrics(
-                    model.theTable.getTableHeader().getFont())
-            int headerWidth = headerMetrics.stringWidth(model.columnNames.get(modelIndex)) + 16
-            int restoredWidth = Math.max(configuredWidth, headerWidth)
+            int restoredWidth = getDefaultColumnWidth(modelIndex)
             column.setPreferredWidth(restoredWidth)
             column.setWidth(restoredWidth)
             columnModel.addColumn(column)
@@ -235,6 +234,121 @@ class DecController {
             columnModel.moveColumn(columnModel.getColumnCount() - 1, targetIndex)
         } else if (!visible && column != null) {
             columnModel.removeColumn(column)
+        }
+    }
+
+    int getDefaultColumnWidth(int modelIndex) {
+        int configuredWidth = modelIndex < model.preferredWidths.size() ?
+                model.preferredWidths.get(modelIndex) : 0
+        FontMetrics headerMetrics = model.theTable.getTableHeader().getFontMetrics(
+                model.theTable.getTableHeader().getFont())
+        int headerWidth = headerMetrics.stringWidth(model.columnNames.get(modelIndex)) + 16
+        return Math.max(configuredWidth, headerWidth)
+    }
+
+    def restoreColumnDefaultsAction = { ActionEvent e ->
+        log.debug("restoring decoder column defaults")
+        model.columnItems.eachWithIndex { JCheckBoxMenuItem menuItem, int modelIndex ->
+            menuItem.setSelected(true)
+            setColumnVisible(modelIndex, true)
+        }
+
+        TableColumnModel columnModel = model.theTable.getColumnModel()
+        for (int modelIndex = 0; modelIndex < model.columnNames.size(); modelIndex++) {
+            int currentIndex = -1
+            for (int viewIndex = 0; viewIndex < columnModel.getColumnCount(); viewIndex++) {
+                if (columnModel.getColumn(viewIndex).getModelIndex() == modelIndex) {
+                    currentIndex = viewIndex
+                    break
+                }
+            }
+            if (currentIndex >= 0 && currentIndex != modelIndex) {
+                columnModel.moveColumn(currentIndex, modelIndex)
+            }
+            TableColumn column = columnModel.getColumn(modelIndex)
+            int defaultWidth = getDefaultColumnWidth(modelIndex)
+            column.setPreferredWidth(defaultWidth)
+            column.setWidth(defaultWidth)
+        }
+        saveColumnVisibility()
+        FrameHelper.closeAction(model.thisDialog, model.theTable)
+    }
+
+    def sortColumnAction = { ActionEvent e ->
+        if (!model.updatingSortBoxes) {
+            int changedIndex = model.sortBoxes.indexOf((JComboBox<String>) e.source)
+            refreshSortBoxes(changedIndex)
+        }
+    }
+
+    void refreshSortBoxes(int changedIndex) {
+        model.updatingSortBoxes = true
+        try {
+            ArrayList<Integer> selectedColumns = new ArrayList<>()
+            model.sortBoxes.eachWithIndex { JComboBox<String> sortBox, int boxIndex ->
+                if (boxIndex <= changedIndex || changedIndex < 0) {
+                    String selectedName = (String) sortBox.getSelectedItem()
+                    selectedColumns.add(selectedName == null ? null : model.columnNames.indexOf(selectedName))
+                } else {
+                    selectedColumns.add(null)
+                }
+            }
+
+            model.sortBoxes.eachWithIndex { JComboBox<String> sortBox, int boxIndex ->
+                Integer currentSelection = selectedColumns.get(boxIndex)
+                Set<Integer> usedColumns = selectedColumns.findAll { it != null } as Set<Integer>
+                if (currentSelection != null) {
+                    usedColumns.remove(currentSelection)
+                }
+                sortBox.removeAllItems()
+                model.columnNames.eachWithIndex { String columnName, int columnIndex ->
+                    if (!usedColumns.contains(columnIndex)) {
+                        sortBox.addItem(columnName)
+                    }
+                }
+                if (currentSelection != null) {
+                    sortBox.setSelectedItem(model.columnNames.get(currentSelection))
+                } else {
+                    sortBox.setSelectedIndex(-1)
+                }
+
+                boolean enabled = boxIndex == 0 ||
+                        (selectedColumns.get(boxIndex - 1) != null &&
+                                !sortColumnsAreUnique(selectedColumns.subList(0, boxIndex)))
+                sortBox.setEnabled(enabled)
+                if (!enabled) {
+                    sortBox.setSelectedIndex(-1)
+                    selectedColumns.set(boxIndex, null)
+                }
+            }
+            model.sortButton.setEnabled(selectedColumns.get(0) != null)
+        } finally {
+            model.updatingSortBoxes = false
+        }
+    }
+
+    boolean sortColumnsAreUnique(List<Integer> columns) {
+        if (columns.isEmpty()) {
+            return false
+        }
+        Set<List<Object>> values = new HashSet<>()
+        model.tableList.each { ArrayList<Object> row ->
+            values.add(columns.collect { row.get(it) })
+        }
+        return values.size() == model.tableList.size()
+    }
+
+    def sortAction = { ActionEvent e ->
+        ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>()
+        model.sortBoxes.each { JComboBox<String> sortBox ->
+            String selectedName = (String) sortBox.getSelectedItem()
+            if (selectedName != null) {
+                sortKeys.add(new RowSorter.SortKey(model.columnNames.indexOf(selectedName), SortOrder.ASCENDING))
+            }
+        }
+        if (!sortKeys.isEmpty()) {
+            model.sorter.setSortKeys(sortKeys)
+            model.sorter.sort()
         }
     }
 

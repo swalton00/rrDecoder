@@ -31,7 +31,7 @@ class DecView {
     static final String D_CVLIST = "cvList"
     static final String D_COLUMN_VISIBLE = "columnVisible"
     PropertySaver saver = PropertySaver.getInstance()
-    static final Pattern REGEX_NUMBER = Pattern.compile("^[\\d]*\$")
+    static final Pattern REGEX_NUMBER = Pattern.compile("^[\\d]+\$")
 
     RrTableModel tableModel
     ArrayList<Component> itemList = new ArrayList<>()
@@ -44,13 +44,15 @@ class DecView {
     }
 
     def roadNumberComparator = { String left, String right ->
-        Matcher leftMatcher = REGEX_NUMBER.matcher(left)
-        Matcher rightMatcher = REGEX_NUMBER.matcher(right)
+        String leftValue = left == null ? "" : left
+        String rightValue = right == null ? "" : right
+        Matcher leftMatcher = REGEX_NUMBER.matcher(leftValue)
+        Matcher rightMatcher = REGEX_NUMBER.matcher(rightValue)
         boolean leftGood = leftMatcher.matches()
         boolean rightGood = rightMatcher.matches()
         if (leftGood & rightGood) {
-            Integer leftInt = Integer.valueOf(left)
-            Integer rightInt = Integer.valueOf(right)
+            Integer leftInt = Integer.valueOf(leftValue)
+            Integer rightInt = Integer.valueOf(rightValue)
             if (leftInt < rightInt) {
                 return -1
             }
@@ -67,10 +69,10 @@ class DecView {
         if ((!leftGood) & rightGood) {
             return 1
         }
-        if (left < right) {
+        if (leftValue < rightValue) {
             return -1
         }
-        if (left > right) {
+        if (leftValue > rightValue) {
             return 1
         }
         return 0
@@ -101,6 +103,9 @@ class DecView {
         model.filePrintItem.addActionListener(controller.filePrintAction)
         model.filePrintItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK))
         fileMenu.add(model.filePrintItem)
+        model.restoreColumnDefaultsItem = new JMenuItem("Restore Column Defaults")
+        model.restoreColumnDefaultsItem.addActionListener(controller.restoreColumnDefaultsAction)
+        fileMenu.add(model.restoreColumnDefaultsItem)
         JMenuItem fileCloseItem = new JMenuItem("Close")
         fileCloseItem.addActionListener(controller.fileCloseAction)
         fileCloseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK))
@@ -213,7 +218,6 @@ class DecView {
         tempDialog.add(scrollPane, BorderLayout.CENTER)
         JPanel cvPanel = new JPanel(new MigLayout("fill"))
         JLabel cvLabel = new JLabel("CVs: ")
-        cvPanel.add(cvLabel, "h 30px:30px:30px, right")
         model.cvListField = new JTextField("")
         model.cvListField.setColumns(40)
         model.cvListField.setName("cvlist")
@@ -239,9 +243,9 @@ class DecView {
         model.theTable.setDefaultRenderer(Timestamp.class, new TimestampRenderer())
         tableModel.tableClasses = classList
         log.debug("setting tableClasses to ${classList}")
-        TableRowSorter sorter = new TableRowSorter(tableModel)
-        sorter.setComparator(7, roadNumberComparator as Comparator)
-        model.theTable.setRowSorter(sorter)
+        model.sorter = new TableRowSorter(tableModel)
+        model.sorter.setComparator(7, roadNumberComparator as Comparator)
+        model.theTable.setRowSorter(model.sorter)
         model.cvListField.addFocusListener(model)
         String cvList = saver.getField(D_NAME, "cvList")
         if (cvList != null) {
@@ -253,6 +257,21 @@ class DecView {
             }
         }
         FrameHelper.restoreColumns(D_NAME, model.theTable)
+        model.sortButton = new JButton("Sort")
+        model.sortButton.setEnabled(false)
+        model.sortButton.addActionListener(controller.sortAction)
+        cvPanel.add(model.sortButton, "h 30px:30px:30px, left")
+        4.times {
+            JComboBox<String> sortBox = new JComboBox<String>()
+            sortBox.setPrototypeDisplayValue("Decoder Family")
+            sortBox.setSelectedIndex(-1)
+            sortBox.setEnabled(it == 0)
+            sortBox.addActionListener(controller.sortColumnAction)
+            model.sortBoxes.add(sortBox)
+            cvPanel.add(sortBox, "h 30px:30px:30px, w 140px!, left")
+        }
+        controller.refreshSortBoxes(-1)
+        cvPanel.add(cvLabel, "h 30px:30px:30px, right")
         cvPanel.add(model.cvListField, "h 30px:30px:30px, left, growx, shrink 0")
         tempDialog.add(cvPanel, BorderLayout.SOUTH)
         FrameHelper.setFrameValues(model.thisDialog, D_NAME, 1200, 900 )
