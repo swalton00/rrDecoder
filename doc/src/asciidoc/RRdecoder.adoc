@@ -258,6 +258,10 @@ Imported is the time and date that this roster was last imported into the databa
 
 The Details Read column shows when this tool last read the full XML file.
 
+The "# ...Versions" columns show the number of versions recorded for CVs,
+Function Labels and Key Values pairs. If the specific field is blank, then no
+changes have been recorded for that decoder. If there is a value, then
+the View Changes, either All, or Only Changed, will show you what was changed.
 
 ==== Menu Items
 
@@ -333,6 +337,11 @@ the engine numbers shown across. For best results, don't select too many locomot
 for this view. The list is pre-sorted by CV numbers, with each set of indexes sorted
 by index, then ascending within that index.
 
+* View Changes - All Items, or Only Changed are menu entries the show choices to
+view the changes for CVs, Function Labels and Key Values. The "All" entry
+shows every entry, regardless of whether it had a change recorded.
+The "Only Changed" shows only those values that had a recorded changed.
+
 * CVs: is the field where you enter the specific CV numbers you want to view.
 For non-indexed CVs enter the CV number (from 0 to 255).
 Some decoders may include letters in the CV number value. You can copy
@@ -352,6 +361,61 @@ At this point the Help menu does nothing.
 All data windows have the same menu items: File and Help.
 File Print (Alt-P) prints the window shown.
 File Close (Alt-C) closes the window.
+
+=== About Showing Changes
+
+Decoder Database records changes when you import data after having previously
+imported the data. Instead of recording a whole new set of data, the program
+records the differences between the older data and the newest data.
+When you view the data, you will always see the most recently imported data,
+but, if there have been changes recorded, a new version number will show up
+in the decoder listing, and you will be able to see the changes by selecting
+"View Changes", either "All" or "Only Changed".
+These changes could be CVs, Function Labels or Key Value Pairs.
+
+==== When are Changes Detected
+
+There are significant differences in the three items as to when a change is detected.
+
+|===
+
+| Event | CVs | Function Labels | Key Value Pairs
+
+| Import Roster.xml
+| No CV Changes detected
+| Label Changes detected
+| Key Value changes detected
+
+| Import Details
+| CV changes detected
+| No label changes detected
+| No Key value changes detected
+
+|===
+
+==== When and what makes the changes
+
+Since Decoder Database reads the complete xml file as recorded by DecoderPro,
+anytime there is at least one CV different from the previous value, a version
+record will be created and you will be able to see the change. This means only that
+the xml file stored by DecoderPro has changed – it does not necessarily mean
+that the actual value in the CV was changed. If you change the DeccoderPro
+Programming screen, but didn't write it the decoder, you would see the
+change in this program, but it wouldn't actually be in the decoder database.
+Good practice says that you should ensure that the xml always matches the real
+decoder by writing to the decoder and then saving the file.
+
+Function Labels are different in that, while they belong the decoder, they
+are recorded in the roster.xm file, and not in the decoder XML.
+You change these values using DecoderPro to bring up the Actions/Labels & Media menu item.
+If you are running WiTrottle, these labels will usually appear in the handheld throttle
+that you use. Other throttles may also show the labels.
+
+Key Value Pair value might not be present in your DecoderPro.
+They are created if you create groups to separate your roster entries.
+Dispatcher creates and updates entries whenever you run a train.
+The dispatcher entry contains the train type run by the associated locomotive,
+the date it was last operated and the duration of the operating session.
 
 include::src/asciidoc/Network.adoc[]
 
