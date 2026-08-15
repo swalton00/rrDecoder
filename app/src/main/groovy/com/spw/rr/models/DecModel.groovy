@@ -6,6 +6,7 @@ import com.spw.rr.views.DecView
 import groovy.transform.ToString
 
 import javax.swing.JMenu
+import javax.swing.JCheckBoxMenuItem
 import javax.swing.JMenuItem
 import javax.swing.JTextField
 import java.awt.Component
@@ -58,6 +59,8 @@ class DecModel extends RrBaseModel implements  FocusListener {
     JMenuItem viewStandCvItem
     JMenuItem ViewAllCvItem
     JMenu changeMenu
+    JMenu columnMenu
+    ArrayList<JCheckBoxMenuItem> columnItems = new ArrayList<>()
 
     JMenuItem viewAllChangesCVs
     JMenuItem viewAllChangeLabels

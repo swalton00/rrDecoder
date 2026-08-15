@@ -72,7 +72,6 @@ class FrameHelper extends WindowAdapter implements ComponentListener {
         TableColumnModel headerModel = header.getColumnModel()
         TableColumnModel tcModel = theTable.getColumnModel()
         Integer[] desiredColumn = new Integer[tcModel.getColumnCount()]
-        boolean widthValid = true
         int[] viewOrder = new int[tcModel.getColumnCount()]
         int[] modelOrder = new int[tcModel.getColumnCount()]
         boolean orderValid = true
@@ -83,12 +82,6 @@ class FrameHelper extends WindowAdapter implements ComponentListener {
                 desiredColumn[i] = newValue
             } else {
                 orderValid = false
-            }
-            newValue = saver.getInt(name, COL_WIDTH_NAME + i.toString())
-            if (newValue != null) {
-                thisColumn.setPreferredWidth(newValue)
-            } else {
-                widthValid = false
             }
         }
         if (orderValid) {
@@ -121,6 +114,16 @@ class FrameHelper extends WindowAdapter implements ComponentListener {
                     }
                 }
                 log.trace("after moves currentArray is ${currentArray}")
+            }
+        }
+        // Widths are saved by view position, so restore them only after
+        // restoring the saved column order.
+        for (i in 0..<tcModel.getColumnCount()) {
+            Integer savedWidth = saver.getInt(name, COL_WIDTH_NAME + i.toString())
+            if (savedWidth != null) {
+                TableColumn thisColumn = tcModel.getColumn(i)
+                thisColumn.setPreferredWidth(savedWidth)
+                thisColumn.setWidth(savedWidth)
             }
         }
         //theTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)

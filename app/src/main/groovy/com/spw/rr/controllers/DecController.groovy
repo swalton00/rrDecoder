@@ -12,9 +12,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import javax.swing.JDialog
+import javax.swing.JCheckBoxMenuItem
 import javax.swing.JTable
+import javax.swing.table.TableColumn
 import javax.swing.SwingUtilities
 import java.awt.Component
+import java.awt.FontMetrics
 import java.awt.event.ActionEvent
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
@@ -95,6 +98,7 @@ class DecController {
 
     def fileCloseAction = { ActionEvent e ->
         log.debug("closing the Decoder dialog")
+        saveColumnVisibility()
         FrameHelper.closeAction(model.thisDialog, model.theTable)
         model.thisDialog.setVisible(false)
     }
@@ -178,6 +182,60 @@ class DecController {
         List<Integer> selList = buildSelectedList()
         String cvList = model.cvListField.getText()
         doDataView( DataController.ViewType.ALL_CVS, selList, null)
+    }
+
+    def columnVisibilityAction = { ActionEvent e ->
+        JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.source
+        int modelIndex = Integer.parseInt(e.actionCommand)
+        setColumnVisible(modelIndex, menuItem.isSelected())
+    }
+
+    void saveColumnVisibility() {
+        model.columnItems.eachWithIndex { JCheckBoxMenuItem menuItem, int modelIndex ->
+            view.saver.putField(DecView.D_NAME, DecView.D_COLUMN_VISIBLE + modelIndex,
+                    menuItem.isSelected().toString())
+        }
+    }
+
+    void setColumnVisible(int modelIndex, boolean visible) {
+        if (model.theTable == null) {
+            return
+        }
+
+        def columnModel = model.theTable.getColumnModel()
+        TableColumn column = null
+        Enumeration<TableColumn> columns = columnModel.getColumns()
+        while (columns.hasMoreElements()) {
+            TableColumn candidate = columns.nextElement()
+            if (candidate.getModelIndex() == modelIndex) {
+                column = candidate
+                break
+            }
+        }
+
+        if (visible && column == null) {
+            column = new TableColumn(modelIndex)
+            column.setHeaderValue(model.columnNames.get(modelIndex))
+            int configuredWidth = modelIndex < model.preferredWidths.size() ?
+                    model.preferredWidths.get(modelIndex) : 0
+            FontMetrics headerMetrics = model.theTable.getTableHeader().getFontMetrics(
+                    model.theTable.getTableHeader().getFont())
+            int headerWidth = headerMetrics.stringWidth(model.columnNames.get(modelIndex)) + 16
+            int restoredWidth = Math.max(configuredWidth, headerWidth)
+            column.setPreferredWidth(restoredWidth)
+            column.setWidth(restoredWidth)
+            columnModel.addColumn(column)
+
+            int targetIndex = 0
+            for (int i = 0; i < columnModel.getColumnCount() - 1; i++) {
+                if (columnModel.getColumn(i).getModelIndex() < modelIndex) {
+                    targetIndex++
+                }
+            }
+            columnModel.moveColumn(columnModel.getColumnCount() - 1, targetIndex)
+        } else if (!visible && column != null) {
+            columnModel.removeColumn(column)
+        }
     }
 
     void viewDiffs(ViewType viewType) {

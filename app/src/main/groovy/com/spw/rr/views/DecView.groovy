@@ -15,6 +15,8 @@ import javax.swing.table.TableRowSorter
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 import java.sql.Timestamp
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -27,6 +29,7 @@ class DecView {
     DecModel model
     static final String D_NAME = "decoders"
     static final String D_CVLIST = "cvList"
+    static final String D_COLUMN_VISIBLE = "columnVisible"
     PropertySaver saver = PropertySaver.getInstance()
     static final Pattern REGEX_NUMBER = Pattern.compile("^[\\d]*\$")
 
@@ -79,6 +82,12 @@ class DecView {
         FrameHelper frameHelper = new FrameHelper()
         model.thisDialog.addComponentListener(frameHelper)
         (JDialog)(model.thisDialog).addWindowListener(frameHelper)
+        (JDialog)(model.thisDialog).addWindowListener(new WindowAdapter() {
+            @Override
+            void windowClosing(WindowEvent e) {
+                controller.saveColumnVisibility()
+            }
+        })
         JDialog tempDialog = (JDialog) (model.thisDialog)
         tempDialog.setLayout(new BorderLayout())
         JMenuBar menuBar = new JMenuBar()
@@ -126,6 +135,19 @@ class DecView {
         model.viewAllCvItem.setEnabled(false)
         viewMenu.add(model.viewAllCvItem)
         model.viewAllCvItem.addActionListener(controller.viewAllCvAction)
+
+        model.columnMenu = new JMenu("Show/Hide Columns")
+        model.columnNames.eachWithIndex { String columnName, int columnIndex ->
+            JCheckBoxMenuItem columnItem = new JCheckBoxMenuItem(columnName)
+            String savedVisibility = saver.getField(D_NAME, D_COLUMN_VISIBLE + columnIndex)
+            columnItem.setSelected(savedVisibility == null || Boolean.parseBoolean(savedVisibility))
+            columnItem.setActionCommand(columnIndex.toString())
+            columnItem.addActionListener(controller.columnVisibilityAction)
+            model.columnItems.add(columnItem)
+            model.columnMenu.add(columnItem)
+        }
+        viewMenu.add(model.columnMenu)
+
         model.changeMenu = new JMenu("View Changes")
 
         JMenu changeAll = new JMenu("All Items")
@@ -224,6 +246,11 @@ class DecView {
         String cvList = saver.getField(D_NAME, "cvList")
         if (cvList != null) {
             model.cvListField.setText(cvList)
+        }
+        model.columnItems.eachWithIndex { JCheckBoxMenuItem columnItem, int columnIndex ->
+            if (!columnItem.isSelected()) {
+                controller.setColumnVisible(columnIndex, false)
+            }
         }
         FrameHelper.restoreColumns(D_NAME, model.theTable)
         cvPanel.add(model.cvListField, "h 30px:30px:30px, left, growx, shrink 0")
