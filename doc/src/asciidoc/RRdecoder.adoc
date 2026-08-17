@@ -62,7 +62,7 @@ long, beginning with a letter and
 must contain only letters, numbers and possibly underscores.
 The final choice is for the schema to use for the tables
 in the database (I used "decoder" for mine).
-You can use any word (beginning with a letter, and containing only
+You can use any word (beginning with a letter and containing only
 letters and numbers).
 
 Once all the values have been entered, the "Save New Settings" button will be enabled. When you click on
@@ -95,12 +95,12 @@ To expand the selection to multiple entries, hold down the shift key
 while you click on another entry. That will add that entry
 and all entries between it and the original entry.
 If you hold down
-the Control key while you click it will add (or subtract) that single entry.
+the Control key while you click the item it will add (or subtract) that single entry.
 Control-clicking an entry will reverse the selection state of that entry.
 
 Several menu actions will depend on whether a row is selected.
 Those actions will be disabled until one or more rows are selected.
-If an action is disabled, the menu item will be light gray.
+If an action is disabled, the menu item will be light-gray.
 Enabled actions are darker.
 
 Clicking on a header entry will sort the entries by that column.
@@ -193,7 +193,6 @@ every roster that has been selected.
 === Help
 At the moment, the Help menu items do nothing.
 
-
 === The Decoder Window
 The Decoder Window opens when either View All or View Selected is chosen in the main window.
 The window shows all decoders contained in the selected roster(s) – unless you chose to filter
@@ -261,7 +260,7 @@ The Details Read column shows when this tool last read the full XML file.
 The "# ...Versions" columns show the number of versions recorded for CVs,
 Function Labels and Key Values pairs. If the specific field is blank, then no
 changes have been recorded for that decoder. If there is a value, then
-the View Changes, either All, or Only Changed, will show you what was changed.
+the View Changes, either All or Only Changed, will show you what was changed.
 
 ==== Menu Items
 
@@ -271,6 +270,9 @@ the View Changes, either All, or Only Changed, will show you what was changed.
 
 * Print – This item will bring up a standard print dialog and print
 the list of decoders as you are currently viewing it. Alt-P is a short-cut key.
+
+* Restore Column Defaults - this item will set all columns to visible and shown
+in their default sequence.
 
 * Close - Closes the view of the decoders. Alt-C is a short-cut key.
 
@@ -340,7 +342,25 @@ by index, then ascending within that index.
 * View Changes - All Items, or Only Changed are menu entries the show choices to
 view the changes for CVs, Function Labels and Key Values. The "All" entry
 shows every entry, regardless of whether it had a change recorded.
-The "Only Changed" shows only those values that had a recorded changed.
+The "Only Changed" shows only those values that had a change recorded.
+
+* Show/Hide Columns - This menu will show a list of all available columns in the Decoder View
+with a checkmark beside each column that is visible. Select an entry to reverse its current status.
+The status of the column will be saved (along with the column size and position) and restored to
+that status the next time you run the program. The File/Show/Hide Columns will let you
+restore the original status and sequence.
+
+=== Other Fields
+
+* Sort - There are four drop-downs that list the columns.
+If you want to sort by a single column, such as the ID column, simply click on the column heading
+and it will sort by that column.
+Use the Sort drop-downs to sort by multiple columns.
+Start from the left and select the highest priority column.
+The next drop-down will show the remaining columns.
+Select a column from that drop-down. If you select a combination that will give a unique row
+(such as selecting the ID column), no more columns will be shown.
+Once you have selected your desired sorting columns, press the "Sort" button.
 
 * CVs: is the field where you enter the specific CV numbers you want to view.
 For non-indexed CVs enter the CV number (from 0 to 255).
@@ -352,7 +372,7 @@ specified as a group of two or three values separated by a period. There are oft
 indexes. Separate each set of CV numbers by a comma and perhaps one or more spaces.
 Examples: 1, 2, 11,99, 0.252.257, 0.252.277, 1.0.257, 16.0.259, 16.0.448, 26.13.317
 
-===== Help
+==== Help
 
 At this point the Help menu does nothing.
 
@@ -373,7 +393,7 @@ in the decoder listing, and you will be able to see the changes by selecting
 "View Changes", either "All" or "Only Changed".
 These changes could be CVs, Function Labels or Key Value Pairs.
 
-==== When are Changes Detected
+==== When are Changes Detected?
 
 There are significant differences in the three items as to when a change is detected.
 
@@ -395,20 +415,20 @@ There are significant differences in the three items as to when a change is dete
 
 ==== When and what makes the changes
 
-Since Decoder Database reads the complete xml file as recorded by DecoderPro,
+Since Decoder Database reads the complete XML file as recorded by DecoderPro,
 anytime there is at least one CV different from the previous value, a version
 record will be created and you will be able to see the change. This means only that
-the xml file stored by DecoderPro has changed – it does not necessarily mean
-that the actual value in the CV was changed. If you change the DeccoderPro
-Programming screen, but didn't write it the decoder, you would see the
+the XML file stored by DecoderPro has changed – it does not necessarily mean
+that the actual value in the CV was changed. If you change the DecoderPro
+Programming screen but didn't write it the decoder, you would see the
 change in this program, but it wouldn't actually be in the decoder database.
-Good practice says that you should ensure that the xml always matches the real
+Good practice says that you should ensure that the XML always matches the real
 decoder by writing to the decoder and then saving the file.
 
-Function Labels are different in that, while they belong the decoder, they
+Function Labels are different in that, while they belong to the decoder, they
 are recorded in the roster.xm file, and not in the decoder XML.
 You change these values using DecoderPro to bring up the Actions/Labels & Media menu item.
-If you are running WiTrottle, these labels will usually appear in the handheld throttle
+If you are running WiThrottle, these labels will usually appear in the handheld throttle
 that you use. Other throttles may also show the labels.
 
 Key Value Pair value might not be present in your DecoderPro.
