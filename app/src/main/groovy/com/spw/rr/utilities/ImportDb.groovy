@@ -17,7 +17,14 @@ class ImportDb {
 
     DatabaseServices parent = null
 
+    private void preTest() {
+         if (parent == null) {
+            parent = DatabaseServices.getInstance()
+        }
+    }
+
     RosterEntry addRoster(RosterEntry entry) {
+        preTest()
         log.debug("adding a new RosterEntry ${entry}")
         SqlSession session
         try {
@@ -32,28 +39,6 @@ class ImportDb {
         return entry
     }
 
-
-    void updateRosterEntry(RosterEntry entry) {
-        log.debug("updating the roster ${entry}")
-        SqlSession session
-        try {
-            session = parent.sqlSessionFactory.openSession(true)
-            ImportMapper map = session.getMapper(ImportMapper.class)
-            map.updateRosterEntry(entry)
-        } finally {
-            if (session) {
-                session.close()
-            }
-        }
-    }
-
-    ArrayList<FunctionLabel> getFunctionLabelsFor(int decoderId) {
-        log.debug("getting a list of FunctionLabels for decoderId ${decoderId}")
-        ArrayList<FunctionLabel> retVal  = (ArrayList<FunctionLabel>)executeSql({ImportMapper map, int id ->
-            return map.getFunctionLabels(id)
-        }, decoderId)
-        return retVal
-    }
 
     Object executeSql(  Closure method, int decoderId)
     {
