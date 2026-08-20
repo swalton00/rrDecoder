@@ -10,6 +10,11 @@ import com.spw.rr.utilities.TimestampRenderer
 import net.miginfocom.swing.MigLayout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.awt.*
+import java.awt.Taskbar
+import java.util.ArrayList
+import java.util.List
+import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JMenu
 import javax.swing.JMenuBar
@@ -19,7 +24,6 @@ import javax.swing.JTable
 import javax.swing.KeyStroke
 import javax.swing.ListSelectionModel
 import javax.swing.WindowConstants
-import javax.swing.table.TableColumnModel
 import javax.swing.table.TableRowSorter
 import java.awt.Dimension
 import java.awt.event.ActionEvent
@@ -36,6 +40,20 @@ class MainView {
 
     RrTableModel tableModel
 
+    public static List<Image> loadAppIcons() {
+        List<Image> icons = new ArrayList<>();
+        int[] sizes = [ 16 , 32 , 48 , 64 , 128 , 256 ];
+        for (int size : sizes) {
+            try {
+                var url = MainView.class.getResource("/icons/railroad-db-" + size + ".png");
+                if (url != null) icons.add(ImageIO.read(url));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return icons;
+    }
+
     MainView() {
 
     }
@@ -48,6 +66,15 @@ class MainView {
     void init() {
         model.dataIsRosterList = true
         model.baseFrame = new JFrame("Model Railroad Decoder Database App")
+        List<Image> icons = loadAppIcons()
+        model.baseFrame.setIconImages(icons)
+        if (Taskbar.isTaskbarSupported()) {
+            Taskbar taskbar = Taskbar.getTaskbar();
+            if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                log.debug("taskBar is being called")
+                taskbar.setIconImage(icons.get(icons.size() - 1)); // largest, e.g. 256
+            }
+        }
         model.baseFrame.setName(WINDOW_NAME)
         model.baseFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
         FrameHelper frameHelper = new FrameHelper()
