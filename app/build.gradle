@@ -43,3 +43,19 @@ application {
 
     mainClass = 'com.spw.rr.RRdecoder'
 }
+
+def documentationTask = ':doc:asciidoctor'
+
+distZip {
+    dependsOn documentationTask
+    from('../doc/build/docs/asciidoc/pdf') {
+        into ''
+    }
+}
+
+distTar {
+    dependsOn documentationTask
+    from('../doc/build/docs/asciidoc/pdf') {
+        into ''
+    }
+}
