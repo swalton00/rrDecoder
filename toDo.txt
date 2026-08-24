@@ -1,8 +1,8 @@
 Bugs:
 
 Future:
-Sort menu
-    dropdowns with options
-        each includes only those left that make it unique
-Show/hide columns menu
-    menu check items
+Backup
+Restore
+Purge Change records
+    By change count
+    By date
