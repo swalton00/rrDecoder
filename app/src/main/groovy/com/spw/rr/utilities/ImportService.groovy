@@ -429,7 +429,7 @@ class ImportService {
             }
             if (rosterFound) {
                 thisEntry.dateUpdated = dbTime
-                database.updateRosterEntry(thisEntry)
+                importDb.updateRosterEntry(thisEntry)
             }
             rosterStopWatch.stop()
         }

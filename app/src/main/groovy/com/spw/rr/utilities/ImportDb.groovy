@@ -23,6 +23,22 @@ class ImportDb {
         }
     }
 
+     void updateRosterEntry(RosterEntry entry) {
+        log.debug("updating the roster ${entry}")
+         preTest()
+        SqlSession session
+        try {
+            session = parent.sqlSessionFactory.openSession(true)
+            ImportMapper map = session.getMapper(ImportMapper.class)
+            map.updateRosterEntry(entry)
+        } finally {
+            if (session) {
+                session.close()
+            }
+        }
+    }
+
+
     RosterEntry addRoster(RosterEntry entry) {
         preTest()
         log.debug("adding a new RosterEntry ${entry}")

@@ -10,6 +10,7 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import java.awt.Component
 import java.awt.Font
+import java.awt.GraphicsEnvironment
 import java.awt.Toolkit
 
 class SeeProgressView {
@@ -28,6 +29,9 @@ class SeeProgressView {
     }
 
     void init() {
+        if (GraphicsEnvironment.isHeadless()) {
+            return
+        }
         SwingUtilities.invokeLater {
             model.theDialog = new JDialog(parent, "Import Progress", true)
             model.theDialog.getContentPane().setLayout(new MigLayout("fill"))
@@ -59,6 +63,9 @@ class SeeProgressView {
     }
 
     void setComplete() {
+        if (GraphicsEnvironment.isHeadless() || model.theDialog == null) {
+            return
+        }
         SwingUtilities.invokeAndWait {
             model.theDialog.setVisible(false)
         }

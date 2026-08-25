@@ -39,12 +39,20 @@ class MainController {
     PropertySaver saver = PropertySaver.getInstance()
     ArrayList<Integer> rosterIdList = new ArrayList<>()
 
+    protected MainModel createModel() {
+        return new MainModel(this)
+    }
+
+    protected MainView createView(MainModel mainModel) {
+        return new MainView(this, mainModel)
+    }
+
     void init() {
         saver.init()
-        model = new MainModel(this)
+        model = createModel()
         model.systemName = ImportService.getSystemName()
         model.init()
-        view = new MainView(this, model)
+        view = createView(model)
         settings.loadSettings()
         SwingUtilities.invokeAndWait {
             view.init()
