@@ -24,9 +24,16 @@ class FunctionLabel extends AbstractItem {
                  (!locked & other.locked)) {
              return false
          }
-        if (!decoderId.equals(other.decoderId)) return false
-        if (!functionNum.equals(other.functionNum)) return false
-        if (!(functionLabel.equals(other.functionLabel))) return false
+       /* if (!decoderId.equals(other.decoderId)) {
+            return false
+        }*/
+        if (!functionNum.equals(other.functionNum))
+        {
+            return false
+        }
+        if (!(functionLabel.equals(other.functionLabel))){
+            return false
+        }
         return true
     }
 

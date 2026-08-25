@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="/xml/XSLT/roster2array.xsl" type="text/xsl"?>
+<roster-config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://jmri.org/xml/schema/roster.xsd">
+  <!--Written by JMRI version 5.17.2+R0e37219373 on Wed Aug 12 01:16:02 EDT 2026-->
+  <roster>
+    <locomotive id="DH126PS - numeric" fileName="DH126PS___numeric.xml" roadNumber="10000" roadName="XXX" mfg="" owner="jsw" model="" dccAddress="1000" comment="This is the comment field" developerID="-1" manufacturerID="129" productID="" decoderModes="" maxSpeed="100" imageFilePath="" iconFilePath="" URL="" IsShuntingOn="" locoDataEnabled="false">
+      <dateUpdated>2026-07-14T21:24:33.758+00:00</dateUpdated>
+      <decoder model="DH126PS" family="Economy Series 6 with FX3, silent" comment="" maxFnNum="28" />
+      <locoaddress>
+        <dcclocoaddress number="1000" longaddress="yes" />
+        <number>1000</number>
+        <protocol>dcc_long</protocol>
+      </locoaddress>
+      <functionlabels>
+        <functionlabel num="0" lockable="true" visible="true" functionImage="" functionImageSelected="">Lights and abc</functionlabel>
+        <functionlabel num="2" lockable="true" visible="true" functionImage="" functionImageSelected="">Bell zzzz</functionlabel>
+        <functionlabel num="3" lockable="true" visible="true" functionImage="" functionImageSelected="">new function</functionlabel>
+      </functionlabels>
+      <soundlabels />
+    </locomotive>
+    <locomotive id="Soundtraxx test" fileName="Soundtraxx_test.xml" roadNumber="" roadName="" mfg="" owner="jsw" model="" dccAddress="2500" comment="" developerID="-1" manufacturerID="141" productID="2149" decoderModes="" maxSpeed="100" imageFilePath="" iconFilePath="" URL="" IsShuntingOn="" locoDataEnabled="false">
+      <dateUpdated>2026-07-15T03:31:07.064+00:00</dateUpdated>
+      <decoder model="BLU-4408 Baldwin Diesels" family="Blunami Diesel" comment="" maxFnNum="28" />
+      <locoaddress>
+        <dcclocoaddress number="2500" longaddress="yes" />
+        <number>2500</number>
+        <protocol>dcc_long</protocol>
+      </locoaddress>
+      <functionlabels />
+      <soundlabels />
+    </locomotive>
+    <locomotive id="TCS WOW SS4" fileName="TCS_WOW_SS4.xml" roadNumber="" roadName="" mfg="" owner="jsw" model="" dccAddress="1200" comment="" developerID="-1" manufacturerID="153" productID="1155" decoderModes="" maxSpeed="100" imageFilePath="" iconFilePath="" URL="" IsShuntingOn="" locoDataEnabled="false">
+      <dateUpdated>2026-07-14T21:25:23.989+00:00</dateUpdated>
+      <decoder model="WOW Steam 121 SS4" family="WOW Steam Sound Set 4" comment="" maxFnNum="28" />
+      <locoaddress>
+        <dcclocoaddress number="1200" longaddress="yes" />
+        <number>1200</number>
+        <protocol>dcc_long</protocol>
+      </locoaddress>
+      <functionlabels>
+        <functionlabel num="0" lockable="true" visible="true" functionImage="" functionImageSelected="">lights</functionlabel>
+        <functionlabel num="1" lockable="true" visible="true" functionImage="" functionImageSelected="">horn</functionlabel>
+        <functionlabel num="2" lockable="true" visible="true" functionImage="" functionImageSelected="">additional</functionlabel>
+      </functionlabels>
+      <soundlabels />
+      <attributepairs>
+        <keyvaluepair>
+          <key>RosterGroup:test2</key>
+          <value>yes</value>
+        </keyvaluepair>
+      </attributepairs>
+    </locomotive>
+    <locomotive id="Test ESU" fileName="Test_ESU.xml" roadNumber="" roadName="" mfg="" owner="jsw" model="" dccAddress="127" comment="" developerID="-1" manufacturerID="151" productID="33554582,33554679,33554650" decoderModes="" maxSpeed="100" imageFilePath="" iconFilePath="" URL="" IsShuntingOn="" locoDataEnabled="false">
+      <dateUpdated>2026-07-14T16:54:45.287+00:00</dateUpdated>
+      <decoder model="LokSound 5" family="ESU LokSound 5" comment="" maxFnNum="31" />
+      <locoaddress>
+        <dcclocoaddress number="127" longaddress="no" />
+        <number>127</number>
+        <protocol>dcc_short</protocol>
+      </locoaddress>
+      <functionlabels>
+        <functionlabel num="0" lockable="true" visible="true" functionImage="" functionImageSelected="">Light</functionlabel>
+        <functionlabel num="1" lockable="true" visible="true" functionImage="" functionImageSelected="">new test</functionlabel>
+      </functionlabels>
+      <soundlabels>
+        <soundlabel num="33">Automatic brake sound</soundlabel>
+        <soundlabel num="34">Gear shift sound</soundlabel>
+      </soundlabels>
+    </locomotive>
+  </roster>
+  <rosterGroup>
+    <group>test2</group>
+    <group>group3</group>
+    <group>group1</group>
+  </rosterGroup>
+</roster-config>
